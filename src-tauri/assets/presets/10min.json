@@ -1,0 +1,30 @@
+{
+    "name": "10min",
+    "title": "10min",
+    "tooltip": "10min encoding for previews",
+    "filter_video": {
+        "scale": "640:360"
+    },
+    "filter_audio": {},
+    "video": {
+        "-t": 600,
+        "-pix_fmt": "yuv420p",
+        "-r": 25,
+        "-aspect": "16:9",
+        "-c:v": "libx264",
+        "-preset": "slower",
+        "-crf": 23,
+        "-g": 25,
+        "-refs": 3,
+        "-maxrate": "1000k",
+        "-bufsize": "1000k",
+        "-x264-params": "bframes=1"
+    },
+    "audio": {
+        "-c:a": "libfdk_aac",
+        "-b:a": "96k",
+        "-ar": "44100"
+    },
+    "container_video": "mp4",
+    "container_audio": null
+}

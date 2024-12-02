@@ -1,0 +1,28 @@
+{
+    "name": "telegram",
+    "title": "Telegram",
+    "tooltip": "Encoding for telegram clips",
+    "filter_video": {
+        "scale": "854:480"
+    },
+    "filter_audio": {},
+    "video": {
+        "-pix_fmt": "yuv420p",
+        "-r": 25,
+        "-aspect": "16:9",
+        "-c:v": "libx265",
+        "-preset": "medium",
+        "-profile:v": "main",
+        "-level:v": "3",
+        "-crf": 28,
+        "-tag:v": "hvc1"
+    },
+    "audio": {
+        "-c:a": "libfdk_aac",
+        "-profile:a": "aac_he",
+        "-b:a": "64k",
+        "-ar": 44100
+    },
+    "container_video": "mp4",
+    "container_audio": null
+}

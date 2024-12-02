@@ -1,0 +1,17 @@
+{
+    "name": "copy_video",
+    "title": "Copy Video",
+    "tooltip": "Encoding settings video copy",
+    "filter_video": {},
+    "filter_audio": {},
+    "video": {
+        "-c:v": "copy"
+    },
+    "audio": {
+        "-c:a": "libfdk_aac",
+        "-b:a": "192k",
+        "-ar": "48k"
+    },
+    "container_video": "mkv",
+    "container_audio": null
+}

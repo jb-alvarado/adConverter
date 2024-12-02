@@ -1,0 +1,337 @@
+<script setup lang="ts">
+import { ref, nextTick, onBeforeMount } from 'vue'
+import { invoke } from '@tauri-apps/api/core'
+import { listen, type Event } from '@tauri-apps/api/event'
+import { load } from '@tauri-apps/plugin-store'
+import { open } from '@tauri-apps/plugin-dialog'
+import { cloneDeep, isEqual, round } from 'lodash-es'
+
+import { stringFormatter } from './composables/helper'
+import { useStore } from './store/index.ts'
+
+import AlertMsg from './components/AlertMsg.vue'
+import HeaderMenu from './components/HeaderMenu.vue'
+import MediaTable from './components/MediaTable.vue'
+import LogWindow from './components/LogWindow.vue'
+import EditConfig from './components/EditConfig.vue'
+import EditPresets from './components/EditPresets.vue'
+import EditTemplate from './components/EditTemplate.vue'
+
+const { folderPath, filename, removeExtension, Logger } = stringFormatter()
+
+const store = useStore()
+
+const defaultTemplate: Template = {
+    intro: '',
+    outro: '',
+    lower_thirds: [],
+}
+const currentTask = ref<Task | null>(null)
+
+const progressCurrent = ref(0)
+const progressAll = ref(0)
+const targetFolder = ref<string | null>(null)
+const jobInProcess = ref(false)
+const processMsg = ref('')
+const processPath = ref('')
+const showTemplateEditor = ref(false)
+
+const log = new Logger()
+
+onBeforeMount(async () => {
+    await invoke('load_config').catch((e) => {
+        store.msgAlert('error', e, 5)
+        log.error(e)
+    })
+
+    const config = await load('config.json', { autoSave: false });
+    store.showTranscript = (await config.get('transcript_cmd')) ? true : false
+    store.transcriptLanguages = (await config.get('transcript_lang')) ?? []
+    store.publishPreset = (await config.get('publish_preset')) ?? ''
+
+    if (store.transcriptLanguages.length === 0) {
+        store.transcriptLanguages = [
+            { name: 'None', code: 'none' },
+            { name: 'Auto', code: 'auto' },
+            { name: 'German', code: 'de' },
+            { name: 'English', code: 'en' },
+            { name: 'Spanish', code: 'es' },
+        ]
+
+        await config.set('transcript_lang', store.transcriptLanguages)
+        await config.save()
+    }
+
+    await invoke<Preset[]>('presets_get')
+        .then((prs: Preset[]) => {
+            for (const preset of prs) {
+                store.presets.push(preset)
+            }
+        })
+        .catch((e) => {
+            store.msgAlert('error', JSON.stringify(e), 5)
+            log.error(JSON.stringify(e))
+        })
+})
+
+listen<Task>('task-active', (event: Event<Task>) => {
+    for (const entry of store.taskList) {
+        if (entry.path === event.payload.path) {
+            entry.active = true
+            processPath.value = filename(entry.path)
+        }
+    }
+})
+
+listen<Task>('task-finish', (event: Event<Task>) => {
+    for (let i = 0; i < store.taskList.length; i++) {
+        if (jobInProcess.value && store.taskList[i].path === event.payload.path) {
+            progressAll.value = round(((i + 1) * 100) / store.taskList.length)
+            store.taskList[i].active = false
+            store.taskList[i].finished = true
+
+            if (i === store.taskList.length - 1) {
+                jobInProcess.value = false
+                store.jobsDone = true
+            } else {
+                taskSendNext()
+            }
+
+            break
+        }
+    }
+
+    if (!store.taskList.some((task: Task) => task.presets.length > 0)) {
+        jobInProcess.value = false
+        store.jobsDone = true
+    }
+})
+
+listen<String>('lufs-progress', async (event: Event<FFmpegProgress>) => {
+    progressCurrent.value = event.payload.elapsed_pct
+    processMsg.value = `<strong>Analyze (${event.payload.title} ${event.payload.speed} Speed): </strong>`
+})
+
+listen<String>('preset-start', async (event: Event<Preset>) => {
+    for (const preset of currentTask.value?.presets) {
+        if (preset.title === event.payload.title) {
+            preset.output_path = event.payload.output_path
+        }
+    }
+})
+
+listen<String>('preset-progress', async (event: Event<FFmpegProgress>) => {
+    progressCurrent.value = event.payload.elapsed_pct
+    processMsg.value = `<strong>Encode (${event.payload.title} ${event.payload.fps} FPS): </strong>`
+})
+
+listen<string>('transcript-progress', async (event: Event<string>) => {
+    progressCurrent.value = parseFloat(event.payload)
+    processMsg.value = `<strong>Transcript: </strong>`
+})
+
+listen<String>('preset-finish', async (event: Event<Preset>) => {
+    progressCurrent.value = 100
+    processMsg.value = `<strong>Done (${event.payload.title}): </strong>`
+
+    const index = currentTask.value.presets.findIndex((item: Task) => item.name === event.payload.name)
+    currentTask.value.presets.splice(index, 1)
+})
+
+listen<string>('logging', (event: Event<string>) => {
+    store.logContent.push(event.payload)
+
+    if (event.payload.includes('[ERROR]')) {
+        store.msgAlert('error', event.payload.replace('[ERROR]', ''), 5)
+    }
+
+    while (store.logContent.length > 10000) {
+        store.logContent.shift()
+    }
+})
+
+function setTarget() {
+    nextTick(async () => {
+        for (const task of store.taskList) {
+            if (!task.active) {
+                task.target = targetFolder.value
+            }
+        }
+    })
+}
+
+async function getDir() {
+    const path = store.taskList[store.taskList.length - 1]?.path
+    let options = {
+        multiple: false,
+        directory: true,
+    } as any
+
+    if (path) {
+        options.defaultPath = folderPath(path)
+    }
+
+    targetFolder.value = (await open(options)) as string | null
+}
+
+async function taskSendNext() {
+    for (const task of store.taskList) {
+        if (!task.finished) {
+            console.log(task.transcript)
+            if (task.presets.length === 0 && task.transcript === 'none') {
+                store.msgAlert('warning', 'No transcription or preset selected!', 3)
+                break
+            }
+
+            jobInProcess.value = true
+            task.active = true
+
+            if (!task.template.intro && !task.template.outro && task.template.lower_thirds.length === 0) {
+                task.template = null
+            }
+
+            currentTask.value = task
+            await invoke<Task>('task_send', { task }).catch((e) => {
+                store.msgAlert('error', e, 5)
+                log.error(e)
+            })
+            break
+        }
+    }
+}
+
+async function jobRun() {
+    if (jobInProcess.value) {
+        jobInProcess.value = false
+
+        await invoke<Task>('task_cancel', { task: currentTask.value })
+            .then(() => {
+                currentTask.value.active = false
+                currentTask.value.finished = false
+            })
+            .catch((e) => {
+                store.msgAlert('error', e, 5)
+                log.error(e)
+            })
+    } else {
+        // start encoding job
+        await invoke('task_start').catch((e) => {
+            store.msgAlert('error', e, 5)
+            log.error(e)
+        })
+
+        await taskSendNext()
+    }
+}
+
+function editTemplate(task: Task) {
+    currentTask.value = task
+    showTemplateEditor.value = true
+
+    store.currentTemplate = cloneDeep(task.template)
+}
+
+async function saveTemplate(update: boolean) {
+    if (!update) {
+        showTemplateEditor.value = false
+    } else if (isEqual(defaultTemplate, store.currentTemplate)) {
+        showTemplateEditor.value = false
+    } else {
+        const path = removeExtension(currentTask.value.path) + '.json'
+
+        await invoke<Task>('template_save', { template: store.currentTemplate, path })
+            .then(() => {
+                store.msgAlert('success', `Save template ${filename(path)} success.`, 3)
+
+                currentTask.value.template = cloneDeep(store.currentTemplate)
+                store.currentTemplate.value = cloneDeep(defaultTemplate)
+                showTemplateEditor.value = false
+            })
+            .catch((e) => {
+                store.msgAlert('error', e, 5)
+                log.error(e)
+            })
+    }
+}
+</script>
+
+<template>
+    <div class="flex flex-col h-screen justify-between select-none cursor-default">
+        <HeaderMenu :logger="log" />
+        <main class="mb-auto bg-base-300 w-full h-full overflow-x-hidden overflow-y-auto">
+            <div class="relative bg-base-200 h-full">
+                <MediaTable :logger="log" :editTemplate="editTemplate" />
+                <LogWindow />
+                <EditConfig v-if="store.showConfig" :logger="log" />
+                <EditPresets v-if="store.showPresets" :logger="log" />
+            </div>
+        </main>
+
+        <footer class="relative z-30 h-25 flex bg-base-100 border-t border-zinc-600">
+            <div class="flex justify-center m-auto item-center w-2/5">
+                <div class="container px-4 flex flex-col gap-0 mb-1">
+                    <div class="flex items-center gap-4">
+                        <div class="font-semibold w-15">Current:</div>
+                        <div class="relative grow flex items-center">
+                            <progress
+                                class="progress progress-accent rounded-sm [&::-webkit-progress-value]:rounded-sm h-4"
+                                :value="progressCurrent"
+                                max="100"
+                            ></progress>
+                            <div class="absolute w-full font-semibold text-center text-xs">{{ progressCurrent }}%</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 mt-2">
+                        <div class="font-semibold w-15">Over All:</div>
+                        <div class="relative grow flex items-center">
+                            <progress
+                                class="progress progress-accent rounded-sm [&::-webkit-progress-value]:rounded-sm h-4"
+                                :value="progressAll"
+                                max="100"
+                            ></progress>
+                            <div class="absolute w-full font-semibold text-center text-xs">{{ progressAll }}%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-center m-auto item-center w-3/5">
+                <div class="container flex">
+                    <div class="p-4 flex flex-col gap-1 w-[calc(100%-102px)]">
+                        <div class="flex items-center">
+                            <div class="grow font-semibold truncate pr-2 h-[25px]" v-html="processMsg + processPath" />
+                        </div>
+                        <div class="flex items-end">
+                            <label class="cursor-pointer join w-full">
+                                <input
+                                    v-model="targetFolder"
+                                    type="text"
+                                    class="input input-sm input-bordered rounded-sm join-item w-full"
+                                    :class="{ 'disabled:input-bordered': jobInProcess }"
+                                    @change="setTarget()"
+                                    :disabled="jobInProcess"
+                                />
+                                <button
+                                    class="btn btn-sm border-[oklch(var(--bc)/0.2)] hover:border-[oklch(var(--bc)/0.15)] rounded-sm join-item"
+                                    @click="getDir()"
+                                    :disabled="jobInProcess"
+                                >
+                                    Save As
+                                </button>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="flex items-end pb-4 pr-4">
+                        <button
+                            class="btn btn-lg border-[oklch(var(--bc)/0.2)] hover:border-[oklch(var(--bc)/0.15)] rounded-sm"
+                            @click="jobRun()"
+                        >
+                            {{ jobInProcess ? 'Cancel' : 'Run' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <AlertMsg v-if="!store.openLog" />
+        <EditTemplate :show="showTemplateEditor" :currentTask="currentTask" :saveTemplate="saveTemplate" />
+    </div>
+</template>

@@ -1,0 +1,21 @@
+{
+  "intro": "colors_1.mp4",
+  "outro": "",
+  "lower_thirds": [
+    {
+      "path": "lower_third_1.png",
+      "duration": 5.0,
+      "position": [
+        "00:00:01.000",
+        "00:00:20.000"
+      ]
+    },
+    {
+      "path": "lower_third_2.mov",
+      "duration": 0.0,
+      "position": [
+        "00:00:07.000"
+      ]
+    }
+  ]
+}

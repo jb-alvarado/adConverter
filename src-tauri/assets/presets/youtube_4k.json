@@ -1,0 +1,28 @@
+{
+    "name": "youtube_4k",
+    "title": "YouTube 4K",
+    "tooltip": "Encoding settings for Youtube 4k",
+    "filter_video": {
+        "scale": "3840:2160"
+    },
+    "filter_audio": {},
+    "video": {
+        "-pix_fmt": "yuv420p",
+        "-r": 25,
+        "-c:v": "libx264",
+        "-preset": "slower",
+        "-crf": 21,
+        "-g": 12,
+        "-flags": "+cgop",
+        "-bf": 2,
+        "-maxrate": "35M",
+        "-bufsize": "10M"
+    },
+    "audio": {
+        "-c:a": "libfdk_aac",
+        "-b:a": "384k",
+        "-ar": "48k"
+    },
+    "container_video": "mp4",
+    "container_audio": null
+}

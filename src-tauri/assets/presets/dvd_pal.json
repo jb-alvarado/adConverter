@@ -1,0 +1,34 @@
+{
+    "name": "dvd_pal",
+    "title": "DVD",
+    "tooltip": "DVD PAL encoding settings, optimized for small size",
+    "filter_video": {
+        "scale": "720:576"
+    },
+    "filter_audio": {},
+    "video": {
+        "-pix_fmt": "yuv420p",
+        "-r": 25,
+        "-aspect": "16:9",
+        "-c:v": "mpeg2video",
+        "-b:v": "3500k",
+        "-maxrate": "9000k",
+        "-bufsize": "1835008",
+        "-g": "12",
+        "-bf": "2",
+        "-trellis": "2",
+        "-cmp": "3",
+        "-mbd": "2",
+        "-subcmp": "3",
+        "-profile:v": "4",
+        "-level": "8",
+        "-f": "dvd"
+    },
+    "audio": {
+        "-c:a": "ac3",
+        "-b:a": "192k",
+        "-ar": "48k"
+    },
+    "container_video": "m2v",
+    "container_audio": "ac3"
+}

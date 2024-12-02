@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "adConverter",
+  "version": "0.1.0",
+  "identifier": "com.adconverter",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "adConverter",
+        "width": 1800,
+        "height": 600,
+        "minWidth": 960,
+        "minHeight": 620
+      }
+    ],
+    "security": {
+      "csp": null
+    },
+    "withGlobalTauri": true
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": ["assets/**/*"]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDkyODAyQTVEQTI1RkQwQjYKUldTMjBGK2lYU3FBa2hGNHpoMEFoSHZMaDBpYVZpc3B3RldzTFNQTlJ4eEpDNW5NRWk2Mk5idWsK",
+      "endpoints": [
+        "https://github.com/jb-alvarado/adConverter/releases/latest/download/latest.json"
+      ]
+    }
+  }
+}

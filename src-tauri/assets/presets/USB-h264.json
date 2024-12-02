@@ -1,0 +1,27 @@
+{
+    "name": "USB-h264",
+    "title": "USB h264",
+    "tooltip": "Encoding settings for USB-Stick with h264",
+    "filter_video": {
+        "scale": "1920:1080"
+    },
+    "filter_audio": {},
+    "video": {
+        "-pix_fmt": "yuv420p",
+        "-aspect": "16:9",
+        "-c:v": "libx264",
+        "-preset": "slow",
+        "-crf": 22,
+        "-flags": "+cgop",
+        "-bf": 2,
+        "-maxrate": "10M",
+        "-bufsize": "2.6M"
+    },
+    "audio": {
+        "-c:a": "libfdk_aac",
+        "-b:a": "128k",
+        "-ar": "44100"
+    },
+    "container_video": "mp4",
+    "container_audio": null
+}

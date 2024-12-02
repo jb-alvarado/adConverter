@@ -1,0 +1,16 @@
+{
+    "name": "mp3",
+    "title": "MP3",
+    "tooltip": "Encode audio in MP3",
+    "filter_video": {},
+    "filter_audio": {},
+    "video": {},
+    "audio": {
+        "-c:a": "libmp3lame",
+        "-q:a": "5",
+        "-ar": "44.1k",
+        "-ac": "2"
+    },
+    "container_video": null,
+    "container_audio": "mp3"
+}

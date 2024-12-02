@@ -1,0 +1,5 @@
+faster-whisper
+mlx-whisper; sys_platform == 'darwin'
+torch
+torchaudio
+torchvision

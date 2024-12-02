@@ -1,0 +1,24 @@
+{
+    "name": "av1",
+    "title": "AV1",
+    "tooltip": "Encoding settings for ffplayout (AV1)",
+    "filter_video": {
+        "scale": "1920:1080"
+    },
+    "filter_audio": {},
+    "video": {
+        "-pix_fmt": "yuv420p",
+        "-r": 25,
+        "-aspect": "16:9",
+        "-c:v": "libsvtav1",
+        "-preset": "7",
+        "-crf": 30
+    },
+    "audio": {
+        "-c:a": "libfdk_aac",
+        "-b:a": "192k",
+        "-ar": "48k"
+    },
+    "container_video": "mp4",
+    "container_audio": null
+}

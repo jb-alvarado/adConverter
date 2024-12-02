@@ -1,0 +1,28 @@
+{
+    "name": "HD-fast",
+    "title": "HD-fast",
+    "tooltip": "Encoding settings for HD-fast",
+    "filter_video": {
+        "scale": "1920:1080"
+    },
+    "filter_audio": {},
+    "video": {
+        "-pix_fmt": "yuv420p",
+        "-r": 25,
+        "-c:v": "libx264",
+        "-preset": "veryfast",
+        "-crf": 23,
+        "-g": 25,
+        "-flags": "+cgop",
+        "-bf": 2,
+        "-maxrate": "15M",
+        "-bufsize": "2.6M"
+    },
+    "audio": {
+        "-c:a": "libfdk_aac",
+        "-b:a": "384k",
+        "-ar": "48k"
+    },
+    "container_video": "mp4",
+    "container_audio": null
+}

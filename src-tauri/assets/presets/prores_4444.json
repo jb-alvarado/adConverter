@@ -1,0 +1,19 @@
+{
+    "name": "prores_4444",
+    "title": "prores 4444",
+    "tooltip": "Encoding ProRes with alpha channel",
+    "filter_video": {},
+    "filter_audio": {},
+    "video": {
+        "-pix_fmt": "yuva444p10le",
+        "-c:v": "prores_ks",
+        "-profile:v": 4,
+        "-qscale:v": 5,
+        "-vendor": "apl0"
+    },
+    "audio": {
+        "-c:a": "pcm_s24le"
+    },
+    "container_video": "mov",
+    "container_audio": null
+}
