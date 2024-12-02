@@ -3,9 +3,11 @@ import type { JsonValue } from "./serde_json/JsonValue";
 
 export type AudioStream = { channels: bigint, codec_name: string | null, duration: number | null, sample_rate: bigint | null, };
 
-export type Config = { lufs: LufsConfig, transcript_cmd: string, };
+export type Config = { copyright: string, lufs: LufsConfig, transcript_cmd: string, transcript_lang: Array<LangConfig>, };
 
 export type FFmpegProgress = { title: string, fps: number, bitrate: string, total_size: bigint, elapsed_sec: number, elapsed_pct: bigint, speed: number, progress: string, };
+
+export type LangConfig = { name: string, code: string, };
 
 export type LowerThird = { path: string, duration: number, position: Array<string>, };
 
