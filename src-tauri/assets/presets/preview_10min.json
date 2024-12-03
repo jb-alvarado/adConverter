@@ -1,16 +1,16 @@
 {
-    "name": "20min",
-    "title": "20min",
-    "tooltip": "20min encoding for previews",
+    "name": "preview_10min",
+    "title": "Preview 10min",
+    "tooltip": "10min encoding for previews",
     "filter_video": {
         "scale": "640:360"
     },
     "filter_audio": {},
     "video": {
-        "-t": 1200,
+        "-t": 600,
         "-pix_fmt": "yuv420p",
-        "-aspect": "16:9",
         "-r": 25,
+        "-aspect": "16:9",
         "-c:v": "libx264",
         "-preset": "slower",
         "-crf": 23,

@@ -1,6 +1,6 @@
 {
-    "name": "youtube",
-    "title": "YouTube",
+    "name": "youtube_HD",
+    "title": "YouTube HD",
     "tooltip": "Encoding settings for Youtube",
     "filter_video": {
         "scale": "1920:1080"
