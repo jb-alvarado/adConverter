@@ -1,19 +1,21 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onBeforeMount } from 'vue'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
+import { check, type Update } from '@tauri-apps/plugin-updater'
 import { storeToRefs } from 'pinia'
-import { cloneDeep } from 'lodash-es'
+import { cloneDeep, round } from 'lodash-es'
 
 import { stringFormatter } from '../composables/helper'
 import { useStore } from '../store/index.ts'
 
-const { folderPath, filename } = stringFormatter()
+const { formatBytes, folderPath, filename } = stringFormatter()
 
 const store = useStore()
 const { jobsDone } = storeToRefs(useStore())
 const shutdown = ref(false)
+const update = ref<Update | null>(null)
 
 const prop = defineProps({
     logger: {
@@ -22,6 +24,10 @@ const prop = defineProps({
             return {}
         },
     },
+})
+
+onBeforeMount(async () => {
+    update.value = await check()
 })
 
 watch([jobsDone], () => {
@@ -35,10 +41,12 @@ async function addFiles() {
     let options = {
         multiple: true,
         directory: false,
-        filters: [{
-            name: 'File Types',
-            extensions: store.ALLOWED_EXTENSIONS,
-        }],
+        filters: [
+            {
+                name: 'File Types',
+                extensions: store.ALLOWED_EXTENSIONS,
+            },
+        ],
     } as any
 
     if (path) {
@@ -90,6 +98,36 @@ function openCloseConfig($event: any, link: string) {
     }, 60)
 }
 
+async function updater() {
+    if (update.value) {
+        // console.log(`found update ${update.value.version} from ${update.value.date} with notes ${update.value.body}`)
+
+        let downloaded = 0
+        let contentLength = 0
+        await update.value.downloadAndInstall((event) => {
+            switch (event.event) {
+                case 'Started':
+                    contentLength = event.data.contentLength ?? 0
+                    store.msgAlert('info', `Started downloading ${formatBytes(contentLength)}`, 3)
+                    break
+                case 'Progress':
+                    downloaded += event.data.chunkLength
+
+                    store.progressCurrent = round((downloaded * 100) / contentLength)
+                    store.processMsg = `Update to ${update.value?.version}`
+                    break
+                case 'Finished':
+                    store.processMsg = 'Install update'
+                    break
+            }
+        })
+
+        store.processMsg = ''
+        store.progressCurrent = 0
+        store.msgAlert('success', `Update done. Restart to apply changes.`, 3)
+    }
+}
+
 async function shutdown_system() {
     await invoke('shutdown_system').catch((e) => {
         store.msgAlert('error', e, 5)
@@ -111,6 +149,11 @@ async function shutdown_system() {
                 <div class="dropdown dropdown-start">
                     <button tabindex="0" role="button" class="btn btn-xs btn-ghost !rounded-none">Option</button>
                     <ul tabindex="0" class="menu dropdown-content bg-base-100 rounded-sm w-36 mt-1 p-0 shadow">
+                        <li v-if="update">
+                            <button class="hover:rounded-sm !rounded-sm" title="Download and install update" @click="updater()">
+                                Update ({{ update.version }})
+                            </button>
+                        </li>
                         <li>
                             <button class="hover:rounded-sm !rounded-sm" @click="openCloseConfig($event, 'presets')">
                                 Presets
@@ -123,7 +166,12 @@ async function shutdown_system() {
                         </li>
                         <li>
                             <label class="label cursor-pointer max-w-xs hover:rounded-sm justify-normal">
-                                <input type="checkbox" v-model="shutdown" class="checkbox checkbox-xs rounded-sm" title="Shutdown after all jobs are done" />
+                                <input
+                                    type="checkbox"
+                                    v-model="shutdown"
+                                    class="checkbox checkbox-xs rounded-sm"
+                                    title="Shutdown after all jobs are done"
+                                />
                                 <span class="pl-3 me-2">Shutdown</span>
                             </label>
                         </li>

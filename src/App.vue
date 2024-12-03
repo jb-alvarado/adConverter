@@ -28,12 +28,8 @@ const defaultTemplate: Template = {
 }
 const currentTask = ref<Task | null>(null)
 
-const progressCurrent = ref(0)
-const progressAll = ref(0)
 const targetFolder = ref<string | null>(null)
 const jobInProcess = ref(false)
-const processMsg = ref('')
-const processPath = ref('')
 const showTemplateEditor = ref(false)
 
 const log = new Logger()
@@ -78,7 +74,7 @@ listen<Task>('task-active', (event: Event<Task>) => {
     for (const entry of store.taskList) {
         if (entry.path === event.payload.path) {
             entry.active = true
-            processPath.value = filename(entry.path)
+            store.processPath = filename(entry.path)
         }
     }
 })
@@ -86,7 +82,7 @@ listen<Task>('task-active', (event: Event<Task>) => {
 listen<Task>('task-finish', (event: Event<Task>) => {
     for (let i = 0; i < store.taskList.length; i++) {
         if (jobInProcess.value && store.taskList[i].path === event.payload.path) {
-            progressAll.value = round(((i + 1) * 100) / store.taskList.length)
+            store.progressAll = round(((i + 1) * 100) / store.taskList.length)
             store.taskList[i].active = false
             store.taskList[i].finished = true
 
@@ -108,8 +104,8 @@ listen<Task>('task-finish', (event: Event<Task>) => {
 })
 
 listen<String>('lufs-progress', async (event: Event<FFmpegProgress>) => {
-    progressCurrent.value = event.payload.elapsed_pct
-    processMsg.value = `<strong>Analyze (${event.payload.title} ${event.payload.speed} Speed): </strong>`
+    store.progressCurrent = event.payload.elapsed_pct
+    store.processMsg = `<strong>Analyze (${event.payload.title} ${event.payload.speed} Speed): </strong>`
 })
 
 listen<String>('preset-start', async (event: Event<Preset>) => {
@@ -121,18 +117,18 @@ listen<String>('preset-start', async (event: Event<Preset>) => {
 })
 
 listen<String>('preset-progress', async (event: Event<FFmpegProgress>) => {
-    progressCurrent.value = event.payload.elapsed_pct
-    processMsg.value = `<strong>Encode (${event.payload.title} ${event.payload.fps} FPS): </strong>`
+    store.progressCurrent = event.payload.elapsed_pct
+    store.processMsg = `<strong>Encode (${event.payload.title} ${event.payload.fps} FPS): </strong>`
 })
 
 listen<string>('transcript-progress', async (event: Event<string>) => {
-    progressCurrent.value = parseFloat(event.payload)
-    processMsg.value = `<strong>Transcript: </strong>`
+    store.progressCurrent = parseFloat(event.payload)
+    store.processMsg = `<strong>Transcript: </strong>`
 })
 
 listen<String>('preset-finish', async (event: Event<Preset>) => {
-    progressCurrent.value = 100
-    processMsg.value = `<strong>Done (${event.payload.title}): </strong>`
+    store.progressCurrent = 100
+    store.processMsg = `<strong>Done (${event.payload.title}): </strong>`
 
     const index = currentTask.value.presets.findIndex((item: Task) => item.name === event.payload.name)
     currentTask.value.presets.splice(index, 1)
@@ -275,10 +271,10 @@ async function saveTemplate(update: boolean) {
                         <div class="relative grow flex items-center">
                             <progress
                                 class="progress progress-accent rounded-sm [&::-webkit-progress-value]:rounded-sm h-4"
-                                :value="progressCurrent"
+                                :value="store.progressCurrent"
                                 max="100"
                             ></progress>
-                            <div class="absolute w-full font-semibold text-center text-xs">{{ progressCurrent }}%</div>
+                            <div class="absolute w-full font-semibold text-center text-xs">{{ store.progressCurrent }}%</div>
                         </div>
                     </div>
                     <div class="flex items-center gap-4 mt-2">
@@ -286,10 +282,10 @@ async function saveTemplate(update: boolean) {
                         <div class="relative grow flex items-center">
                             <progress
                                 class="progress progress-accent rounded-sm [&::-webkit-progress-value]:rounded-sm h-4"
-                                :value="progressAll"
+                                :value="store.progressAll"
                                 max="100"
                             ></progress>
-                            <div class="absolute w-full font-semibold text-center text-xs">{{ progressAll }}%</div>
+                            <div class="absolute w-full font-semibold text-center text-xs">{{ store.progressAll }}%</div>
                         </div>
                     </div>
                 </div>
@@ -298,7 +294,7 @@ async function saveTemplate(update: boolean) {
                 <div class="container flex">
                     <div class="p-4 flex flex-col gap-1 w-[calc(100%-102px)]">
                         <div class="flex items-center">
-                            <div class="grow font-semibold truncate pr-2 h-[25px]" v-html="processMsg + processPath" />
+                            <div class="grow font-semibold truncate pr-2 h-[25px]" v-html="store.processMsg + store.processPath" />
                         </div>
                         <div class="flex items-end">
                             <label class="cursor-pointer join w-full">

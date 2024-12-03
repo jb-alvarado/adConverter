@@ -2,9 +2,21 @@
 import { useStore } from '../store/index.ts'
 
 export const stringFormatter = () => {
+    function formatBytes(bytes: number, decimals = 2) {
+        if (!+bytes) return '0 Bytes'
+
+        const k = 1024
+        const dm = decimals < 0 ? 0 : decimals
+        const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+
+        const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+    }
+
     function folderPath(path: string): string {
-        const match = path.match(/^(.*[\\/])/);
-        return match ? match[1] : '';
+        const match = path.match(/^(.*[\\/])/)
+        return match ? match[1] : ''
     }
 
     function filename(path: string): string {
@@ -18,7 +30,7 @@ export const stringFormatter = () => {
     }
 
     function removeExtension(path: string): string {
-        return path.replace(/\.[^/.]+$/, '');
+        return path.replace(/\.[^/.]+$/, '')
     }
 
     function secToMin(seconds: number): string {
@@ -34,14 +46,14 @@ export const stringFormatter = () => {
     }
 
     function logTime(): string {
-        const now = new Date();
+        const now = new Date()
 
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-        const microseconds = String(now.getMilliseconds() * 1000).padStart(6, '0');
+        const hours = String(now.getHours()).padStart(2, '0')
+        const minutes = String(now.getMinutes()).padStart(2, '0')
+        const seconds = String(now.getSeconds()).padStart(2, '0')
+        const microseconds = String(now.getMilliseconds() * 1000).padStart(6, '0')
 
-        return `${hours}:${minutes}:${seconds}.${microseconds}`;
+        return `${hours}:${minutes}:${seconds}.${microseconds}`
     }
 
     class Logger {
@@ -72,7 +84,7 @@ export const stringFormatter = () => {
         }
     }
 
-    return { folderPath, filename, format, extension, removeExtension, secToMin, logTime, Logger }
+    return { formatBytes, folderPath, filename, format, extension, removeExtension, secToMin, logTime, Logger }
 }
 
 export const useVariables = () => {
@@ -204,6 +216,7 @@ export const useVariables = () => {
     }
 
     return {
-        multiSelectClasses, alertIcon,
+        multiSelectClasses,
+        alertIcon,
     }
 }

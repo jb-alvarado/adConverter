@@ -62,6 +62,10 @@ export const useStore = defineStore('index', {
         showPresets: false,
         showTranscript: false,
         transcriptLanguages: [] as TLang[],
+        progressCurrent: 0,
+        progressAll: 0,
+        processMsg: '',
+        processPath: '',
     }),
 
     actions: {
