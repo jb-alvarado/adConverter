@@ -2,7 +2,7 @@ name: Release
 on:
     push:
         tags:
-            - 'adConverter-v0.1.1-v*'
+            - 'adConverter-v*'
     workflow_dispatch:
 
 jobs:
