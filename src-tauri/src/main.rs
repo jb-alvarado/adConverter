@@ -3,8 +3,13 @@
 
 #[tokio::main]
 async fn main() {
-    // prevent "Error 71 dispatching to Wayland display." error
-    std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+    #[cfg(target_os = "linux")]
+    {
+        // prevent "Error 71 dispatching to Wayland display." error
+        std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+        // prevent "Could not create GBM EGL display: EGL_SUCCESS."
+        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+    }
 
     // set tauri runtime to tokio
     tauri::async_runtime::set(tokio::runtime::Handle::current());
