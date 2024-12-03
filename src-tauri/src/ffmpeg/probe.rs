@@ -214,7 +214,8 @@ impl MediaProbe {
     }
 
     pub fn aspect(&self) -> f64 {
-        self.video
+        let mut asp = self
+            .video
             .first()
             .and_then(|v| v.aspect_ratio.as_ref())
             .and_then(|ratio| ratio.split_once(':'))
@@ -223,7 +224,18 @@ impl MediaProbe {
                 let height = h.parse::<f64>().ok()?;
                 Some(width / height)
             })
-            .unwrap_or(0.0)
+            .unwrap_or(0.0);
+
+        if asp == 0.0 {
+            asp = self
+                .video
+                .first()
+                .and_then(|v| v.width.zip(v.height))
+                .map(|(width, height)| width as f64 / height as f64)
+                .unwrap_or(0.0);
+        }
+
+        asp
     }
 }
 
