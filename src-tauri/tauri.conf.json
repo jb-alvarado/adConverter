@@ -35,14 +35,7 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": ["assets/**/*"],
-    "linux": {
-      "appimage": {
-        "files": {
-          "/usr/lib/adConverter/assets": "assets/"
-        }
-      }
-    }
+    "resources": ["assets/**/*"]
   },
   "plugins": {
     "updater": {
