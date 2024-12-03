@@ -25,6 +25,7 @@
     "withGlobalTauri": true
   },
   "bundle": {
+    "createUpdaterArtifacts": true,
     "active": true,
     "targets": "all",
     "icon": [
@@ -34,7 +35,14 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": ["assets/**/*"]
+    "resources": ["assets/**/*"],
+    "linux": {
+      "appimage": {
+        "files": {
+          "/usr/lib/adConverter/assets": "assets/"
+        }
+      }
+    }
   },
   "plugins": {
     "updater": {
