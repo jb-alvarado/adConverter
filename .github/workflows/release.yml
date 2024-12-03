@@ -53,8 +53,8 @@ jobs:
                   TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ""
 
               with:
-                  tagName: adConverter-v__VERSION__' # This only works if your workflow triggers on new tags.
-                  releaseName: 'adConverter v__VERSION__' # tauri-action replaces \_\_VERSION\_\_ with the app version.
+                  tagName: adConverter-v__VERSION__'
+                  releaseName: 'adConverter v__VERSION__'
                   releaseBody: 'See the assets to download this version and install.'
                   releaseDraft: true
                   prerelease: false
