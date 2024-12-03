@@ -16,6 +16,7 @@ import LogWindow from './components/LogWindow.vue'
 import EditConfig from './components/EditConfig.vue'
 import EditPresets from './components/EditPresets.vue'
 import EditTemplate from './components/EditTemplate.vue'
+import EditPublisher from './components/EditPublisher.vue'
 
 const { folderPath, filename, removeExtension, Logger } = stringFormatter()
 
@@ -31,6 +32,7 @@ const currentTask = ref<Task | null>(null)
 const targetFolder = ref<string | null>(null)
 const jobInProcess = ref(false)
 const showTemplateEditor = ref(false)
+const showPublisherEditor = ref(false)
 
 const log = new Logger()
 
@@ -249,6 +251,13 @@ async function saveTemplate(update: boolean) {
             })
     }
 }
+
+function editPublisher(task: Task) {
+    currentTask.value = task
+    showPublisherEditor.value = true
+
+    // store.currentPublisher = cloneDeep(task.template)
+}
 </script>
 
 <template>
@@ -256,7 +265,7 @@ async function saveTemplate(update: boolean) {
         <HeaderMenu :logger="log" />
         <main class="mb-auto bg-base-300 w-full h-full overflow-x-hidden overflow-y-auto">
             <div class="relative bg-base-200 h-full">
-                <MediaTable :logger="log" :editTemplate="editTemplate" />
+                <MediaTable :logger="log" :editTemplate="editTemplate" :editPublisher="editPublisher" />
                 <LogWindow />
                 <EditConfig v-if="store.showConfig" :logger="log" />
                 <EditPresets v-if="store.showPresets" :logger="log" />
@@ -329,5 +338,6 @@ async function saveTemplate(update: boolean) {
         </footer>
         <AlertMsg v-if="!store.openLog" />
         <EditTemplate :show="showTemplateEditor" :currentTask="currentTask" :saveTemplate="saveTemplate" />
+        <EditPublisher :show="showPublisherEditor" :currentTask="currentTask" />
     </div>
 </template>

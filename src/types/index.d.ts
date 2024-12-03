@@ -1,4 +1,4 @@
-import type { FFmpegProgress, Preset, Task, Template } from './backend'
+import type { FFmpegProgress, Preset, Task, Template, LufsConfig, Platform } from './backend'
 
 export {}
 
@@ -9,6 +9,7 @@ declare global {
     type Template = Template
     type Config = Config
     type LufsConfig = LufsConfig
+    type Platform = Platform
 
     type AlertObj = {
         text: string

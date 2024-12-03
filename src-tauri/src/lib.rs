@@ -29,6 +29,7 @@ use ts_rs::TS;
 
 mod ffmpeg;
 mod macros;
+mod publish;
 mod utils;
 
 pub use utils::{

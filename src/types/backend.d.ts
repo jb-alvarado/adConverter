@@ -17,6 +17,8 @@ export type MediaFormat = { duration: number | null, nb_streams: bigint, size: b
 
 export type MediaProbe = { format: MediaFormat, audio: Array<AudioStream>, video: Array<VideoStream>, };
 
+export type Platform = { name: string, username: string, password: string, };
+
 export type Preset = { name: string, title: string, tooltip: string, filter_video: JsonValue, filter_audio: JsonValue, video: JsonValue, audio: JsonValue, container_video: string, container_audio: string, output_path: string, finished: bool, };
 
 export type Task = { path: string, in: number, out: number, fade: boolean, lufs: boolean, transcript: string | null, probe: MediaProbe, presets: Array<Preset>, template: Template | null, target: string, active: bool, finished: bool, };
