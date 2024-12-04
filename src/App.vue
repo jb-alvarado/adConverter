@@ -344,6 +344,6 @@ function savePublisher(save: boolean) {
         </footer>
         <AlertMsg v-if="!store.openLog" />
         <EditTemplate :show="showTemplateEditor" :currentTask="currentTask" :saveTemplate="saveTemplate" />
-        <EditPublisher :show="showPublisherEditor" :currentTask="currentTask" :savePublisher="savePublisher" />
+        <EditPublisher v-if="showPublisherEditor" :show="showPublisherEditor" :currentTask="currentTask" :savePublisher="savePublisher" />
     </div>
 </template>

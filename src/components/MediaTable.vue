@@ -190,9 +190,9 @@ function changePresets(task: Task | undefined) {
                         </select>
                     </div>
                 </th>
-                <th class="p-0">
+                <th class="p-0 border-r border-zinc-700">
                     <div
-                        class="relative z-10 px-1 py-[3px] h-[41px] border-b border-zinc-700"
+                        class="relative z-10 px-1 py-[3px] h-[41px] border-b border-r border-zinc-700"
                         :style="{ minWidth: `${presetList.length * 58 + 9}px` }"
                     >
                         <Multiselect
