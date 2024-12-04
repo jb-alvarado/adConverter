@@ -68,6 +68,14 @@ async function getOutro() {
     let options = {
         multiple: false,
         directory: false,
+        filters: [{
+            name: 'Image',
+            extensions: store.IMAGE_EXTENSIONS
+        },
+        {
+            name: 'Video',
+            extensions: store.VIDEO_EXTENSIONS
+        }]
     } as any
 
     if (path) {

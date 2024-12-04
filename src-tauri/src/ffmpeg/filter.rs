@@ -792,6 +792,7 @@ mod tests {
             probe: MediaProbe::new(&path.to_string_lossy().to_string())
                 .await
                 .unwrap(),
+            publish: None,
             active: Arc::new(AtomicBool::new(false)),
             finished: Arc::new(AtomicBool::new(false)),
             lufs: false,

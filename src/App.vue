@@ -258,6 +258,12 @@ function editPublisher(task: Task) {
 
     // store.currentPublisher = cloneDeep(task.template)
 }
+
+function savePublisher(save: boolean) {
+    showPublisherEditor.value = false
+
+    // store.currentPublisher = cloneDeep(task.template)
+}
 </script>
 
 <template>
@@ -338,6 +344,6 @@ function editPublisher(task: Task) {
         </footer>
         <AlertMsg v-if="!store.openLog" />
         <EditTemplate :show="showTemplateEditor" :currentTask="currentTask" :saveTemplate="saveTemplate" />
-        <EditPublisher :show="showPublisherEditor" :currentTask="currentTask" />
+        <EditPublisher :show="showPublisherEditor" :currentTask="currentTask" :savePublisher="savePublisher" />
     </div>
 </template>

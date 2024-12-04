@@ -11,6 +11,11 @@
     "shell:allow-open",
     "dialog:default",
     "store:default",
-    "window-state:default"
+    "window-state:default",
+    {
+      "identifier": "http:default",
+      "allow": [{ "url": "https://*" }],
+      "deny": []
+    }
   ]
 }

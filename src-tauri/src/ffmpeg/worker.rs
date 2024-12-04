@@ -72,7 +72,7 @@ async fn calc_duration(task: &Task) -> (f64, f64, f64) {
     (duration_intro, duration, duration_outro)
 }
 
-async fn encode(
+async fn work(
     app: AppHandle,
     child: Arc<Mutex<Option<Child>>>,
     is_running: Arc<AtomicBool>,
@@ -369,7 +369,7 @@ pub async fn run(
         {
             app.emit("task-active", &task)?;
 
-            encode(
+            work(
                 app.clone(),
                 state.encoder.clone(),
                 state.run.clone(),

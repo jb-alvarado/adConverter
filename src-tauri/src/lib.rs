@@ -32,6 +32,7 @@ mod macros;
 mod publish;
 mod utils;
 
+pub use publish::Publish;
 pub use utils::{
     args_parse::ARGS,
     copy_assets, delete_files,
@@ -42,7 +43,7 @@ pub use utils::{
     Sources,
 };
 
-use ffmpeg::{encoder, probe::MediaProbe};
+use ffmpeg::{probe::MediaProbe, worker};
 
 #[cfg(target_os = "macos")]
 const MACOS_PATH: &str = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
@@ -66,6 +67,8 @@ struct Task {
     #[ts(type = "string")]
     #[serde_as(as = "NoneAsEmptyString")]
     target: Option<String>,
+    #[serde(default)]
+    publish: Option<Publish>,
     #[ts(type = "bool")]
     active: Arc<AtomicBool>,
     #[ts(type = "bool")]
@@ -87,6 +90,8 @@ struct Config {
     pub lufs: LufsConfig,
     pub transcript_cmd: String,
     pub transcript_lang: Vec<LangConfig>,
+    #[serde(default)]
+    pub publisher: Option<Value>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize, Serialize, TS)]
@@ -261,6 +266,8 @@ async fn load_config(app: AppHandle, state: State<'_, AppState>) -> Result<(), P
         config.copyright = copyright;
     }
 
+    config.publisher = store.get("publisher");
+
     match store.get("lufs") {
         Some(l) => {
             config.lufs.i = l.get("i").and_then(|l| l.as_f64()).unwrap_or_default();
@@ -306,6 +313,7 @@ pub async fn run() -> tauri::Result<()> {
     let (tx, rx) = channel(5);
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin({
@@ -343,7 +351,7 @@ pub async fn run() -> tauri::Result<()> {
             tokio::spawn(async move {
                 let state = app_handle_clone.state::<AppState>().to_owned();
 
-                encoder::run(app_handle_clone.clone(), state, rx)
+                worker::run(app_handle_clone.clone(), state, rx)
                     .await
                     .expect("Encode Task");
             });

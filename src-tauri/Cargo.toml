@@ -36,6 +36,7 @@ shlex = "1"
 system_shutdown = "*"
 tauri = { version = "2", features = ["tray-icon"] }
 tauri-plugin-dialog = "2"
+tauri-plugin-http = "2"
 tauri-plugin-shell = "2"
 tauri-plugin-store = "2"
 thiserror = "2"

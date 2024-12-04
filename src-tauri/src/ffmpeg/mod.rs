@@ -4,10 +4,10 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 pub mod analyze;
-pub mod encoder;
 pub mod filter;
 pub mod probe;
 pub mod transcript;
+pub mod worker;
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize, TS)]
 #[ts(export, export_to = "backend.d.ts")]
