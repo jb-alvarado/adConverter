@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import logging
-import os
 import platform
 import re
 import subprocess
@@ -24,7 +23,7 @@ stdin_parser = ArgumentParser(description="Transcribe video file")
 stdin_parser.add_argument(
     "-c",
     metavar="compute_type",
-    help=f"Compute type for faster-whisper. Choices: {
+    help=f"Compute type for whisper. Choices: {
         supported_compute_types}",
     default="default",
     choices=supported_compute_types
