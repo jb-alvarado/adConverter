@@ -81,28 +81,40 @@ pub async fn run(
     *child.lock().await = Some(proc);
 
     let stderr_task = tokio::spawn(async move {
-        let mut reader = BufReader::new(stderr).lines();
+        let mut reader = BufReader::new(stderr);
+        let mut buffer = Vec::new();
 
-        while let Some(line) = reader.next_line().await.expect("Read line") {
+        while let Ok(bytes_read) = reader.read_until(b'\n', &mut buffer).await {
+            if bytes_read == 0 {
+                break; // EOF
+            }
+
             if !is_running.load(Ordering::SeqCst) {
                 break;
             }
 
-            cmd_logger.log(None, &line)
+            cmd_logger.log(None, &String::from_utf8_lossy(&buffer));
+            buffer.clear();
         }
     });
 
     let stdout_task = tokio::spawn(async move {
-        let mut reader = BufReader::new(stdout).lines();
+        let mut reader = BufReader::new(stdout);
+        let mut buffer = Vec::new();
 
-        while let Some(line) = reader.next_line().await.expect("Read line") {
+        while let Ok(bytes_read) = reader.read_until(b'\n', &mut buffer).await {
+            if bytes_read == 0 {
+                break; // EOF
+            }
+
             if !running_clone.load(Ordering::SeqCst) {
                 break;
             }
 
             app_clone
-                .emit("transcript-progress", &line)
+                .emit("transcript-progress", &String::from_utf8_lossy(&buffer))
                 .expect("Emit progress");
+            buffer.clear();
         }
     });
 

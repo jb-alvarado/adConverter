@@ -385,5 +385,7 @@ pub async fn run(
         }
     }
 
+    warn!("Task worker done...");
+
     Ok(())
 }
