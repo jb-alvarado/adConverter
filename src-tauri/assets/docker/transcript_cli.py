@@ -200,7 +200,7 @@ def transcribe_video_mlx(video_path: Path):
                 video_path.parent}'); "
             f"writer_vtt(result, '{vtt_path}')"
         )
-        command = ["python", "-c", python_code]
+        command = [sys.executable, "-c", python_code]
         log.debug(" ".join(command))
 
         process = subprocess.Popen(
