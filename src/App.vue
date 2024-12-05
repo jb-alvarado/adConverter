@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { ref, nextTick, onBeforeMount } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
 import { listen, type Event } from '@tauri-apps/api/event'
-import { load } from '@tauri-apps/plugin-store'
 import { open } from '@tauri-apps/plugin-dialog'
+import { load } from '@tauri-apps/plugin-store'
 import { cloneDeep, isEqual, round } from 'lodash-es'
+import { nextTick, onBeforeMount, ref } from 'vue'
 
 import { stringFormatter } from './composables/helper'
 import { useStore } from './store/index.ts'
 
 import AlertMsg from './components/AlertMsg.vue'
-import HeaderMenu from './components/HeaderMenu.vue'
-import MediaTable from './components/MediaTable.vue'
-import LogWindow from './components/LogWindow.vue'
 import EditConfig from './components/EditConfig.vue'
 import EditPresets from './components/EditPresets.vue'
-import EditTemplate from './components/EditTemplate.vue'
 import EditPublisher from './components/EditPublisher.vue'
+import EditTemplate from './components/EditTemplate.vue'
+import HeaderMenu from './components/HeaderMenu.vue'
+import LogWindow from './components/LogWindow.vue'
+import MediaTable from './components/MediaTable.vue'
 
 const { folderPath, filename, removeExtension, Logger } = stringFormatter()
 
@@ -100,7 +100,9 @@ listen<Task>('task-finish', (event: Event<Task>) => {
         }
     }
 
-    if (!store.taskList.some((task: Task) => task.presets.length > 0)) {
+    if (
+        !store.taskList.some((task: Task) => task.presets.length > 0 || (task.transcript && task.transcript != 'none'))
+    ) {
         jobInProcess.value = false
         store.jobsDone = true
     }
