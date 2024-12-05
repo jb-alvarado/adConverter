@@ -345,16 +345,16 @@ pub async fn run() -> tauri::Result<()> {
             #[cfg(not(target_os = "linux"))]
             window
                 .restore_state(StateFlags::SIZE)
-                .expect("Restore window position");
+                .expect("Restore window size");
 
             init_logging(app_handle.clone());
 
             tokio::spawn(async move {
                 let state = app_handle_clone.state::<AppState>().to_owned();
 
-                worker::run(app_handle_clone.clone(), state, rx)
-                    .await
-                    .expect("Encode Task");
+                if let Err(e) = worker::run(app_handle_clone.clone(), state, rx).await {
+                    error!("{e:?}");
+                };
             });
 
             let _ = TrayIconBuilder::new()
