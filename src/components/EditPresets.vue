@@ -126,8 +126,8 @@ async function savePreset() {
                 changed.value = false
             })
             .catch((e) => {
-                store.msgAlert('error', JSON.stringify(e), 5)
-                prop.logger.error(JSON.stringify(e))
+                store.msgAlert('error', e, 5)
+                prop.logger.error(e)
             })
     }
 }

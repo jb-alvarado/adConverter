@@ -151,7 +151,7 @@ def transcribe_video(video_path: Path):
                 progress += (segment.end - segment.start)
                 percent_complete = int((progress / total_duration) * 100)
 
-                print(percent_complete)
+                print(percent_complete, flush=True)
 
         log.info(f"Transcription completed for {
                  video_path}, saved to {vtt_path}")
@@ -160,7 +160,7 @@ def transcribe_video(video_path: Path):
         log.warning(f"Transcription interrupted, cleanup: {video_path}")
     finally:
         unlock_video(video_path)
-        print(100)
+        print(100, flush=True)
 
 
 def read_stream(stream, callback):
@@ -173,7 +173,7 @@ def process_output(line):
     result = re.search(r"^(\d+)%", line.strip())
     if result is not None:
         g = result.group(1)
-        print(g)
+        print(g, flush=True)
 
 
 def transcribe_video_mlx(video_path: Path):
@@ -220,7 +220,7 @@ def transcribe_video_mlx(video_path: Path):
         return
     finally:
         unlock_video(video_path)
-        print(100)
+        print(100, flush=True)
 
 
 # Main function

@@ -30,6 +30,7 @@ const defaultTemplate: Template = {
 const currentTask = ref<Task | null>(null)
 
 const targetFolder = ref<string | null>(null)
+const noProgressValues = ref(false)
 const jobInProcess = ref(false)
 const showTemplateEditor = ref(false)
 const showPublisherEditor = ref(false)
@@ -42,7 +43,7 @@ onBeforeMount(async () => {
         log.error(e)
     })
 
-    const config = await load('config.json', { autoSave: false });
+    const config = await load('config.json', { autoSave: false })
     store.showTranscript = (await config.get('transcript_cmd')) ? true : false
     store.transcriptLanguages = (await config.get('transcript_lang')) ?? []
     store.publishPreset = (await config.get('publish_preset')) ?? ''
@@ -67,8 +68,8 @@ onBeforeMount(async () => {
             }
         })
         .catch((e) => {
-            store.msgAlert('error', JSON.stringify(e), 5)
-            log.error(JSON.stringify(e))
+            store.msgAlert('error', e, 5)
+            log.error(e)
         })
 })
 
@@ -106,11 +107,13 @@ listen<Task>('task-finish', (event: Event<Task>) => {
 })
 
 listen<String>('lufs-progress', async (event: Event<FFmpegProgress>) => {
+    noProgressValues.value = false
     store.progressCurrent = event.payload.elapsed_pct
     store.processMsg = `<strong>Analyze (${event.payload.title} ${event.payload.speed} Speed): </strong>`
 })
 
 listen<String>('preset-start', async (event: Event<Preset>) => {
+    noProgressValues.value = false
     for (const preset of currentTask.value?.presets) {
         if (preset.title === event.payload.title) {
             preset.output_path = event.payload.output_path
@@ -123,7 +126,13 @@ listen<String>('preset-progress', async (event: Event<FFmpegProgress>) => {
     store.processMsg = `<strong>Encode (${event.payload.title} ${event.payload.fps} FPS): </strong>`
 })
 
+listen<string>('transcript-start', async () => {
+    noProgressValues.value = true
+    store.processMsg = `<strong>Transcript: </strong>`
+})
+
 listen<string>('transcript-progress', async (event: Event<string>) => {
+    noProgressValues.value = false
     store.progressCurrent = parseFloat(event.payload)
     store.processMsg = `<strong>Transcript: </strong>`
 })
@@ -259,7 +268,7 @@ function editPublisher(task: Task) {
     // store.currentPublisher = cloneDeep(task.template)
 }
 
-function savePublisher(save: boolean) {
+function savePublisher(_save: boolean) {
     showPublisherEditor.value = false
 
     // store.currentPublisher = cloneDeep(task.template)
@@ -285,11 +294,19 @@ function savePublisher(save: boolean) {
                         <div class="font-semibold w-15">Current:</div>
                         <div class="relative grow flex items-center">
                             <progress
+                                v-if="noProgressValues"
                                 class="progress progress-accent rounded-sm [&::-webkit-progress-value]:rounded-sm h-4"
-                                :value="store.progressCurrent"
-                                max="100"
-                            ></progress>
-                            <div class="absolute w-full font-semibold text-center text-xs">{{ store.progressCurrent }}%</div>
+                            />
+                            <template v-else>
+                                <progress
+                                    class="progress progress-accent rounded-sm [&::-webkit-progress-value]:rounded-sm h-4"
+                                    :value="store.progressCurrent"
+                                    max="100"
+                                />
+                                <div class="absolute w-full font-semibold text-center text-xs">
+                                    {{ store.progressCurrent }}%
+                                </div>
+                            </template>
                         </div>
                     </div>
                     <div class="flex items-center gap-4 mt-2">
@@ -299,8 +316,10 @@ function savePublisher(save: boolean) {
                                 class="progress progress-accent rounded-sm [&::-webkit-progress-value]:rounded-sm h-4"
                                 :value="store.progressAll"
                                 max="100"
-                            ></progress>
-                            <div class="absolute w-full font-semibold text-center text-xs">{{ store.progressAll }}%</div>
+                            />
+                            <div class="absolute w-full font-semibold text-center text-xs">
+                                {{ store.progressAll }}%
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -309,7 +328,10 @@ function savePublisher(save: boolean) {
                 <div class="container flex">
                     <div class="p-4 flex flex-col gap-1 w-[calc(100%-102px)]">
                         <div class="flex items-center">
-                            <div class="grow font-semibold truncate pr-2 h-[25px]" v-html="store.processMsg + store.processPath" />
+                            <div
+                                class="grow font-semibold truncate pr-2 h-[25px]"
+                                v-html="store.processMsg + store.processPath"
+                            />
                         </div>
                         <div class="flex items-end">
                             <label class="cursor-pointer join w-full">
@@ -344,6 +366,11 @@ function savePublisher(save: boolean) {
         </footer>
         <AlertMsg v-if="!store.openLog" />
         <EditTemplate :show="showTemplateEditor" :currentTask="currentTask" :saveTemplate="saveTemplate" />
-        <EditPublisher v-if="showPublisherEditor" :show="showPublisherEditor" :currentTask="currentTask" :savePublisher="savePublisher" />
+        <EditPublisher
+            v-if="showPublisherEditor"
+            :show="showPublisherEditor"
+            :currentTask="currentTask"
+            :savePublisher="savePublisher"
+        />
     </div>
 </template>

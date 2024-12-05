@@ -48,6 +48,12 @@ impl<T> From<std::sync::PoisonError<T>> for ProcessError {
     }
 }
 
+impl From<&str> for ProcessError {
+    fn from(err: &str) -> Self {
+        Self::Regex(err.to_string())
+    }
+}
+
 impl From<regex::Error> for ProcessError {
     fn from(err: regex::Error) -> Self {
         Self::Regex(err.to_string())

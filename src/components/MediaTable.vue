@@ -65,8 +65,8 @@ listen('tauri://drag-drop', async (event: Event<any>) => {
                 store.taskList.push(task)
             })
             .catch((e) => {
-                store.msgAlert('error', JSON.stringify(e), 5)
-                prop.logger.error(JSON.stringify(e))
+                store.msgAlert('error', e, 5)
+                prop.logger.error(e)
             })
     }
 })

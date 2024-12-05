@@ -118,11 +118,10 @@ pub async fn copy_assets(app: &AppHandle) -> Result<(), ProcessError> {
                 let source_path = entry.path();
                 let relative_path = source_path.strip_prefix(&path_source)?;
                 let target_path = target_source.join(relative_path);
-                let target_file = target_path.join(source_path.file_name().unwrap_or_default());
 
                 if source_path.is_dir() && !target_path.is_dir() {
                     fs::create_dir_all(&target_path).await?;
-                } else if source_path.is_file() && !target_file.is_file() {
+                } else if source_path.is_file() && !target_path.is_file() {
                     fs::copy(&source_path, &target_path).await?;
                 }
             }

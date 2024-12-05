@@ -63,24 +63,28 @@ export const stringFormatter = () => {
 
         store = {} as any
 
-        debug(msg: string) {
+        fmt(text: string | object) {
+            return typeof text === "object" ? JSON.stringify(text) : text
+        }
+
+        debug(msg: string | object) {
             let line = `<span class="text-cyan-600">${logTime()}</span> <span class="text-lime-600">[DEBUG]</span> ${msg}`
-            this.store.logContent.push(line)
+            this.store.logContent.push(this.fmt(line))
         }
 
-        error(msg: string) {
+        error(msg: string | object) {
             let line = `<span class="text-gray-600">${logTime()}</span> <span class="text-red-600">[ERROR]</span> ${msg}`
-            this.store.logContent.push(line)
+            this.store.logContent.push(this.fmt(line))
         }
 
-        info(msg: string) {
+        info(msg: string | object) {
             let line = `<span class="text-gray-600">${logTime()}</span> <span class="text-lime-600">[ INFO]</span> ${msg}`
-            this.store.logContent.push(line)
+            this.store.logContent.push(this.fmt(line))
         }
 
-        warn(msg: string) {
+        warn(msg: string | object) {
             let line = `<span class="text-yellow-600">${logTime()}</span> <span class="text-lime-600">[ WARN]</span> ${msg}`
-            this.store.logContent.push(line)
+            this.store.logContent.push(this.fmt(line))
         }
     }
 

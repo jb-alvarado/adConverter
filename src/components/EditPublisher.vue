@@ -76,7 +76,7 @@ async function refresh_peertube_token(data: any) {
             await config.save()
         })
         .catch((e) => {
-            prop.logger.error(JSON.stringify(e))
+            prop.logger.error(e)
         })
 }
 
@@ -127,11 +127,11 @@ async function saveLogin(save: boolean) {
                         })
                     })
                     .catch((e) => {
-                        prop.logger.error(JSON.stringify(e))
+                        prop.logger.error(e)
                     })
             })
             .catch((e) => {
-                prop.logger.error(JSON.stringify(e))
+                prop.logger.error(e)
             })
     }
 

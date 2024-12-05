@@ -38,7 +38,7 @@ pub async fn run(
     if transcript_cmd.contains("%mount%") {
         if let Some(parent) = Path::new(&task.path).parent() {
             transcript_cmd =
-                transcript_cmd.replace("%mount%", &format!("'{}'", parent.to_string_lossy()))
+                transcript_cmd.replace("%mount%", &format!("\"{}\"", parent.to_string_lossy()))
         };
     }
 
@@ -47,9 +47,9 @@ pub async fn run(
         task.transcript.as_ref().unwrap_or(&"auto".to_string()),
     );
 
-    transcript_cmd = transcript_cmd.replace("%file%", &format!("'{source}'"));
+    transcript_cmd = transcript_cmd.replace("%file%", &format!("\"{source}\""));
 
-    let mut args = shlex::split(&transcript_cmd).unwrap();
+    let mut args = shlex::split(&transcript_cmd).ok_or("No transcript command to split")?;
 
     log_command("Transcript", None, args.clone());
 
@@ -64,10 +64,14 @@ pub async fn run(
     #[cfg(target_os = "windows")]
     cmd.creation_flags(0x08000000);
 
+    app_clone
+        .emit("transcript-start", 0)
+        .expect("Emit progress");
+
     let mut proc = cmd.spawn()?;
 
-    let stderr = proc.stderr.take().expect("Failed to capture stderr");
-    let stdout = proc.stdout.take().expect("Failed to capture stdout");
+    let stderr = proc.stderr.take().ok_or("Failed to capture stderr")?;
+    let stdout = proc.stdout.take().ok_or("Failed to capture stdout")?;
 
     *child.lock().await = Some(proc);
 

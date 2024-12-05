@@ -81,8 +81,9 @@ export const useStore = defineStore('index', {
             }, seconds * 1000)
         },
 
-        msgAlert(variance: string, text: string, seconds: number = 3) {
-            const msg = { text, variance, seconds }
+        msgAlert(variance: string, text: string | object, seconds: number = 3) {
+            const textStr = typeof text === "object" ? JSON.stringify(text) : text
+            const msg = { text: textStr, variance, seconds }
 
             if (!some(this.alertList, msg)) {
                 this.alertList.push(msg)

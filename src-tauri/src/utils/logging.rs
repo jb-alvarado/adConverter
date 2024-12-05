@@ -147,7 +147,10 @@ pub fn init_logging(app: AppHandle) {
         .module("tao", LevelFilter::Error)
         .module("tokio", LevelFilter::Error)
         .module("winit", LevelFilter::Error)
-        .module("winit-gtk", LevelFilter::Error);
+        .module("winit-gtk", LevelFilter::Error)
+        .module("reqwest", LevelFilter::Error)
+        .module("tauri-plugin-http", LevelFilter::Error)
+        .module("tauri-plugin-updater", LevelFilter::Error);
 
     let _ = Logger::with(builder.build())
         .log_to_writer(Box::new(LogEmitter::new(app.clone())))
@@ -186,6 +189,7 @@ pub fn log_command(title: &str, prefix: Option<String>, mut cmd: Vec<String>) {
             quote_next = false;
         } else {
             formatted_cmd.push(arg.to_string());
+            // TODO: podman use also -i; command after should not be im quotes
             if ["-i", "-filter_complex", "-map", "-metadata"].contains(&arg.as_str()) {
                 quote_next = true;
             }
