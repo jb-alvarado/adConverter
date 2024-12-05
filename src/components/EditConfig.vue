@@ -191,7 +191,7 @@ async function cancel() {
                                 </tbody>
                             </table>
                         </div>
-                        <div>
+                        <div class="grow">
                             Command line argument
                             <label class="form-control mt-2 max-w-full px-0">
                                 <input

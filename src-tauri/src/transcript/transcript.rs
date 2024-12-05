@@ -35,6 +35,11 @@ pub async fn run(
     let running_clone = is_running.clone();
     let mut transcript_cmd = state.config.lock().await.transcript_cmd.clone();
 
+    #[cfg(target_os = "windows")]
+    {
+        transcript_cmd = transcript_cmd.replace("\\", "\\\\");
+    }
+
     if transcript_cmd.contains("%mount%") {
         if let Some(parent) = Path::new(&task.path).parent() {
             transcript_cmd =

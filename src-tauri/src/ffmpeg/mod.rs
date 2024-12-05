@@ -6,7 +6,6 @@ use ts_rs::TS;
 pub mod analyze;
 pub mod filter;
 pub mod probe;
-pub mod transcript;
 pub mod worker;
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize, TS)]

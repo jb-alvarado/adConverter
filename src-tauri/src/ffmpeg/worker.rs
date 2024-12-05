@@ -18,12 +18,12 @@ use tokio::{
     sync::{mpsc::Receiver, Mutex},
 };
 
-use super::{analyze::Lufs, filter::filter_chain, probe::MediaProbe, transcript, FFmpegProgress};
+use super::{analyze::Lufs, filter::filter_chain, probe::MediaProbe, FFmpegProgress};
 use crate::utils::{
     logging::{log_command, CommandLogger},
     Sources,
 };
-use crate::{vec_strings, AppState, ProcessError, Task};
+use crate::{transcript::transcript, vec_strings, AppState, ProcessError, Task};
 
 #[cfg(target_os = "macos")]
 use crate::MACOS_PATH;
