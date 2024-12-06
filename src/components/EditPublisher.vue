@@ -22,6 +22,13 @@ const loginDefault = {
     password: '',
 }
 
+enum User {
+    NotConfigured = 0,
+    NeedsLogin = 1,
+    IsLogin = 2,
+}
+
+const userPeertube = ref<User>(User.NotConfigured)
 const showLogin = ref(false)
 const login = ref(cloneDeep(loginDefault))
 const publish = ref({ name: '', thumbnail: '', description: '', tags: '' })
@@ -70,12 +77,13 @@ async function refresh_peertube_token(data: any) {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams(payload),
     })
-        .then((response) => response.json())
-        .then(async (data) => {
+        .then((response: any) => response.json())
+        .then(async (data: any) => {
             await config.set('publisher', { peertube: data })
             await config.save()
+            userPeertube.value = User.IsLogin
         })
-        .catch((e) => {
+        .catch((e: any) => {
             prop.logger.error(e)
         })
 }
@@ -84,24 +92,28 @@ async function loadPlatforms() {
     let platform: any = await config.get('publisher')
 
     if (platform?.peertube) {
-        if (platform.peertube.expires_in < 7200 && platform.peertube.refresh_token_expires_in > 0) {
+        if (platform.peertube.expires_in > 3600) {
+            userPeertube.value = User.IsLogin
+        } else if (platform.peertube.refresh_token_expires_in > 0) {
             await refresh_peertube_token(platform.peertube)
 
             await invoke('load_config').catch((e) => {
                 store.msgAlert('error', e, 5)
                 prop.logger.error(e)
             })
+        } else {
+            userPeertube.value = User.NeedsLogin
         }
     } else {
-        showLogin.value = true
+        userPeertube.value = User.NotConfigured
     }
 }
 
 async function saveLogin(save: boolean) {
     if (save) {
         fetch(`${login.value.url}/api/v1/oauth-clients/local`)
-            .then((response) => response.json())
-            .then((data) => {
+            .then((response: any) => response.json())
+            .then((data: any) => {
                 let payload = {
                     client_id: data.client_id,
                     client_secret: data.client_secret,
@@ -116,26 +128,34 @@ async function saveLogin(save: boolean) {
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams(payload),
                 })
-                    .then((response) => response.json())
-                    .then(async (data) => {
+                    .then((response: any) => response.json())
+                    .then(async (data: any) => {
                         await config.set('publisher', { peertube: data })
                         await config.save()
+
+                        userPeertube.value = User.IsLogin
 
                         await invoke('load_config').catch((e) => {
                             store.msgAlert('error', e, 5)
                             prop.logger.error(e)
                         })
                     })
-                    .catch((e) => {
+                    .catch((e: any) => {
                         prop.logger.error(e)
                     })
             })
-            .catch((e) => {
+            .catch((e: any) => {
                 prop.logger.error(e)
             })
     }
 
     showLogin.value = false
+}
+
+function handlePeertube() {
+    if (userPeertube.value !== User.IsLogin) {
+        showLogin.value = true
+    }
 }
 
 async function getThumbnail() {
@@ -160,11 +180,32 @@ async function getThumbnail() {
 
     publish.value.thumbnail = thumbnail ?? ''
 }
+
+function addPublisher($event: any) {
+    publish.value.tags = publish.value.tags.trim().replace(/\s*,\s*/g, ',')
+    prop.currentTask.publish = cloneDeep(publish.value)
+
+    prop.savePublisher($event)
+}
 </script>
 <template>
-    <GenericModal :show="show" title="Edit Publisher" :modal-action="savePublisher">
+    <GenericModal :show="show" title="Edit Publisher" :modal-action="addPublisher">
         <div class="min-w-[700px]">
             <div>
+                <div class="h-8">
+                    <button class="btn btn-sm rounded-sm" @click="handlePeertube()">
+                        Peertube
+                        <div
+                            class="badge badge-sm"
+                            :class="{
+                                'badge-secondary': userPeertube === User.NotConfigured,
+                                'badge-success': userPeertube === User.IsLogin,
+                                'badge-warning': userPeertube === User.NeedsLogin,
+                            }"
+                            :title="userPeertube === User.NotConfigured ? 'Not Configured' : userPeertube === User.IsLogin ? 'Logged In' : 'Needs Login'"
+                        ></div>
+                    </button>
+                </div>
                 <label class="form-control mt-2 max-w-full px-0">
                     <input
                         type="text"

@@ -101,7 +101,7 @@ listen<Task>('task-finish', (event: Event<Task>) => {
     }
 
     if (
-        !store.taskList.some((task: Task) => task.presets.length > 0 || (task.transcript && task.transcript != 'none'))
+        !store.taskList.some((task: Task) => task.presets.length > 0 || (task.transcript && task.transcript != 'none') || task.publish)
     ) {
         jobInProcess.value = false
         store.jobsDone = true
@@ -186,9 +186,8 @@ async function getDir() {
 async function taskSendNext() {
     for (const task of store.taskList) {
         if (!task.finished) {
-            console.log(task.transcript)
-            if (task.presets.length === 0 && task.transcript === 'none') {
-                store.msgAlert('warning', 'No transcription or preset selected!', 3)
+            if (task.presets.length === 0 && task.transcript === 'none' && !task.publish) {
+                store.msgAlert('warning', 'No transcription, preset or publisher selected!', 3)
                 break
             }
 

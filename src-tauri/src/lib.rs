@@ -181,6 +181,7 @@ async fn task_start(state: State<'_, AppState>) -> Result<(), ProcessError> {
 
 #[tauri::command]
 async fn task_send(task: Task, state: State<'_, AppState>) -> Result<(), ProcessError> {
+    println!("task: {task:?}");
     state.sender.send(task).await?;
 
     Ok(())

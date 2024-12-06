@@ -19,9 +19,12 @@ use tokio::{
 };
 
 use super::{analyze::Lufs, filter::filter_chain, probe::MediaProbe, FFmpegProgress};
-use crate::utils::{
-    logging::{log_command, CommandLogger},
-    Sources,
+use crate::{
+    publish,
+    utils::{
+        logging::{log_command, CommandLogger},
+        Sources,
+    },
 };
 use crate::{transcript, vec_strings, AppState, ProcessError, Task};
 
@@ -353,6 +356,10 @@ async fn work(
 
     *child.lock().await = None;
 
+    if let Some(publish) = task.publish {
+        unimplemented!()
+    }
+
     Ok(())
 }
 
@@ -381,7 +388,7 @@ pub async fn run(
 
             app.emit("task-finish", &task)?;
         } else {
-            warn!("Task {:?} doesn't contain any preset!", task.path);
+            warn!("Task {:?} doesn't contain any job to process!", task.path);
         }
     }
 
