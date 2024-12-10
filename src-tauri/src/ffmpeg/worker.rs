@@ -20,7 +20,7 @@ use tokio::{
 
 use super::{analyze::Lufs, filter::filter_chain, probe::MediaProbe, FFmpegProgress};
 use crate::{
-    publish,
+    publisher,
     utils::{
         logging::{log_command, CommandLogger},
         Sources,
@@ -356,8 +356,8 @@ async fn work(
 
     *child.lock().await = None;
 
-    if let Some(publish) = task.publish {
-        unimplemented!()
+    if task.publish.is_some() {
+        publisher::peertube::publish(app, &task).await?;
     }
 
     Ok(())

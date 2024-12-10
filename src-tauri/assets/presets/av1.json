@@ -11,12 +11,12 @@
         "-r": 25,
         "-aspect": "16:9",
         "-c:v": "libsvtav1",
-        "-preset": "7",
+        "-preset": "6",
         "-crf": 30
     },
     "audio": {
-        "-c:a": "libfdk_aac",
-        "-b:a": "192k",
+        "-c:a": "libopus",
+        "-b:a": "160k",
         "-ar": "48k"
     },
     "container_video": "mp4",

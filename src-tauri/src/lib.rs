@@ -29,11 +29,11 @@ use ts_rs::TS;
 
 mod ffmpeg;
 mod macros;
-mod publish;
+mod publisher;
 mod transcript;
 mod utils;
 
-pub use publish::Publish;
+pub use publisher::Publish;
 pub use utils::{
     args_parse::ARGS,
     copy_assets, delete_files,
@@ -181,7 +181,6 @@ async fn task_start(state: State<'_, AppState>) -> Result<(), ProcessError> {
 
 #[tauri::command]
 async fn task_send(task: Task, state: State<'_, AppState>) -> Result<(), ProcessError> {
-    println!("task: {task:?}");
     state.sender.send(task).await?;
 
     Ok(())

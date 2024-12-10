@@ -3,6 +3,7 @@ use std::{
     str::FromStr,
 };
 
+use log::*;
 use tauri::{path::BaseDirectory, AppHandle, Manager};
 use tokio::fs::{self};
 use tokio_stream::StreamExt;
@@ -126,7 +127,7 @@ pub async fn copy_assets(app: &AppHandle) -> Result<(), ProcessError> {
                 }
             }
             Some(Err(e)) => {
-                eprintln!("error: {}", e);
+                error!("error: {}", e);
                 break;
             }
             None => break,

@@ -165,6 +165,7 @@ async function savePreset() {
                                 ref="textInput"
                                 v-model="preset"
                                 class="textarea textarea-bordered bg-base-200 rounded-sm w-full h-full text-sm leading-5"
+                                :spellcheck="false"
                                 @keydown="catchKeyDown"
                                 @keyup="catchKeyUp"
                             />

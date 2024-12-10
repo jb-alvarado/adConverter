@@ -101,7 +101,9 @@ listen<Task>('task-finish', (event: Event<Task>) => {
     }
 
     if (
-        !store.taskList.some((task: Task) => task.presets.length > 0 || (task.transcript && task.transcript != 'none') || task.publish)
+        !store.taskList.some(
+            (task: Task) => task.presets.length > 0 || (task.transcript && task.transcript != 'none') || task.publish
+        )
     ) {
         jobInProcess.value = false
         store.jobsDone = true
@@ -282,85 +284,96 @@ function savePublisher(_save: boolean) {
         <main class="mb-auto bg-base-300 w-full h-full overflow-x-hidden overflow-y-auto">
             <div class="relative bg-base-200 h-full">
                 <MediaTable :logger="log" :editTemplate="editTemplate" :editPublisher="editPublisher" />
-                <LogWindow />
+                <LogWindow v-if="store.openLog" />
                 <EditConfig v-if="store.showConfig" :logger="log" />
                 <EditPresets v-if="store.showPresets" :logger="log" />
             </div>
         </main>
 
-        <footer class="relative z-30 h-25 flex bg-base-100 border-t border-zinc-600">
-            <div class="flex justify-center m-auto item-center w-2/5">
-                <div class="container px-4 flex flex-col gap-0 mb-1">
-                    <div class="flex items-center gap-4">
-                        <div class="font-semibold w-15">Current:</div>
-                        <div class="relative grow flex items-center">
-                            <progress
-                                v-if="noProgressValues"
-                                class="progress progress-accent rounded-sm [&::-webkit-progress-value]:rounded-sm h-4"
-                            />
-                            <template v-else>
+        <footer class="relative z-30 h-[100px]">
+            <div v-if="!store.openLog" class="absolute w-full flex justify-center -top-[12px]">
+                <button
+                    class="w-20 h-[12px] min-h-[12px] btn bg-base-100 rounded-none border-b-0 hover:border-zinc-600 rounded-t-box border-t border-zinc-600 hover:text-base-content/50"
+                    title="Open Logging"
+                    @click="store.openLog = true"
+                >
+                    <i class="bi-chevron-compact-up" />
+                </button>
+            </div>
+            <div class="flex bg-base-100 border-t border-zinc-600">
+                <div class="flex justify-center m-auto item-center w-2/5">
+                    <div class="container px-4 flex flex-col gap-0 mb-1">
+                        <div class="flex items-center gap-4">
+                            <div class="font-semibold w-15">Current:</div>
+                            <div class="relative grow flex items-center">
+                                <progress
+                                    v-if="noProgressValues"
+                                    class="progress progress-accent rounded-sm [&::-webkit-progress-value]:rounded-sm h-4"
+                                />
+                                <template v-else>
+                                    <progress
+                                        class="progress progress-accent rounded-sm [&::-webkit-progress-value]:rounded-sm h-4"
+                                        :value="store.progressCurrent"
+                                        max="100"
+                                    />
+                                    <div class="absolute w-full font-semibold text-center text-xs">
+                                        {{ store.progressCurrent }}%
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 mt-2">
+                            <div class="font-semibold w-15">Over All:</div>
+                            <div class="relative grow flex items-center">
                                 <progress
                                     class="progress progress-accent rounded-sm [&::-webkit-progress-value]:rounded-sm h-4"
-                                    :value="store.progressCurrent"
+                                    :value="store.progressAll"
                                     max="100"
                                 />
                                 <div class="absolute w-full font-semibold text-center text-xs">
-                                    {{ store.progressCurrent }}%
+                                    {{ store.progressAll }}%
                                 </div>
-                            </template>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4 mt-2">
-                        <div class="font-semibold w-15">Over All:</div>
-                        <div class="relative grow flex items-center">
-                            <progress
-                                class="progress progress-accent rounded-sm [&::-webkit-progress-value]:rounded-sm h-4"
-                                :value="store.progressAll"
-                                max="100"
-                            />
-                            <div class="absolute w-full font-semibold text-center text-xs">
-                                {{ store.progressAll }}%
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="flex justify-center m-auto item-center w-3/5">
-                <div class="container flex">
-                    <div class="p-4 flex flex-col gap-1 w-[calc(100%-102px)]">
-                        <div class="flex items-center">
-                            <div
-                                class="grow font-semibold truncate pr-2 h-[25px]"
-                                v-html="store.processMsg + store.processPath"
-                            />
-                        </div>
-                        <div class="flex items-end">
-                            <label class="cursor-pointer join w-full">
-                                <input
-                                    v-model="targetFolder"
-                                    type="text"
-                                    class="input input-sm input-bordered rounded-sm join-item w-full"
-                                    :class="{ 'disabled:input-bordered': jobInProcess }"
-                                    @change="setTarget()"
-                                    :disabled="jobInProcess"
+                <div class="flex justify-center m-auto item-center w-3/5">
+                    <div class="container flex">
+                        <div class="p-4 flex flex-col gap-1 w-[calc(100%-102px)]">
+                            <div class="flex items-center">
+                                <div
+                                    class="grow font-semibold truncate pr-2 h-[25px]"
+                                    v-html="store.processMsg + store.processPath"
                                 />
-                                <button
-                                    class="btn btn-sm border-[oklch(var(--bc)/0.2)] hover:border-[oklch(var(--bc)/0.15)] rounded-sm join-item"
-                                    @click="getDir()"
-                                    :disabled="jobInProcess"
-                                >
-                                    Save As
-                                </button>
-                            </label>
+                            </div>
+                            <div class="flex items-end">
+                                <label class="cursor-pointer join w-full">
+                                    <input
+                                        v-model="targetFolder"
+                                        type="text"
+                                        class="input input-sm input-bordered rounded-sm join-item w-full"
+                                        :class="{ 'disabled:input-bordered': jobInProcess }"
+                                        @change="setTarget()"
+                                        :disabled="jobInProcess"
+                                    />
+                                    <button
+                                        class="btn btn-sm border-[oklch(var(--bc)/0.2)] hover:border-[oklch(var(--bc)/0.15)] rounded-sm join-item"
+                                        @click="getDir()"
+                                        :disabled="jobInProcess"
+                                    >
+                                        Save As
+                                    </button>
+                                </label>
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex items-end pb-4 pr-4">
-                        <button
-                            class="btn btn-lg border-[oklch(var(--bc)/0.2)] hover:border-[oklch(var(--bc)/0.15)] rounded-sm"
-                            @click="jobRun()"
-                        >
-                            {{ jobInProcess ? 'Cancel' : 'Run' }}
-                        </button>
+                        <div class="flex items-end pb-4 pr-4">
+                            <button
+                                class="btn btn-lg border-[oklch(var(--bc)/0.2)] hover:border-[oklch(var(--bc)/0.15)] rounded-sm"
+                                @click="jobRun()"
+                            >
+                                {{ jobInProcess ? 'Cancel' : 'Run' }}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

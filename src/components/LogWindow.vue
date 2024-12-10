@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, watch } from 'vue'
+import { nextTick, watch, onBeforeMount } from 'vue'
 import { useVirtualList } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 
@@ -12,15 +12,14 @@ const { list, containerProps, wrapperProps, scrollTo } = useVirtualList(store.lo
     itemHeight: 22,
 })
 
+onBeforeMount(() => {
+    handleScrollTo()
+})
+
 function handleScrollTo() {
     nextTick(() => {
         scrollTo(store.logContent.length - 1)
     })
-}
-
-function showLog() {
-    store.openLog = true
-    handleScrollTo()
 }
 
 watch([logContent.value], () => {
@@ -52,15 +51,6 @@ watch([logContent.value], () => {
                     </ul>
                 </div>
             </div>
-        </div>
-        <div v-if="!store.openLog" class="fixed bottom-[97px] w-full flex justify-center">
-            <button
-                class="w-20 h-[12px] min-h-[12px] btn bg-base-100 rounded-none hover:border-zinc-600 rounded-t-box border-t border-zinc-600 hover:text-base-content/50"
-                title="Open Logging"
-                @click="showLog()"
-            >
-                <i class="bi-chevron-compact-up" />
-            </button>
         </div>
     </div>
 </template>
