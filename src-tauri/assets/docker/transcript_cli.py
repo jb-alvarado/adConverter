@@ -12,8 +12,12 @@ from pathlib import Path
 
 import torch
 from ctranslate2 import get_supported_compute_types
-from faster_whisper import (BatchedInferencePipeline, WhisperModel,
-                            format_timestamp)
+
+if platform.system() == "Darwin":
+    from mlx_whisper import transcribe, writers
+else:
+    from faster_whisper import (BatchedInferencePipeline, WhisperModel,
+                                format_timestamp)
 
 supported_compute_types = list(get_supported_compute_types(
     "cuda" if torch.cuda.is_available() else "cpu"))
@@ -153,8 +157,7 @@ def transcribe_video(video_path: Path):
 
                 print(percent_complete, flush=True)
 
-        log.info(f"Transcription completed for {
-                 video_path}, saved to {vtt_path}")
+        log.info(f"Transcription completed for {video_path}, saved to {vtt_path}")
     except KeyboardInterrupt:
         vtt_path.unlink(missing_ok=True)
         log.warning(f"Transcription interrupted, cleanup: {video_path}")
@@ -213,8 +216,7 @@ def transcribe_video_mlx(video_path: Path):
         process.wait()
 
         vtt_path = video_path.with_suffix('.vtt')
-        log.info(f"Transcription completed for {
-            video_path}, saved to {vtt_path}")
+        log.info(f"Transcription completed for {video_path}, saved to {vtt_path}")
     except Exception as e:
         log.error(f"Failed to transcribe {video_path}: {e}")
         return
