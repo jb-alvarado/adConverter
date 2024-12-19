@@ -16,14 +16,18 @@ from ctranslate2 import get_supported_compute_types
 if platform.system() == "Darwin":
     from mlx_whisper import transcribe, writers
 else:
-    from faster_whisper import (BatchedInferencePipeline, WhisperModel,
-                                format_timestamp)
+    from faster_whisper import (WhisperModel, BatchedInferencePipeline, format_timestamp)
 
 supported_compute_types = list(get_supported_compute_types(
     "cuda" if torch.cuda.is_available() else "cpu"))
 
 # Argument parser for command-line options
 stdin_parser = ArgumentParser(description="Transcribe video file")
+stdin_parser.add_argument(
+    "-b",
+    help=f"Use batched model to transcript",
+    action='store_true'
+)
 stdin_parser.add_argument(
     "-c",
     metavar="compute_type",
@@ -116,7 +120,7 @@ def unlock_video(video_path: Path):
 def transcribe_video(video_path: Path):
     lang = ARGS.l
 
-    if lang == "Auto" or lang == "auto":
+    if lang.lower() == "auto":
         lang = None
 
     # Load Faster Whisper model (e.g., use GPU if available)
@@ -129,8 +133,20 @@ def transcribe_video(video_path: Path):
     batched_model = BatchedInferencePipeline(model=model)
 
     try:
-        segments, info = batched_model.transcribe(
-            video_path, vad_filter=True, language=lang)
+        if ARGS.b:
+            if lang == 'ml':
+                segments, info = batched_model.transcribe(
+                    ideo_path, vad_filter=True, multilingual=True, batch_size=16)
+            else:
+                segments, info = batched_model.transcribe(
+                    video_path, vad_filter=True, language=lang, batch_size=16)
+        else:
+            if lang == 'ml':
+                segments, info = model.transcribe(
+                    video_path, vad_filter=True, multilingual=True)
+            else:
+                segments, info = model.transcribe(
+                    video_path, vad_filter=True, language=lang)
     except Exception as e:
         log.error(f"Failed to transcribe {video_path}: {e}")
         return
@@ -157,7 +173,7 @@ def transcribe_video(video_path: Path):
 
                 print(percent_complete, flush=True)
 
-        log.info(f"Transcription completed for {video_path}, saved to {vtt_path}")
+        log.info(f"Transcription completed, saved to {vtt_path}")
     except KeyboardInterrupt:
         vtt_path.unlink(missing_ok=True)
         log.warning(f"Transcription interrupted, cleanup: {video_path}")
@@ -216,7 +232,7 @@ def transcribe_video_mlx(video_path: Path):
         process.wait()
 
         vtt_path = video_path.with_suffix('.vtt')
-        log.info(f"Transcription completed for {video_path}, saved to {vtt_path}")
+        log.info(f"Transcription completed, saved to {vtt_path}")
     except Exception as e:
         log.error(f"Failed to transcribe {video_path}: {e}")
         return
@@ -235,6 +251,9 @@ if __name__ == "__main__":
         log.info("Whisper will run with CUDA on GPU")
     else:
         log.warning("Whisper will run on CPU")
+
+    if platform.system() != 'Darwin' and ARGS.b:
+        log.info("Use batched model to transcript")
 
     for f in ARGS.f:
         if f.is_file():

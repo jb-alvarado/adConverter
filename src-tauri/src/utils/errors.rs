@@ -90,6 +90,12 @@ impl From<tokio::task::JoinError> for ProcessError {
     }
 }
 
+impl From<tauri_plugin_http::reqwest::Error> for ProcessError {
+    fn from(err: tauri_plugin_http::reqwest::Error) -> Self {
+        Self::Tauri(err.to_string())
+    }
+}
+
 impl From<Box<dyn std::any::Any + std::marker::Send>> for ProcessError {
     fn from(err: Box<dyn std::any::Any + std::marker::Send>) -> Self {
         Self::Thread(format!("{err:?}"))

@@ -18,6 +18,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
+async-stream = "0.3"
 async-walkdir = "2"
 chrono = { version = "0.4", default-features = false, features = ["clock", "std", "serde"] }
 clap = { version = "4.3", features = ["derive", "env"] }
@@ -36,12 +37,13 @@ shlex = "1"
 system_shutdown = "*"
 tauri = { version = "2", features = ["tray-icon"] }
 tauri-plugin-dialog = "2"
-tauri-plugin-http = "2"
+tauri-plugin-http = { version = "2", features = ["multipart"] }
 tauri-plugin-shell = "2"
 tauri-plugin-store = "2"
 thiserror = "2"
 tokio = { version = "1", features = ["full"] }
 tokio-stream = "0.1"
+tokio-util = "0.7"
 ts-rs = { version = "10", features = ["chrono-impl", "no-serde-warnings", "serde-json-impl"] }
 
 [profile.release]

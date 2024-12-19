@@ -1,5 +1,0 @@
-faster-whisper
-mlx-whisper
-torch
-torchaudio
-torchvision

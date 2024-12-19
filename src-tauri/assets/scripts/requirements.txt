@@ -1,5 +1,3 @@
-faster-whisper
+faster-whisper==1.1.0; sys_platform != 'darwin'
 mlx-whisper; sys_platform == 'darwin'
-torch
-torchaudio
-torchvision
+

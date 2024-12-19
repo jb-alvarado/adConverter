@@ -52,6 +52,7 @@ onBeforeMount(async () => {
         store.transcriptLanguages = [
             { name: 'None', code: 'none' },
             { name: 'Auto', code: 'auto' },
+            { name: 'Multilingual', code: 'ml' },
             { name: 'German', code: 'de' },
             { name: 'English', code: 'en' },
             { name: 'Spanish', code: 'es' },
@@ -383,6 +384,7 @@ function savePublisher(_save: boolean) {
         <EditPublisher
             v-if="showPublisherEditor"
             :show="showPublisherEditor"
+            :logger="log"
             :currentTask="currentTask"
             :savePublisher="savePublisher"
         />

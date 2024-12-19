@@ -20,6 +20,7 @@ const loginDefault = {
     url: '',
     username: '',
     password: '',
+    channelID: 0,
 }
 
 enum User {
@@ -31,6 +32,7 @@ enum User {
 const userPeertube = ref<User>(User.NotConfigured)
 const showLogin = ref(false)
 const login = ref(cloneDeep(loginDefault))
+const doPublish = ref(false)
 const publish = ref({ name: '', thumbnail: '', description: '', tags: '' })
 
 const prop = defineProps({
@@ -79,6 +81,10 @@ async function refresh_peertube_token(data: any) {
     })
         .then((response: any) => response.json())
         .then(async (data: any) => {
+            data.timestamp = new Date().getTime() / 1000
+            data.username = login.value.username
+            data.url = login.value.url
+            data.channel_id = login.value.channelID
             await config.set('publisher', { peertube: data })
             await config.save()
             userPeertube.value = User.IsLogin
@@ -90,11 +96,18 @@ async function refresh_peertube_token(data: any) {
 
 async function loadPlatforms() {
     let platform: any = await config.get('publisher')
+    const timeNow = new Date().getTime() / 1000
+
+    login.value.channelID = platform?.peertube?.channel_id ?? 0
+    login.value.username = platform?.peertube?.username ?? ''
+    login.value.url = platform?.peertube?.url ?? ''
 
     if (platform?.peertube) {
-        if (platform.peertube.expires_in > 3600) {
+        const lastTime = platform.peertube.timestamp ?? 0
+
+        if (lastTime && lastTime + platform.peertube.expires_in - 3600 > timeNow) {
             userPeertube.value = User.IsLogin
-        } else if (platform.peertube.refresh_token_expires_in > 0) {
+        } else if (lastTime && lastTime + platform.peertube.refresh_token_expires_in - 20 > timeNow) {
             await refresh_peertube_token(platform.peertube)
 
             await invoke('load_config').catch((e) => {
@@ -130,6 +143,10 @@ async function saveLogin(save: boolean) {
                 })
                     .then((response: any) => response.json())
                     .then(async (data: any) => {
+                        data.timestamp = new Date().getTime() / 1000
+                        data.username = login.value.username
+                        data.url = login.value.url
+                        data.channel_id = login.value.channelID
                         await config.set('publisher', { peertube: data })
                         await config.save()
 
@@ -148,6 +165,8 @@ async function saveLogin(save: boolean) {
                 prop.logger.error(e)
             })
     }
+
+    login.value.password = ''
 
     showLogin.value = false
 }
@@ -182,8 +201,12 @@ async function getThumbnail() {
 }
 
 function addPublisher($event: any) {
-    publish.value.tags = publish.value.tags.trim().replace(/\s*,\s*/g, ',')
-    prop.currentTask.publish = cloneDeep(publish.value)
+    if (doPublish.value) {
+        publish.value.tags = publish.value.tags.trim().replace(/\s*,\s*/g, ',')
+        prop.currentTask.publish = cloneDeep(publish.value)
+    } else {
+        prop.currentTask.publish = null
+    }
 
     prop.savePublisher($event)
 }
@@ -202,18 +225,32 @@ function addPublisher($event: any) {
                                 'badge-success': userPeertube === User.IsLogin,
                                 'badge-warning': userPeertube === User.NeedsLogin,
                             }"
-                            :title="userPeertube === User.NotConfigured ? 'Not Configured' : userPeertube === User.IsLogin ? 'Logged In' : 'Needs Login'"
+                            :title="
+                                userPeertube === User.NotConfigured
+                                    ? 'Not Configured'
+                                    : userPeertube === User.IsLogin
+                                    ? 'Logged In'
+                                    : 'Needs Login'
+                            "
                         ></div>
                     </button>
                 </div>
-                <label class="form-control mt-2 max-w-full px-0">
-                    <input
-                        type="text"
-                        v-model="publish.name"
-                        class="input input-bordered input-xs w-full rounded-sm"
-                        placeholder="Video name"
-                    />
-                </label>
+                <div class="flex gap-3">
+                    <div class="form-control w-20">
+                        <label class="label cursor-pointer mt-[2px] p-0 pt-2">
+                            <span class="label-text">Publish</span>
+                            <input v-model="doPublish" type="checkbox" class="checkbox checkbox-sm" />
+                        </label>
+                    </div>
+                    <label class="form-control grow mt-2 max-w-full px-0">
+                        <input
+                            type="text"
+                            v-model="publish.name"
+                            class="input input-bordered input-xs w-full rounded-sm"
+                            placeholder="Video name"
+                        />
+                    </label>
+                </div>
                 <label class="join mt-2 w-full">
                     <input
                         v-model="publish.thumbnail"
@@ -254,6 +291,16 @@ function addPublisher($event: any) {
                 name="url"
                 class="input input-bordered input-xs w-full rounded-sm"
                 placeholder="URL"
+            />
+        </label>
+        <label class="form-control mt-2 max-w-full px-0">
+            <input
+                type="number"
+                v-model="login.channelID"
+                name="channel"
+                class="input input-bordered input-xs w-full rounded-sm"
+                min="0"
+                step="1"
             />
         </label>
         <label class="form-control mt-2 max-w-full px-0">

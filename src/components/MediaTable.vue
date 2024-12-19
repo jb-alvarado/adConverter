@@ -176,8 +176,8 @@ function changePresets(task: Task | undefined) {
                 <th class="p-0 w-[41px] border-r border-zinc-700">
                     <div class="px-1 flex items-center w-[41px] h-[41px] border-b border-r border-zinc-700"></div>
                 </th>
-                <th v-if="store.showTranscript" class="p-0 w-[110px] border-r border-zinc-700">
-                    <div class="px-1 py-[3px] w-[110px] h-[41px] border-b border-r border-zinc-700">
+                <th v-if="store.showTranscript" class="p-0 w-[138px] border-r border-zinc-700">
+                    <div class="px-1 py-[3px] w-[138px] h-[41px] border-b border-r border-zinc-700">
                         <select
                             v-model="allTranscript"
                             class="select select-sm select-bordered rounded-sm w-full max-w-xs"
@@ -192,7 +192,7 @@ function changePresets(task: Task | undefined) {
                 </th>
                 <th class="p-0 border-r border-zinc-700">
                     <div
-                        class="relative z-10 px-1 py-[3px] h-[41px] border-b border-r border-zinc-700"
+                        class="relative z-10 px-1 w-[calc(100%+1px)] py-[3px] h-[41px] border-b border-r border-zinc-700"
                         :style="{ minWidth: `${presetList.length * 58 + 9}px` }"
                     >
                         <Multiselect

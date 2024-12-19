@@ -83,6 +83,8 @@ async fn work(
 ) -> Result<(), ProcessError> {
     let state = app.state::<AppState>().to_owned();
     let config = state.config.lock().await.clone();
+    let mut task_clone = task.clone();
+    // let mut presets = mem::take(&mut task_clone.presets);
     let sources = Sources::new(&task.path).await;
     let path = Path::new(&task.path);
     let (i_dur, m_dur, o_dur) = calc_duration(&task).await;
@@ -171,6 +173,10 @@ async fn work(
         Lufs::default()
     };
 
+    if !is_running.load(Ordering::SeqCst) {
+        return Ok(());
+    }
+
     task_args.extend(vec_strings![
         "-map_chapters",
         "-1",
@@ -187,7 +193,8 @@ async fn work(
         ]);
     }
 
-    for preset in &task.presets {
+    for i in 0..task_clone.presets.len() {
+        let preset = task_clone.presets[i].clone();
         let mut args = task_args.clone();
         let running = is_running.clone();
         let running_clone = is_running.clone();
@@ -195,19 +202,17 @@ async fn work(
         let title = preset.title.clone();
         let finished = preset.finished.clone();
         let mut cmd_logger = cmd_logger.clone();
-        let mut preset_clone = preset.clone();
 
         let parent_path = path.parent().expect("Path should have a parent");
         let file_stem = path
             .file_stem()
-            .expect("Path should have a valid file stem")
+            .ok_or("Path should have a valid file stem")?
             .to_string_lossy();
-        let default_extension = String::new();
         let extension = preset
             .container_video
             .clone()
             .or(preset.container_audio.clone())
-            .unwrap_or(default_extension);
+            .unwrap_or(String::new());
 
         let file_name = format!("{} # {}.{}", file_stem, preset.title, extension);
 
@@ -216,7 +221,9 @@ async fn work(
             None => parent_path.join(&file_name),
         };
 
-        preset_clone.output_path = Some(output.clone());
+        // TODO: encode to temp folder and copy to target, to prevent errors on COW filesystems
+
+        task_clone.presets[i].output_path = Some(output.clone());
 
         if sources.as_ref().map(|s| s.video.clone()).is_ok() {
             if let Value::Object(map) = &preset.video {
@@ -226,7 +233,7 @@ async fn work(
             }
         }
 
-        let mut filter = filter_chain(&task, preset, &lufs, has_audio, has_video, audio_pos).await;
+        let mut filter = filter_chain(&task, &preset, &lufs, has_audio, has_video, audio_pos).await;
         args.extend(filter.cmd());
 
         if let Some(video_ext) = &preset.container_video {
@@ -274,7 +281,7 @@ async fn work(
         );
 
         app_clone1
-            .emit("preset-start", &preset_clone)
+            .emit("preset-start", &preset)
             .expect("Emit Preset");
 
         let mut cmd = Command::new("ffmpeg");
@@ -335,7 +342,7 @@ async fn work(
                         finished.store(true, Ordering::SeqCst);
 
                         app_clone1
-                            .emit("preset-finish", &preset_clone)
+                            .emit("preset-finish", &preset)
                             .expect("Emit progress");
                     } else {
                         app_clone1
@@ -356,8 +363,8 @@ async fn work(
 
     *child.lock().await = None;
 
-    if task.publish.is_some() {
-        publisher::peertube::publish(app, &task).await?;
+    if task.publish.is_some() && is_running.load(Ordering::SeqCst) {
+        publisher::peertube::publish(app, &task_clone, is_running).await?;
     }
 
     Ok(())

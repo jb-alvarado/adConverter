@@ -92,6 +92,8 @@ struct Config {
     pub transcript_cmd: String,
     pub transcript_lang: Vec<LangConfig>,
     #[serde(default)]
+    pub publish_preset: Option<String>,
+    #[serde(default)]
     pub publisher: Option<Value>,
 }
 
@@ -265,6 +267,10 @@ async fn load_config(app: AppHandle, state: State<'_, AppState>) -> Result<(), P
 
     if let Some(Value::String(copyright)) = store.get("copyright") {
         config.copyright = copyright;
+    }
+
+    if let Some(Value::String(publish_preset)) = store.get("publish_preset") {
+        config.publish_preset = Some(publish_preset);
     }
 
     config.publisher = store.get("publisher");

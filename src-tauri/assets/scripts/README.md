@@ -1,7 +1,7 @@
 ## Build image:
 
 ```bash
-podman build -t faster_whisper -f docker/Dockerfile .
+podman build -t faster_whisper -f scripts/Dockerfile .
 ```
 
 ## Run command:
