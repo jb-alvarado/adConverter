@@ -50,6 +50,11 @@ stdin_parser.add_argument(
     nargs='+',
     type=Path
 )
+stdin_parser.add_argument(
+    "-p",
+    help="Print status in percent",
+    action='store_true'
+)
 
 ARGS = stdin_parser.parse_args()
 MODEL_NAME = "mlx-community/whisper-large-v3-mlx" if platform.system(
@@ -171,7 +176,10 @@ def transcribe_video(video_path: Path):
                 progress += (segment.end - segment.start)
                 percent_complete = int((progress / total_duration) * 100)
 
-                print(percent_complete, flush=True)
+                if ARGS.p:
+                    print(f'{percent_complete}%', end='\r', flush=True)
+                else:
+                    print(percent_complete, flush=True)
 
         log.info(f"Transcription completed, saved to {vtt_path}")
     except KeyboardInterrupt:
@@ -179,7 +187,10 @@ def transcribe_video(video_path: Path):
         log.warning(f"Transcription interrupted, cleanup: {video_path}")
     finally:
         unlock_video(video_path)
-        print(100, flush=True)
+        if ARGS.p:
+            print('100%', end='\r', flush=True)
+        else:
+            print(100, flush=True)
 
 
 def read_stream(stream, callback):
