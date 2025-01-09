@@ -331,7 +331,10 @@ fn lower_third(
     for lt in &template.lower_thirds {
         let p = PathBuf::from(&lt.path.replace("\\", "/"));
         let src = if p.is_relative() { path.join(p) } else { p };
-        let mut layer_base = format!("movie={}", prepare_path(src.to_string_lossy().to_string()));
+        let mut layer_base = format!(
+            "movie='{}'",
+            prepare_path(src.to_string_lossy().to_string())
+        );
 
         if lt.duration > 0.0
             && IMAGE_EXTENSIONS.contains(
@@ -400,7 +403,10 @@ async fn intro_outro(
         let src = if p.is_relative() { path.join(p) } else { p };
         let probe = MediaProbe::new(&src).await;
 
-        intro = format!("movie={}", prepare_path(src.to_string_lossy().to_string()));
+        intro = format!(
+            "movie='{}'",
+            prepare_path(src.to_string_lossy().to_string())
+        );
 
         if template.intro_duration > 0.0 {
             intro.push_str(&format!(
@@ -433,7 +439,10 @@ async fn intro_outro(
         let src = if p.is_relative() { path.join(p) } else { p };
         let probe = MediaProbe::new(&src).await;
 
-        outro = format!("movie={}", prepare_path(src.to_string_lossy().to_string()));
+        outro = format!(
+            "movie='{}'",
+            prepare_path(src.to_string_lossy().to_string())
+        );
 
         if template.outro_duration > 0.0 {
             outro.push_str(&format!(

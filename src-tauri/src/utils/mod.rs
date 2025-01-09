@@ -1,4 +1,5 @@
 use std::{
+    env,
     path::{Path, PathBuf},
     str::FromStr,
 };
@@ -89,10 +90,15 @@ pub fn time_to_sec(time_str: &str) -> f64 {
 }
 
 pub async fn delete_files(path: &Path) -> Result<(), ProcessError> {
+    let temp_file = env::temp_dir().join(path.file_name().unwrap());
     let folder = path
         .parent()
         .ok_or(ProcessError::IO(format!("No parent folder from: {path:?}")))?;
     let mut entries = fs::read_dir(folder).await?;
+
+    if temp_file.is_file() {
+        fs::remove_file(temp_file).await?;
+    }
 
     while let Some(entry) = entries.next_entry().await? {
         if entry.path().file_stem() == path.file_stem() {
