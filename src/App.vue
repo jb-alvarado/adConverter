@@ -4,7 +4,7 @@ import { listen, type Event } from '@tauri-apps/api/event'
 import { open } from '@tauri-apps/plugin-dialog'
 import { load } from '@tauri-apps/plugin-store'
 import { cloneDeep, isEqual, round } from 'lodash-es'
-import { nextTick, onBeforeMount, ref } from 'vue'
+import { onBeforeMount, ref } from 'vue'
 
 import { stringFormatter } from './composables/helper'
 import { useStore } from './store/index.ts'
@@ -30,6 +30,7 @@ const defaultTemplate: Template = {
 const currentTask = ref<Task | null>(null)
 
 const targetFolder = ref<string | null>(null)
+const targetSubfolder = ref(false)
 const noProgressValues = ref(false)
 const jobInProcess = ref(false)
 const showTemplateEditor = ref(false)
@@ -162,16 +163,6 @@ listen<string>('logging', (event: Event<string>) => {
     }
 })
 
-function setTarget() {
-    nextTick(async () => {
-        for (const task of store.taskList) {
-            if (!task.active) {
-                task.target = targetFolder.value
-            }
-        }
-    })
-}
-
 async function getDir() {
     const path = store.taskList[store.taskList.length - 1]?.path
     let options = {
@@ -196,6 +187,8 @@ async function taskSendNext() {
 
             jobInProcess.value = true
             task.active = true
+            task.target = targetFolder.value
+            task.target_subfolder = targetSubfolder.value
 
             if (!task.template.intro && !task.template.outro && task.template.lower_thirds.length === 0) {
                 task.template = null
@@ -346,6 +339,15 @@ function savePublisher(_save: boolean) {
                                     class="grow font-semibold truncate pr-2 h-[25px]"
                                     v-html="store.processMsg + store.processPath"
                                 />
+
+                                <label class="label cursor-pointer pr-0 pt-0 pb-[5px]" :disabled="jobInProcess">
+                                    <span class="label-text mr-2">Subfolder</span>
+                                    <input
+                                        type="checkbox"
+                                        v-model="targetSubfolder"
+                                        class="checkbox checkbox-sm rounded-sm"
+                                    />
+                                </label>
                             </div>
                             <div class="flex items-end">
                                 <label class="cursor-pointer join w-full">
@@ -354,7 +356,6 @@ function savePublisher(_save: boolean) {
                                         type="text"
                                         class="input input-sm input-bordered rounded-sm join-item w-full"
                                         :class="{ 'disabled:input-bordered': jobInProcess }"
-                                        @change="setTarget()"
                                         :disabled="jobInProcess"
                                     />
                                     <button
@@ -369,7 +370,7 @@ function savePublisher(_save: boolean) {
                         </div>
                         <div class="flex items-end pb-4 pr-4">
                             <button
-                                class="btn btn-lg border-[oklch(var(--bc)/0.2)] hover:border-[oklch(var(--bc)/0.15)] rounded-sm"
+                                class="btn btn-lg border-[oklch(var(--bc)/0.2)] hover:border-[oklch(var(--bc)/0.15)] rounded-sm w-20"
                                 @click="jobRun()"
                             >
                                 {{ jobInProcess ? 'Cancel' : 'Run' }}

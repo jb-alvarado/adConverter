@@ -69,6 +69,8 @@ struct Task {
     #[serde_as(as = "NoneAsEmptyString")]
     target: Option<String>,
     #[serde(default)]
+    target_subfolder: bool,
+    #[serde(default)]
     publish: Option<Publish>,
     #[ts(type = "bool")]
     active: Arc<AtomicBool>,
@@ -365,7 +367,7 @@ pub async fn run() -> tauri::Result<()> {
 
             let _ = TrayIconBuilder::new()
                 .menu(&menu)
-                .menu_on_left_click(true)
+                .show_menu_on_left_click(true)
                 .icon(app.default_window_icon().unwrap().clone())
                 .on_menu_event(move |app, event| match event.id.as_ref() {
                     "quit" => {

@@ -797,6 +797,7 @@ mod tests {
             finished: Arc::new(AtomicBool::new(false)),
             lufs: false,
             target: None,
+            target_subfolder: false,
         }
     }
 

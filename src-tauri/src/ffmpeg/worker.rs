@@ -1,6 +1,7 @@
 use std::{
     collections::HashMap,
-    path::Path,
+    env,
+    path::{Path, PathBuf},
     process::Stdio,
     sync::{
         atomic::{AtomicBool, Ordering},
@@ -13,6 +14,7 @@ use log::*;
 use serde_json::Value;
 use tauri::{AppHandle, Emitter, Manager, State};
 use tokio::{
+    fs,
     io::{AsyncBufReadExt, BufReader},
     process::{Child, Command},
     sync::{mpsc::Receiver, Mutex},
@@ -212,17 +214,29 @@ async fn work(
             .container_video
             .clone()
             .or(preset.container_audio.clone())
-            .unwrap_or(String::new());
+            .unwrap_or_default();
 
         let file_name = format!("{} # {}.{}", file_stem, preset.title, extension);
 
         let output = match task.target.as_ref() {
-            Some(target) => Path::new(target).join(&file_name),
+            Some(target) => {
+                let mut op = PathBuf::from(target);
+
+                if task.target_subfolder {
+                    let sub = parent_path
+                        .file_name()
+                        .expect("Parent path should have a file name");
+                    op = op.join(sub);
+
+                    fs::create_dir_all(&op).await?;
+                }
+
+                op.join(&file_name)
+            }
             None => parent_path.join(&file_name),
         };
 
-        // TODO: encode to temp folder and copy to target, to prevent errors on COW filesystems
-
+        let temp_out = env::temp_dir().join(&file_name);
         task_clone.presets[i].output_path = Some(output.clone());
 
         if sources.as_ref().map(|s| s.video.clone()).is_ok() {
@@ -249,7 +263,7 @@ async fn work(
 
         if let Some(audio_ext) = &preset.container_audio {
             if has_video {
-                args.push(output.to_string_lossy().to_string());
+                args.push(temp_out.to_string_lossy().to_string());
             }
 
             if has_audio {
@@ -258,7 +272,7 @@ async fn work(
             }
 
             args.push(
-                output
+                temp_out
                     .with_extension(audio_ext)
                     .to_string_lossy()
                     .to_string(),
@@ -270,7 +284,7 @@ async fn work(
             }
 
             if has_video {
-                args.push(output.to_string_lossy().to_string());
+                args.push(temp_out.to_string_lossy().to_string());
             }
         }
 
@@ -359,6 +373,9 @@ async fn work(
         if let Some(proc) = child.lock().await.as_mut() {
             proc.wait().await?;
         }
+
+        fs::copy(&temp_out, output).await?;
+        fs::remove_file(temp_out).await?;
     }
 
     *child.lock().await = None;

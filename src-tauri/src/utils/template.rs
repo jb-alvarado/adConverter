@@ -22,11 +22,13 @@ pub struct LowerThird {
 #[ts(export, export_to = "backend.d.ts")]
 pub struct Template {
     #[ts(type = "string")]
+    #[serde(default)]
     #[serde_as(as = "NoneAsEmptyString")]
     pub intro: Option<String>,
     #[serde(default)]
     pub intro_duration: f64,
     #[ts(type = "string")]
+    #[serde(default)]
     #[serde_as(as = "NoneAsEmptyString")]
     pub outro: Option<String>,
     #[serde(default)]

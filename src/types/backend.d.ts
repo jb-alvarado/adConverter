@@ -3,7 +3,7 @@ import type { JsonValue } from "./serde_json/JsonValue";
 
 export type AudioStream = { channels: bigint, codec_name: string | null, duration: number | null, sample_rate: bigint | null, };
 
-export type Config = { copyright: string, lufs: LufsConfig, transcript_cmd: string, transcript_lang: Array<LangConfig>, publisher: JsonValue | null, };
+export type Config = { copyright: string, lufs: LufsConfig, transcript_cmd: string, transcript_lang: Array<LangConfig>, publish_preset: string | null, publisher: JsonValue | null, };
 
 export type FFmpegProgress = { title: string, fps: number, bitrate: string, total_size: bigint, elapsed_sec: number, elapsed_pct: bigint, speed: number, progress: string, };
 
@@ -21,7 +21,7 @@ export type Preset = { name: string, title: string, tooltip: string, filter_vide
 
 export type Publish = { name: string, thumbnail: string, description: string, tags: string, };
 
-export type Task = { path: string, in: number, out: number, fade: boolean, lufs: boolean, transcript: string | null, probe: MediaProbe, presets: Array<Preset>, template: Template | null, target: string, publish: Publish | null, active: bool, finished: bool, };
+export type Task = { path: string, in: number, out: number, fade: boolean, lufs: boolean, transcript: string | null, probe: MediaProbe, presets: Array<Preset>, template: Template | null, target: string, target_subfolder: boolean, publish: Publish | null, active: bool, finished: bool, };
 
 export type Template = { intro: string, intro_duration: number, outro: string, outro_duration: number, lower_thirds: Array<LowerThird>, };
 
