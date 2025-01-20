@@ -55,7 +55,7 @@ pub fn prepare_path(path: String) -> String {
     // on windows path for move/amove filter has to format
 
     if cfg!(windows) {
-        return path.replace("\\", "/").replace(":", "\\\\:");
+        return path.replace("\\", "/").replace(":", "\\:");
         // for UNC: .replace('//', '\\\\\\\\\\\\\\\\'
     }
 

@@ -1,7 +1,7 @@
 {
   "name": "ad_converter",
   "private": true,
-  "version": "0.1.9",
+  "version": "0.1.10",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,12 +16,12 @@
     "@tauri-apps/plugin-shell": "^2",
     "@tauri-apps/plugin-store": "^2.2.0",
     "@tauri-apps/plugin-updater": "^2.3.1",
-    "@tauri-apps/plugin-window-state": "^2.2.0",
+    "@tauri-apps/plugin-window-state": "^2.2.1",
     "@vueform/multiselect": "^2.6.11",
-    "@vueuse/core": "^12.3.0",
+    "@vueuse/core": "^12.4.0",
     "bootstrap-icons": "^1.11.3",
     "lodash-es": "^4.17.21",
-    "pinia": "^2.3.0",
+    "pinia": "^2.3.1",
     "vue": "^3.5.13"
   },
   "devDependencies": {
@@ -31,10 +31,10 @@
     "autoprefixer": "^10.4.20",
     "daisyui": "^4.12.23",
     "mini-svg-data-uri": "^1.4.4",
-    "postcss": "^8.4.49",
+    "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17",
     "typescript": "=5.6.3",
-    "vite": "^6.0.7",
+    "vite": "^6.0.9",
     "vue-tsc": "^2.2.0"
   }
 }

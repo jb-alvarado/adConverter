@@ -5,12 +5,12 @@ import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
 import { check, type Update } from '@tauri-apps/plugin-updater'
 import { storeToRefs } from 'pinia'
-import { cloneDeep, round } from 'lodash-es'
+import { cloneDeep } from 'lodash-es'
 
 import { stringFormatter } from '../composables/helper'
 import { useStore } from '../store/index.ts'
 
-const { formatBytes, folderPath, filename } = stringFormatter()
+const { folderPath, filename } = stringFormatter()
 
 const store = useStore()
 const { jobsDone } = storeToRefs(useStore())
@@ -98,35 +98,35 @@ function openCloseConfig($event: any, link: string) {
     }, 60)
 }
 
-async function updater() {
-    if (update.value) {
-        // console.log(`found update ${update.value.version} from ${update.value.date} with notes ${update.value.body}`)
+// async function updater() {
+//     if (update.value) {
+//         // console.log(`found update ${update.value.version} from ${update.value.date} with notes ${update.value.body}`)
 
-        let downloaded = 0
-        let contentLength = 0
-        await update.value.downloadAndInstall((event) => {
-            switch (event.event) {
-                case 'Started':
-                    contentLength = event.data.contentLength ?? 0
-                    store.msgAlert('info', `Started downloading ${formatBytes(contentLength)}`, 3)
-                    break
-                case 'Progress':
-                    downloaded += event.data.chunkLength
+//         let downloaded = 0
+//         let contentLength = 0
+//         await update.value.downloadAndInstall((event) => {
+//             switch (event.event) {
+//                 case 'Started':
+//                     contentLength = event.data.contentLength ?? 0
+//                     store.msgAlert('info', `Started downloading ${formatBytes(contentLength)}`, 3)
+//                     break
+//                 case 'Progress':
+//                     downloaded += event.data.chunkLength
 
-                    store.progressCurrent = round((downloaded * 100) / contentLength)
-                    store.processMsg = `Update to ${update.value?.version}`
-                    break
-                case 'Finished':
-                    store.processMsg = 'Install update'
-                    break
-            }
-        })
+//                     store.progressCurrent = round((downloaded * 100) / contentLength)
+//                     store.processMsg = `Update to ${update.value?.version}`
+//                     break
+//                 case 'Finished':
+//                     store.processMsg = 'Install update'
+//                     break
+//             }
+//         })
 
-        store.processMsg = ''
-        store.progressCurrent = 0
-        store.msgAlert('success', `Update done. Restart to apply changes.`, 3)
-    }
-}
+//         store.processMsg = ''
+//         store.progressCurrent = 0
+//         store.msgAlert('success', `Update done. Restart to apply changes.`, 3)
+//     }
+// }
 
 async function shutdown_system() {
     await invoke('shutdown_system').catch((e) => {
@@ -150,9 +150,9 @@ async function shutdown_system() {
                     <button tabindex="0" role="button" class="btn btn-xs btn-ghost !rounded-none">Option</button>
                     <ul tabindex="0" class="menu dropdown-content bg-base-100 rounded-sm w-36 mt-1 p-0 shadow">
                         <li v-if="update">
-                            <button class="hover:rounded-sm !rounded-sm" title="Download and install update" @click="updater()">
-                                Update ({{ update.version }})
-                            </button>
+                            <div class="hover:rounded-sm !rounded-sm" title="Download and install update">
+                                Update available ({{ update.version }})
+                            </div>
                         </li>
                         <li>
                             <button class="hover:rounded-sm !rounded-sm" @click="openCloseConfig($event, 'presets')">

@@ -41,7 +41,7 @@ pub use utils::{
     logging::init_logging,
     presets::{collect_presets, Preset},
     template::Template,
-    Sources,
+    update, Sources,
 };
 
 use ffmpeg::{probe::MediaProbe, worker};
@@ -340,9 +340,14 @@ pub async fn run() -> tauri::Result<()> {
         .setup(|app| {
             let app_handle = app.app_handle().clone();
             let app_handle_clone = app_handle.clone();
+            let app_handle_clone2 = app_handle.clone();
             let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&quit])?;
             let window = app.get_webview_window("main").unwrap();
+
+            tokio::spawn(async move {
+                update(app_handle_clone2).await.unwrap();
+            });
 
             window
                 .restore_state(StateFlags::POSITION)
