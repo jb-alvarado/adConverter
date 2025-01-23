@@ -158,7 +158,7 @@ listen<string>('logging', (event: Event<string>) => {
         store.msgAlert('error', event.payload.replace('[ERROR]', ''), 5)
     }
 
-    while (store.logContent.length > 10000) {
+    while (store.logContent.length > 5000) {
         store.logContent.shift()
     }
 })

@@ -33,6 +33,8 @@ use crate::{transcript, vec_strings, AppState, ProcessError, Task};
 #[cfg(target_os = "macos")]
 use crate::MACOS_PATH;
 
+const IGNORE_LINES: &[&str; 1] = &["SEI type 1 size"];
+
 fn to_vec(value: Value) -> Vec<String> {
     let mut params = Vec::new();
 
@@ -323,7 +325,9 @@ async fn work(
                     break;
                 }
 
-                cmd_logger.log(Some("[ffmpeg]"), &line)
+                if !IGNORE_LINES.iter().any(|&s| line.contains(s)) {
+                    cmd_logger.log(Some("[ffmpeg]"), &line);
+                }
             }
         });
 
