@@ -1,0 +1,24 @@
+{
+  "name": "av1-nvenc",
+  "title": "AV1 NVENC",
+  "tooltip": "Encoding settings for ffplayout (AV1 NVENC)",
+  "filter_video": {
+    "scale": "1920:1080"
+  },
+  "filter_audio": {},
+  "video": {
+    "-aspect": "16:9",
+    "-c:v": "av1_nvenc",
+    "-cq:v": "38",
+    "-preset:v": "p7",
+    "-r": 25,
+    "-rc:v": "vbr"
+  },
+  "audio": {
+    "-ar": "48k",
+    "-b:a": "160k",
+    "-c:a": "libopus"
+  },
+  "container_video": "mp4",
+  "container_audio": null
+}
