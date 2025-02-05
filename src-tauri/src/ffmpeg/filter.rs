@@ -706,14 +706,25 @@ pub async fn filter_chain(
                 chain.add_filter(&format!(";{o}"), 0, Video);
             }
 
-            chain.add_filter(
-                &format!(
-                    ";{}concat=n={c_count}:v=1:a=1[vout0][aout0]",
-                    selectors.join("")
-                ),
-                0,
-                Video,
-            );
+            if let Some(up) = hw_up {
+                chain.add_filter(
+                    &format!(
+                        ";{}concat=n={c_count}:v=1:a=1[vo][aout0];[vo]{up}[vout0]",
+                        selectors.join("")
+                    ),
+                    0,
+                    Video,
+                );
+            } else {
+                chain.add_filter(
+                    &format!(
+                        ";{}concat=n={c_count}:v=1:a=1[vout0][aout0]",
+                        selectors.join("")
+                    ),
+                    0,
+                    Video,
+                );
+            };
         } else if let Some(up) = hw_up {
             chain.add_filter(&format!("{up}"), 0, Video);
         }
