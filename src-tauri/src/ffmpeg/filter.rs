@@ -32,6 +32,7 @@ use FilterType::*;
 
 #[derive(Clone, Default, Debug)]
 pub struct Filters {
+    hw_context: bool,
     pub audio_chain: String,
     pub video_chain: String,
     pub output_chain: Vec<String>,
@@ -45,8 +46,9 @@ pub struct Filters {
 }
 
 impl Filters {
-    pub fn new() -> Self {
+    pub fn new(hw_context: bool) -> Self {
         Self {
+            hw_context,
             audio_chain: String::new(),
             video_chain: String::new(),
             output_chain: vec![],
@@ -90,9 +92,15 @@ impl Filters {
             if filter.starts_with("aevalsrc") || filter.starts_with("movie") {
                 chain.push_str(&format!("{sep}{filter}"));
             } else {
+                let hw_dl = if self.hw_context {
+                    "hwdownload,format=nv12,"
+                } else {
+                    ""
+                };
+
                 chain.push_str(&format!(
                     // build audio/video selector like [0:a:0]
-                    "{sep}[{position}:{filter_type}:{track_nr}]{filter}",
+                    "{sep}[{position}:{filter_type}:{track_nr}]{hw_dl}{filter}",
                 ));
             }
 
@@ -258,6 +266,14 @@ impl TargetSpec {
             aspect,
         }
     }
+}
+
+fn hw_upload_str(input: &Option<String>) -> String {
+    if input.as_ref().is_some_and(|i| i.contains("cuda")) {
+        return "hwupload_cuda".to_string();
+    }
+
+    "hwupload".to_string()
 }
 
 fn move_concat(input: &str) -> String {
@@ -601,7 +617,13 @@ pub async fn filter_chain(
     has_video: bool,
     audio_pos: i32,
 ) -> Filters {
-    let mut chain = Filters::new();
+    let hw_context = preset.input.as_ref().is_some_and(|i| i.contains("-hw"));
+    let mut hw_up = None;
+    let mut chain = Filters::new(hw_context);
+
+    if hw_context {
+        hw_up = Some(hw_upload_str(&preset.input));
+    }
 
     if has_audio && !has_codec_copy(&preset.audio, Audio) {
         chain.audio_position = audio_pos;
@@ -692,6 +714,8 @@ pub async fn filter_chain(
                 0,
                 Video,
             );
+        } else if let Some(up) = hw_up {
+            chain.add_filter(&format!("{up}"), 0, Video);
         }
     }
 
@@ -717,6 +741,7 @@ mod tests {
             name: "adtv".to_string(),
             title: "ADtv".to_string(),
             tooltip: "Encoding settings for ADTV (x265)".to_string(),
+            input: None,
             filter_video: {
                 let mut map = Map::new();
                 map.insert("scale".to_string(), Value::String("1920:1080".to_string()));

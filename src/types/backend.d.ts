@@ -17,7 +17,7 @@ export type MediaFormat = { duration: number | null, nb_streams: bigint, size: b
 
 export type MediaProbe = { format: MediaFormat, audio: Array<AudioStream>, video: Array<VideoStream>, };
 
-export type Preset = { name: string, title: string, tooltip: string, filter_video: JsonValue, filter_audio: JsonValue, video: JsonValue, audio: JsonValue, container_video: string, container_audio: string, output_path: string, finished: bool, };
+export type Preset = { name: string, title: string, tooltip: string, input: string | null, filter_video: JsonValue, filter_audio: JsonValue, video: JsonValue, audio: JsonValue, container_video: string, container_audio: string, output_path: string, finished: bool, };
 
 export type Publish = { name: string, thumbnail: string, description: string, tags: string, };
 

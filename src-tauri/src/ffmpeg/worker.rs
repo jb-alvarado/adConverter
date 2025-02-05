@@ -12,6 +12,7 @@ use std::{
 use chrono::{Datelike, Local};
 use log::*;
 use serde_json::Value;
+use shlex::split;
 use tauri::{AppHandle, Emitter, Manager, State};
 use tokio::{
     fs,
@@ -218,21 +219,14 @@ async fn work(
             .or(preset.container_audio.clone())
             .unwrap_or_default();
 
-        // // decoding with nvidia will not work because of the image scaling filter used in filter_complex
-        // if preset
-        //     .video
-        //     .as_object()
-        //     .map(|obj| obj.values().any(|v| v.to_string().contains("nvenc")))
-        //     .unwrap_or(false)
-        // {
-        //     if let Some(pos) = args.iter().position(|x| x == "-i") {
-        //         // Insert before input "-i"
-        //         args.splice(
-        //             pos..pos,
-        //             vec_strings!["-hwaccel", "cuda", "-hwaccel_output_format", "cuda"],
-        //         );
-        //     }
-        // }
+        if let Some(input_args) = &preset.input {
+            let i_args = split(&input_args).unwrap_or_default();
+
+            if let Some(pos) = args.iter().position(|x| x == "-i") {
+                // Insert before input "-i"
+                args.splice(pos..pos, i_args);
+            }
+        }
 
         let file_name = format!("{} # {}.{}", file_stem, preset.title, extension);
 

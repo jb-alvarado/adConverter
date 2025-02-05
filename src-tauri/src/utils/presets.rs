@@ -21,6 +21,7 @@ pub struct Preset {
     pub name: String,
     pub title: String,
     pub tooltip: String,
+    pub input: Option<String>,
     pub filter_video: Value,
     pub filter_audio: Value,
     pub video: Value,

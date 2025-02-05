@@ -215,9 +215,9 @@ function changePresets(task: Task | undefined) {
                         </Multiselect>
                     </div>
                 </th>
-                <th class="p-0 w-[41px] border-r border-zinc-700">
+                <!-- <th class="p-0 w-[41px] border-r border-zinc-700">
                     <div class="px-1 flex items-center w-[41px] h-[41px] border-b border-r border-zinc-700"></div>
-                </th>
+                </th> -->
             </tr>
         </thead>
         <tbody>
@@ -312,13 +312,13 @@ function changePresets(task: Task | undefined) {
                         </Multiselect>
                     </div>
                 </th>
-                <td class="p-0 border-r border-zinc-700">
+                <!-- <td class="p-0 border-r border-zinc-700">
                     <div class="p-1">
                         <button class="btn btn-primary btn-sm rounded-sm p-1" @click="editPublisher(task)">
                             <i class="bi-cloud-arrow-up text-xl"></i>
                         </button>
                     </div>
-                </td>
+                </td> -->
             </tr>
         </tbody>
     </table>
