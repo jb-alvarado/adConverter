@@ -55,6 +55,12 @@ stdin_parser.add_argument(
     help="Print status in percent",
     action='store_true'
 )
+stdin_parser.add_argument(
+    "-o",
+    metavar="output",
+    help="Output path",
+    type=Path
+)
 
 ARGS = stdin_parser.parse_args()
 MODEL_NAME = "mlx-community/whisper-large-v3-mlx" if platform.system(
@@ -160,6 +166,10 @@ def transcribe_video(video_path: Path):
 
     lock_video(video_path)
     vtt_path = video_path.with_suffix('.vtt')
+
+    if ARGS.o:
+        vtt_path = ARGS.o.joinpath(vtt_path.name)
+
     total_duration = info.duration
     progress = 0
 

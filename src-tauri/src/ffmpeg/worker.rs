@@ -154,6 +154,7 @@ async fn work(
                 cmd_logger.clone(),
                 &task,
                 &audio_path,
+                &task.target,
             )
             .await?;
         }

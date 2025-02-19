@@ -36,7 +36,7 @@ function addLang() {
 }
 
 function deleteLang(lang: TLang) {
-    store.transcriptLanguages = store.transcriptLanguages.filter((l) => l.code !== lang.code)
+    store.transcriptLanguages = store.transcriptLanguages.filter((l: TLang) => l.code !== lang.code)
 }
 
 async function saveConfig() {
@@ -198,7 +198,7 @@ async function cancel() {
                                     type="text"
                                     v-model="transcript_cmd"
                                     class="input input-xs w-full rounded-sm"
-                                    placeholder="/usr/local/bin/transcript.py -c int8 -l %lang% -f %file%"
+                                    placeholder="/usr/local/bin/transcript.py -c int8 -l %lang% -f %file% -o %output%"
                                 />
                             </label>
                             <label class="label">

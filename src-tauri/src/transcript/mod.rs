@@ -1,4 +1,5 @@
 use std::{
+    env,
     path::Path,
     process::Stdio,
     sync::{
@@ -9,6 +10,7 @@ use std::{
 
 use tauri::{AppHandle, Emitter, Manager};
 use tokio::{
+    fs,
     io::{AsyncBufReadExt, BufReader},
     process::{Child, Command},
     sync::Mutex,
@@ -29,11 +31,19 @@ pub async fn run(
     mut cmd_logger: CommandLogger,
     task: &Task,
     source: &str,
+    target: &Option<String>,
 ) -> Result<(), ProcessError> {
     let app_clone = app.clone();
     let state = app.state::<AppState>().to_owned();
     let running_clone = is_running.clone();
     let mut transcript_cmd = state.config.lock().await.transcript_cmd.clone();
+    let source_path = Path::new(source);
+    let file_name = source_path.file_name().unwrap();
+    let temp_out = env::temp_dir().join(&file_name).with_extension("vtt");
+    let output_path = match target {
+        Some(p) => Path::new(p).join(file_name).with_extension("vtt"),
+        None => source_path.with_extension("vtt"),
+    };
 
     #[cfg(target_os = "windows")]
     {
@@ -53,6 +63,10 @@ pub async fn run(
     );
 
     transcript_cmd = transcript_cmd.replace("%file%", &format!("\"{source}\""));
+
+    if transcript_cmd.contains("%output%") {
+        transcript_cmd = transcript_cmd.replace("%output%", &format!("{:?}", env::temp_dir()));
+    }
 
     let mut args = shlex::split(&transcript_cmd).ok_or("No transcript command to split")?;
 
@@ -126,6 +140,11 @@ pub async fn run(
     }
 
     *child.lock().await = None;
+
+    if temp_out.is_file() {
+        fs::copy(&temp_out, output_path).await?;
+        fs::remove_file(temp_out).await?;
+    }
 
     Ok(())
 }
