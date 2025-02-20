@@ -30,14 +30,14 @@ pub async fn run(
     is_running: Arc<AtomicBool>,
     mut cmd_logger: CommandLogger,
     task: &Task,
-    source: &str,
+    source: String,
     target: &Option<String>,
 ) -> Result<(), ProcessError> {
     let app_clone = app.clone();
     let state = app.state::<AppState>().to_owned();
     let running_clone = is_running.clone();
     let mut transcript_cmd = state.config.lock().await.transcript_cmd.clone();
-    let source_path = Path::new(source);
+    let source_path = Path::new(&source);
     let file_name = source_path.file_name().unwrap();
     let temp_out = env::temp_dir().join(&file_name).with_extension("vtt");
     let output_path = match target {
@@ -48,6 +48,7 @@ pub async fn run(
     #[cfg(target_os = "windows")]
     {
         transcript_cmd = transcript_cmd.replace("\\", "\\\\");
+        source = source.replace("\\", "\\\\");
     }
 
     if transcript_cmd.contains("%mount%") {

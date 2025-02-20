@@ -153,7 +153,7 @@ async fn work(
                 is_running.clone(),
                 cmd_logger.clone(),
                 &task,
-                &audio_path,
+                audio_path.clone(),
                 &task.target,
             )
             .await?;
