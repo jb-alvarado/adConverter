@@ -46,6 +46,9 @@ pub async fn run(
     };
 
     #[cfg(target_os = "windows")]
+    let mut source = source;
+
+    #[cfg(target_os = "windows")]
     {
         transcript_cmd = transcript_cmd.replace("\\", "\\\\");
         source = source.replace("\\", "\\\\");
