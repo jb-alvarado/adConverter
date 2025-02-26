@@ -1,0 +1,28 @@
+{
+    "name": "youtube_HD_nvenc",
+    "title": "YouTube HD NVENC",
+    "tooltip": "Encoding settings for Youtube (H264 NVENC)",
+    "input": null,
+    "filter_video": {
+        "scale": "1920:1080"
+    },
+    "filter_audio": {},
+    "video": {
+        "-bf": 2,
+        "-bufsize": "2.6M",
+        "-c:v": "h264_nvenc",
+        "-cq:v": "26",
+        "-maxrate": "15M",
+        "-pix_fmt": "yuv420p",
+        "-preset:v": "p7",
+        "-r": 25,
+        "-rc:v": "vbr_hq"
+    },
+    "audio": {
+        "-ar": "48k",
+        "-b:a": "384k",
+        "-c:a": "libfdk_aac"
+    },
+    "container_video": "mp4",
+    "container_audio": null
+}
