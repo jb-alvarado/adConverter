@@ -38,6 +38,7 @@ pub async fn run(
     let mut transcript_cmd = state.config.lock().await.transcript_cmd.clone();
     let lang = task.transcript.as_ref().map_or("auto", |v| v);
     let file_name = source.file_name().unwrap();
+    let source_str = source.to_string_lossy().to_string();
     let temp_out = env::temp_dir().join(&file_name).with_extension("vtt");
     let output_path = match &task.target {
         Some(p) => Path::new(p).join(file_name).with_extension("vtt"),
@@ -45,12 +46,12 @@ pub async fn run(
     };
 
     #[cfg(target_os = "windows")]
-    let mut source = source;
+    let mut source_str = source_str;
 
     #[cfg(target_os = "windows")]
     {
         transcript_cmd = transcript_cmd.replace("\\", "\\\\");
-        source = source.replace("\\", "\\\\");
+        source_str = source_str.replace("\\", "\\\\");
     }
 
     if transcript_cmd.contains("%mount%") {
@@ -61,7 +62,7 @@ pub async fn run(
 
     transcript_cmd = transcript_cmd.replace("%lang%", lang);
 
-    transcript_cmd = transcript_cmd.replace("%file%", &format!("{source:?}"));
+    transcript_cmd = transcript_cmd.replace("%file%", &format!("{source_str:?}"));
 
     if transcript_cmd.contains("%output%") {
         transcript_cmd = transcript_cmd.replace("%output%", &format!("{:?}", env::temp_dir()));
