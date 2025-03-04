@@ -10,7 +10,6 @@ use tauri_plugin_updater::UpdaterExt;
 use tokio::fs::{self};
 use tokio_stream::StreamExt;
 
-pub mod args_parse;
 pub mod errors;
 pub mod logging;
 pub mod presets;

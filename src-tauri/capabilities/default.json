@@ -6,6 +6,7 @@
     "main"
   ],
   "permissions": [
+    "cli:default",
     "core:default",
     "core:window:allow-close",
     "shell:allow-open",

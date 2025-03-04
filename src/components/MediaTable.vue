@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, onMounted } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
 import { listen, type Event } from '@tauri-apps/api/event'
+import { getMatches } from '@tauri-apps/plugin-cli'
 import { cloneDeep, isEqual } from 'lodash-es'
 import Multiselect from '@vueform/multiselect'
 
@@ -40,46 +41,51 @@ const allLufs = ref({ value: false })
 const allTranscript = ref('none')
 const presetList = ref<Preset[]>([])
 
+onMounted(async () => {
+    const matches = await getMatches()
+    const files = matches.args?.files?.value
+
+    if (Array.isArray(files)) {
+        for (const path of files) {
+            addFile(path)
+        }
+    }
+})
+
 listen('tauri://drag-drop', async (event: Event<any>) => {
     for (const path of event.payload.paths) {
-        const task = cloneDeep(store.defaultTask)
-        const ext = extension(path)
-
-        if (!store.ALLOWED_EXTENSIONS.includes(ext)) {
-            store.msgAlert('error', `Extension <strong>${ext}</strong> not Allowed!`, 5)
-            continue
-        }
-
-        if (store.taskList.some((task: Task) => task.path === path)) {
-            store.msgAlert('warning', `File: <strong>${filename(path)}</strong> already in list!`, 5)
-            continue
-        }
-
-        task.path = path
-
-        await invoke<Task>('file_drop', { task })
-            .then((task: Task) => {
-                if (!task.template) {
-                    task.template = cloneDeep(store.defaultTemplate)
-                }
-                store.taskList.push(task)
-            })
-            .catch((e) => {
-                store.msgAlert('error', e, 5)
-                prop.logger.error(e)
-            })
+        await addFile(path)
     }
 })
 
-listen<Task>('task-from-argument', (event: Event<Task>) => {
-    let task = event.payload
+async function addFile(path: string) {
+    const ext = extension(path)
 
-    if (!task.template) {
-        task.template = cloneDeep(store.defaultTemplate)
+    if (!store.ALLOWED_EXTENSIONS.includes(ext)) {
+        store.msgAlert('error', `Extension <strong>${ext}</strong> not Allowed!`, 5)
+        return
     }
 
-    store.taskList.push(task)
-})
+    if (store.taskList.some((task: Task) => task.path === path)) {
+        store.msgAlert('warning', `File: <strong>${filename(path)}</strong> already in list!`, 5)
+        return
+    }
+
+    const task = cloneDeep(store.defaultTask)
+    task.path = path
+
+    await invoke<Task>('file_drop', { task })
+        .then((task: Task) => {
+            if (!task.template) {
+                task.template = cloneDeep(store.defaultTemplate)
+            }
+            store.taskList.push(task)
+        })
+        .catch((e) => {
+            store.msgAlert('error', e, 5)
+            prop.logger.error(e)
+        })
+}
 
 async function changeBoolean(task: Task | undefined, all: { value: boolean }, field: keyof Task & ('fade' | 'lufs')) {
     if (task) {

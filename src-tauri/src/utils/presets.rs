@@ -9,10 +9,11 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_with::serde_as;
 use tauri::{AppHandle, Manager};
+use tauri_plugin_cli::CliExt;
 use tokio::{fs, io::AsyncWriteExt};
 use ts_rs::TS;
 
-use crate::{ProcessError, ARGS};
+use crate::ProcessError;
 
 #[serde_as]
 #[derive(Clone, Debug, Default, Deserialize, Serialize, TS)]
@@ -54,15 +55,23 @@ impl Preset {
 }
 
 pub fn preset_path(app: &AppHandle) -> Result<PathBuf, Box<dyn std::error::Error>> {
-    if let Some(path) = &ARGS.presets {
-        let absolute_path = if path.is_absolute() {
-            path.clone()
-        } else {
-            env::current_dir()?.join(path)
-        }
-        .clean();
+    if let Ok(Some(presets_path)) = app.cli().matches().and_then(|m| {
+        m.args
+            .get("presets-path")
+            .map(|arg| Ok(arg.value.clone()))
+            .transpose()
+    }) {
+        if let Some(p) = presets_path.as_str() {
+            let path = PathBuf::from(p);
+            let absolute_path = if path.is_absolute() {
+                path.clone()
+            } else {
+                env::current_dir()?.join(path)
+            }
+            .clean();
 
-        return Ok(absolute_path);
+            return Ok(absolute_path);
+        }
     }
 
     let mut directory = if cfg!(debug_assertions) {

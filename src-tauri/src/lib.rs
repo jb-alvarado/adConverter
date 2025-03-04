@@ -35,7 +35,6 @@ mod utils;
 
 pub use publisher::Publish;
 pub use utils::{
-    args_parse::ARGS,
     copy_assets, delete_files,
     errors::ProcessError,
     logging::init_logging,
@@ -320,6 +319,7 @@ pub async fn run() -> tauri::Result<()> {
     let (tx, rx) = channel(5);
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_cli::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::new().build())

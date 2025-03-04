@@ -1,6 +1,6 @@
 [package]
 name = "adConverter"
-version = "0.3.0"
+version = "0.4.0"
 description = "Batch/Preset converter based on ffmpeg."
 authors = ["Jonathan Baecker <jonbae77@gmail.com>"]
 edition = "2021"
@@ -52,6 +52,7 @@ strip = true
 lto = true
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-cli = "2"
 tauri-plugin-updater = "2"
 tauri-plugin-window-state = "2"
 
