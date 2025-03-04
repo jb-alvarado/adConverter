@@ -1,10 +1,11 @@
 [Desktop Entry]
-Categories={{categories}}
+Categories=AudioVideo;Audio;Video;
 {{#if comment}}
 Comment={{comment}}
 {{/if}}
-Exec={{exec}} %u
+Exec={{exec}} %U
 Icon={{icon}}
 Name={{name}}
 Terminal=false
 Type=Application
+MimeType=video/mpeg;video/x-mpeg;video/msvideo;video/quicktime;video/x-avi;video/x-ms-wmv;video/mp4;video/mp4v-es;video/mp2t;application/ogg;application/x-ogg;video/x-ogm+ogg;audio/x-vorbis+ogg;application/x-matroska;audio/x-matroska;video/x-matroska;video/webm;audio/webm;audio/x-mp3;audio/x-mpeg;audio/mpeg;audio/x-wav;audio/x-mpegurl;audio/x-m4a;audio/x-ms-wax;application/x-flac;audio/x-flac;audio/x-pn-aiff;audio/x-pn-au;audio/x-pn-wav;audio/x-pn-windows-acm;application/x-extension-mp4;audio/mp4;audio/amr;audio/amr-wb;audio/x-wavpack;audio/x-opus+ogg;

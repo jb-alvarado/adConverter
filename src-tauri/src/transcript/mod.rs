@@ -39,7 +39,7 @@ pub async fn run(
     let lang = task.transcript.as_ref().map_or("auto", |v| v);
     let file_name = source.file_name().unwrap();
     let source_str = source.to_string_lossy().to_string();
-    let temp_out = env::temp_dir().join(&file_name).with_extension("vtt");
+    let temp_out = env::temp_dir().join(file_name).with_extension("vtt");
     let output_path = match &task.target {
         Some(p) => Path::new(p).join(file_name).with_extension("vtt"),
         None => source.with_extension("vtt"),

@@ -215,7 +215,7 @@ async fn work(
             .unwrap_or_default();
 
         if let Some(input_args) = &preset.input {
-            let i_args = split(&input_args).unwrap_or_default();
+            let i_args = split(input_args).unwrap_or_default();
 
             if let Some(pos) = args.iter().position(|x| x == "-i") {
                 // Insert before input "-i"

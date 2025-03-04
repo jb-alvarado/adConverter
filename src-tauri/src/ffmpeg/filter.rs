@@ -726,7 +726,7 @@ pub async fn filter_chain(
                 );
             };
         } else if let Some(up) = hw_up {
-            chain.add_filter(&format!("{up}"), 0, Video);
+            chain.add_filter(&up, 0, Video);
         }
     }
 
