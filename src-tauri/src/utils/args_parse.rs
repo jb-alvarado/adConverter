@@ -14,6 +14,8 @@ lazy_static! {
 next_line_help = false,
 )]
 pub struct Args {
+    pub files: Vec<String>,
+
     #[clap(
         short,
         long,

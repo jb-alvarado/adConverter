@@ -36,6 +36,14 @@ use crate::MACOS_PATH;
 
 const IGNORE_LINES: &[&str; 1] = &["SEI type 1 size"];
 
+fn is_empty(value: &Value) -> bool {
+    match value {
+        Value::Object(map) => map.is_empty(),
+        Value::Array(arr) => arr.is_empty(),
+        _ => false,
+    }
+}
+
 fn to_vec(value: Value) -> Vec<String> {
     let mut params = Vec::new();
 
@@ -99,6 +107,7 @@ async fn work(
     let mut audio_pos = -1;
     let mut has_audio = !task.probe.audio.is_empty();
     let mut has_video = false;
+    let mut transcript_src = None;
 
     let mut task_args = vec_strings![
         "-hide_banner",
@@ -142,21 +151,6 @@ async fn work(
             task_args.extend(seek.clone());
             task_args.extend(vec_strings!["-i", audio]);
             task_args.extend(length.clone());
-        }
-    }
-
-    if let Some(lang) = &task.transcript {
-        if lang.to_lowercase() != "none" {
-            transcript::run(
-                app.clone(),
-                child.clone(),
-                is_running.clone(),
-                cmd_logger.clone(),
-                &task,
-                audio_path.clone(),
-                &task.target,
-            )
-            .await?;
         }
     }
 
@@ -249,6 +243,10 @@ async fn work(
             None => parent_path.join(&file_name),
         };
 
+        if transcript_src.is_none() && has_audio && !is_empty(&preset.audio) {
+            transcript_src = Some(output.clone())
+        }
+
         let temp_out = env::temp_dir().join(&file_name);
         task_clone.presets[i].output_path = Some(output.clone());
 
@@ -307,9 +305,7 @@ async fn work(
             args.clone(),
         );
 
-        app_clone1
-            .emit("preset-start", &preset)
-            .expect("Emit Preset");
+        app.emit("preset-start", &preset).expect("Emit Preset");
 
         let mut cmd = Command::new("ffmpeg");
 
@@ -367,13 +363,7 @@ async fn work(
                     stat_map.clear();
                     stat_map.insert("title".to_string(), title.clone());
 
-                    if &process == "end" {
-                        finished.store(true, Ordering::SeqCst);
-
-                        app_clone1
-                            .emit("preset-finish", &preset)
-                            .expect("Emit progress");
-                    } else {
+                    if &process != "end" {
                         app_clone1
                             .emit("preset-progress", &progress)
                             .expect("Emit progress");
@@ -389,8 +379,31 @@ async fn work(
             proc.wait().await?;
         }
 
+        info!("Copy output file to: {output:?}");
+
         fs::copy(&temp_out, output).await?;
         fs::remove_file(temp_out).await?;
+
+        finished.store(true, Ordering::SeqCst);
+        app.emit("preset-finish", &preset).expect("Emit progress");
+    }
+
+    if let Some(src) = transcript_src {
+        if task
+            .transcript
+            .as_ref()
+            .is_some_and(|lang| lang.to_lowercase() != "none")
+        {
+            transcript::run(
+                app.clone(),
+                child.clone(),
+                is_running.clone(),
+                cmd_logger.clone(),
+                &src,
+                &task,
+            )
+            .await?;
+        }
     }
 
     *child.lock().await = None;
@@ -410,9 +423,7 @@ pub async fn run(
     while let Some(task) = rx.recv().await {
         task.active.store(true, Ordering::SeqCst);
 
-        if !task.presets.is_empty()
-            || (task.transcript.is_some() && task.transcript != Some("none".to_string()))
-        {
+        if !task.presets.is_empty() || task.transcript.as_ref().is_some_and(|t| t != "none") {
             app.emit("task-active", &task)?;
 
             work(

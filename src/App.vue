@@ -132,6 +132,14 @@ listen<String>('preset-progress', async (event: Event<FFmpegProgress>) => {
     store.processMsg = `<strong>Encode (${event.payload.title} ${event.payload.fps} FPS): </strong>`
 })
 
+listen<String>('preset-finish', async (event: Event<Preset>) => {
+    store.progressCurrent = 100
+    store.processMsg = `<strong>Done (${event.payload.title}): </strong>`
+
+    const index = currentTask.value.presets.findIndex((item: Task) => item.name === event.payload.name)
+    currentTask.value.presets.splice(index, 1)
+})
+
 listen<string>('transcript-start', async () => {
     noProgressValues.value = true
     store.processMsg = `<strong>Transcript: </strong>`
@@ -143,12 +151,9 @@ listen<string>('transcript-progress', async (event: Event<string>) => {
     store.processMsg = `<strong>Transcript: </strong>`
 })
 
-listen<String>('preset-finish', async (event: Event<Preset>) => {
+listen<string>('transcript-finish', async (event: Event<string>) => {
     store.progressCurrent = 100
-    store.processMsg = `<strong>Done (${event.payload.title}): </strong>`
-
-    const index = currentTask.value.presets.findIndex((item: Task) => item.name === event.payload.name)
-    currentTask.value.presets.splice(index, 1)
+     store.processMsg = `<strong>Transcript (${event.payload}) done: </strong>`
 })
 
 listen<string>('logging', (event: Event<string>) => {

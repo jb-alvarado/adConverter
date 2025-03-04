@@ -29,20 +29,19 @@ pub async fn run(
     child: Arc<Mutex<Option<Child>>>,
     is_running: Arc<AtomicBool>,
     mut cmd_logger: CommandLogger,
+    source: &Path,
     task: &Task,
-    source: String,
-    target: &Option<String>,
 ) -> Result<(), ProcessError> {
     let app_clone = app.clone();
     let state = app.state::<AppState>().to_owned();
     let running_clone = is_running.clone();
     let mut transcript_cmd = state.config.lock().await.transcript_cmd.clone();
-    let source_path = Path::new(&source);
-    let file_name = source_path.file_name().unwrap();
+    let lang = task.transcript.as_ref().map_or("auto", |v| v);
+    let file_name = source.file_name().unwrap();
     let temp_out = env::temp_dir().join(&file_name).with_extension("vtt");
-    let output_path = match target {
+    let output_path = match &task.target {
         Some(p) => Path::new(p).join(file_name).with_extension("vtt"),
-        None => source_path.with_extension("vtt"),
+        None => source.with_extension("vtt"),
     };
 
     #[cfg(target_os = "windows")]
@@ -56,17 +55,13 @@ pub async fn run(
 
     if transcript_cmd.contains("%mount%") {
         if let Some(parent) = Path::new(&task.path).parent() {
-            transcript_cmd =
-                transcript_cmd.replace("%mount%", &format!("\"{}\"", parent.to_string_lossy()))
+            transcript_cmd = transcript_cmd.replace("%mount%", &format!("{parent:?}"))
         };
     }
 
-    transcript_cmd = transcript_cmd.replace(
-        "%lang%",
-        task.transcript.as_ref().unwrap_or(&"auto".to_string()),
-    );
+    transcript_cmd = transcript_cmd.replace("%lang%", lang);
 
-    transcript_cmd = transcript_cmd.replace("%file%", &format!("\"{source}\""));
+    transcript_cmd = transcript_cmd.replace("%file%", &format!("{source:?}"));
 
     if transcript_cmd.contains("%output%") {
         transcript_cmd = transcript_cmd.replace("%output%", &format!("{:?}", env::temp_dir()));
@@ -111,7 +106,7 @@ pub async fn run(
                 break;
             }
 
-            cmd_logger.log(None, &String::from_utf8_lossy(&buffer));
+            cmd_logger.log(Some("[transcript]"), &String::from_utf8_lossy(&buffer));
             buffer.clear();
         }
     });
@@ -149,6 +144,8 @@ pub async fn run(
         fs::copy(&temp_out, output_path).await?;
         fs::remove_file(temp_out).await?;
     }
+
+    app.emit("transcript-finish", lang).expect("Emit progress");
 
     Ok(())
 }

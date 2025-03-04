@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use tauri::Error as TauriError;
 use thiserror::Error;
 
 use crate::ffmpeg::probe::FfProbeError;
@@ -99,5 +100,17 @@ impl From<tauri_plugin_http::reqwest::Error> for ProcessError {
 impl From<Box<dyn std::any::Any + std::marker::Send>> for ProcessError {
     fn from(err: Box<dyn std::any::Any + std::marker::Send>) -> Self {
         Self::Thread(format!("{err:?}"))
+    }
+}
+
+impl From<ProcessError> for TauriError {
+    fn from(err: ProcessError) -> Self {
+        TauriError::Anyhow(err.into())
+    }
+}
+
+impl From<ProcessError> for tauri::Result<()> {
+    fn from(err: ProcessError) -> Self {
+        Err(TauriError::Anyhow(err.into()))
     }
 }

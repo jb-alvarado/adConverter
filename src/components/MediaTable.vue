@@ -71,6 +71,16 @@ listen('tauri://drag-drop', async (event: Event<any>) => {
     }
 })
 
+listen<Task>('task-from-argument', (event: Event<Task>) => {
+    let task = event.payload
+
+    if (!task.template) {
+        task.template = cloneDeep(store.defaultTemplate)
+    }
+
+    store.taskList.push(task)
+})
+
 async function changeBoolean(task: Task | undefined, all: { value: boolean }, field: keyof Task & ('fade' | 'lufs')) {
     if (task) {
         task[field] = !task[field]
