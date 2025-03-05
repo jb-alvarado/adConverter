@@ -41,6 +41,10 @@ export const useStore = defineStore('index', {
             finished: false,
         } as Task,
         presets: [] as Preset[],
+        allFade: { value: false },
+        allLufs: { value: false },
+        allTranscript: 'none',
+        presetList: [] as Preset[],
         publishPreset: null  as string | null,
         currentTemplate: {
             intro: '',

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, nextTick, onMounted } from 'vue'
+import { nextTick, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { invoke } from '@tauri-apps/api/core'
 import { listen, type Event } from '@tauri-apps/api/event'
 import { getMatches } from '@tauri-apps/plugin-cli'
@@ -12,6 +13,7 @@ import { useStore } from '../store/index.ts'
 import TimePicker from '../components/TimePicker.vue'
 
 const store = useStore()
+const { allFade, allLufs, allTranscript, presetList } = storeToRefs(useStore())
 const { filename, extension, secToMin } = stringFormatter()
 const { multiSelectClasses } = useVariables()
 
@@ -35,11 +37,6 @@ const prop = defineProps({
         },
     },
 })
-
-const allFade = ref({ value: false })
-const allLufs = ref({ value: false })
-const allTranscript = ref('none')
-const presetList = ref<Preset[]>([])
 
 onMounted(async () => {
     const matches = await getMatches()

@@ -79,6 +79,22 @@ async function addFiles() {
     }
 }
 
+async function resetApp($event: any,) {
+    store.taskList.length = 0
+    store.processMsg = ''
+    store.processPath = ''
+    store.progressAll = 0
+    store.progressCurrent = 0
+    store.allFade = { value: false }
+    store.allLufs = { value: false }
+    store.allTranscript = 'none'
+    store.presetList = []
+
+    setTimeout(() => {
+        $event.target.blur()
+    }, 60)
+}
+
 async function closeApp() {
     await getCurrentWindow().close()
 }
@@ -98,36 +114,6 @@ function openCloseConfig($event: any, link: string) {
     }, 60)
 }
 
-// async function updater() {
-//     if (update.value) {
-//         // console.log(`found update ${update.value.version} from ${update.value.date} with notes ${update.value.body}`)
-
-//         let downloaded = 0
-//         let contentLength = 0
-//         await update.value.downloadAndInstall((event) => {
-//             switch (event.event) {
-//                 case 'Started':
-//                     contentLength = event.data.contentLength ?? 0
-//                     store.msgAlert('info', `Started downloading ${formatBytes(contentLength)}`, 3)
-//                     break
-//                 case 'Progress':
-//                     downloaded += event.data.chunkLength
-
-//                     store.progressCurrent = round((downloaded * 100) / contentLength)
-//                     store.processMsg = `Update to ${update.value?.version}`
-//                     break
-//                 case 'Finished':
-//                     store.processMsg = 'Install update'
-//                     break
-//             }
-//         })
-
-//         store.processMsg = ''
-//         store.progressCurrent = 0
-//         store.msgAlert('success', `Update done. Restart to apply changes.`, 3)
-//     }
-// }
-
 async function shutdown_system() {
     await invoke('shutdown_system').catch((e) => {
         store.msgAlert('error', e, 5)
@@ -143,6 +129,7 @@ async function shutdown_system() {
                     <button tabindex="0" role="button" class="btn btn-xs btn-ghost !rounded-none">File</button>
                     <ul tabindex="0" class="menu dropdown-content bg-base-100 rounded-sm w-36 mt-1 p-0 shadow">
                         <li><button class="hover:rounded-sm !rounded-sm" @click="addFiles()">Open</button></li>
+                        <li><button class="hover:rounded-sm !rounded-sm" @click="resetApp">Reset</button></li>
                         <li><button class="hover:rounded-sm !rounded-sm" @click="closeApp()">Close</button></li>
                     </ul>
                 </div>
