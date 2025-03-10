@@ -126,10 +126,10 @@ function removeLowerThirdPosition(li: number, i: number) {
                 <input
                     v-model="store.currentTemplate.intro"
                     type="text"
-                    class="input input-sm input-bordered rounded-sm join-item w-full"
+                    class="input input-sm input-bordered rounded-xs join-item w-full"
                 />
                 <button
-                    class="btn btn-sm border-[oklch(var(--bc)/0.2)] hover:border-[oklch(var(--bc)/0.15)] rounded-sm join-item"
+                    class="btn btn-sm border-base-content/30 hover:border-base-content/40 rounded-xs join-item"
                     @click="getIntro()"
                 >
                     ...
@@ -137,7 +137,7 @@ function removeLowerThirdPosition(li: number, i: number) {
                 <input
                     v-model="store.currentTemplate.intro_duration"
                     type="number"
-                    class="w-16 pr-0 input bg-base-200 input-bordered input-sm join-item rounded-sm"
+                    class="w-16 pr-0 input bg-base-200 input-bordered input-sm join-item rounded-xs"
                     min="0"
                     max="99"
                     step="0.1"
@@ -150,10 +150,10 @@ function removeLowerThirdPosition(li: number, i: number) {
                 <input
                     v-model="store.currentTemplate.outro"
                     type="text"
-                    class="input input-sm input-bordered rounded-sm join-item w-full"
+                    class="input input-sm input-bordered rounded-xs join-item w-full"
                 />
                 <button
-                    class="btn btn-sm border-[oklch(var(--bc)/0.2)] hover:border-[oklch(var(--bc)/0.15)] rounded-sm join-item"
+                    class="btn btn-sm border-base-content/30 hover:border-base-content/40 rounded-xs join-item"
                     @click="getOutro()"
                 >
                     ...
@@ -161,7 +161,7 @@ function removeLowerThirdPosition(li: number, i: number) {
                 <input
                     v-model="store.currentTemplate.outro_duration"
                     type="number"
-                    class="w-16 pr-0 input bg-base-200 input-bordered input-sm join-item rounded-sm"
+                    class="w-16 pr-0 input bg-base-200 input-bordered input-sm join-item rounded-xs"
                     min="0"
                     max="99"
                     step="0.1"
@@ -170,49 +170,49 @@ function removeLowerThirdPosition(li: number, i: number) {
             <div class="flex gap-2 mt-1">
                 <div class="flex flex-col gap-1 w-10">
                     <button
-                        class="btn btn-xs rounded-sm border-[oklch(var(--bc)/0.2)] hover:border-[oklch(var(--bc)/0.15)]"
+                        class="btn btn-xs rounded-xs border-base-content/30 hover:border-base-content/40"
                         title="Add lower third"
                         @click="addLowerThird()"
                     >
                         <i class="bi bi-plus leading-3 text-lg" />
                     </button>
                 </div>
-                <div class="grow bg-base-200 min-h-20 rounded-sm">
+                <div class="grow bg-base-200 min-h-20 rounded-xs">
                     <div class="overflow-x-auto max-h-[300px]">
-                        <table class="table table-zebra rounded-sm border-collapse">
-                            <thead class="top-0 sticky z-[101] bg-base-200">
+                        <table class="table table-zebra rounded-xs border-collapse">
+                            <thead class="top-0 sticky z-101 bg-base-200">
                                 <tr>
                                     <th class="min-w-[200px] p-0">
-                                        <div class="w-full h-full border border-[oklch(var(--bc)/0.2)] p-1">Path</div>
+                                        <div class="w-full h-full border border-base-content/30 p-1">Path</div>
                                     </th>
                                     <th class="w-16 p-0">
-                                        <div class="w-full h-full border border-[oklch(var(--bc)/0.2)] p-1">
+                                        <div class="w-full h-full border border-base-content/30 p-1">
                                             Duration
                                         </div>
                                     </th>
                                     <th class="min-w-[220px] max-w-[400px] p-0">
-                                        <div class="w-full h-full border border-[oklch(var(--bc)/0.2)] p-1">
+                                        <div class="w-full h-full border border-base-content/30 p-1">
                                             Position
                                         </div>
                                     </th>
                                     <th class="w-[28px] p-0">
-                                        <div class="w-full h-full border border-[oklch(var(--bc)/0.2)] p-1">&nbsp;</div>
+                                        <div class="w-full h-full border border-base-content/30 p-1">&nbsp;</div>
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="(lower, li) in store.currentTemplate.lower_thirds" :key="lower.path">
-                                    <th class="border border-[oklch(var(--bc)/0.2)]">{{ lower.path }}</th>
-                                    <td class="border border-[oklch(var(--bc)/0.2)] p-1">
+                                    <th class="border border-base-content/30">{{ lower.path }}</th>
+                                    <td class="border border-base-content/30 p-1">
                                         <input
                                             type="number"
                                             step="0.1"
                                             min="0.0"
                                             v-model.number="lower.duration"
-                                            class="input input-sm input-bordered rounded-sm w-16 px-1"
+                                            class="input input-sm input-bordered rounded-xs w-16 px-1"
                                         />
                                     </td>
-                                    <td class="border border-[oklch(var(--bc)/0.2)] p-1">
+                                    <td class="border border-base-content/30 p-1">
                                         <div class="flex">
                                             <div class="grow flex flex-wrap max-w-[430px] pr-1">
                                                 <div
@@ -222,7 +222,7 @@ function removeLowerThirdPosition(li: number, i: number) {
                                                 >
                                                     <TimePicker v-model="lower.position[i]" :isNumber="false" />
                                                     <button
-                                                        class="absolute top-0 right-0 btn btn-sm w-2 px-2 btn-ghost rounded-sm"
+                                                        class="absolute top-0 right-0 btn btn-sm w-2 px-2 btn-ghost rounded-xs"
                                                         title="Delete position"
                                                         @click="removeLowerThirdPosition(li, i)"
                                                     >
@@ -233,7 +233,7 @@ function removeLowerThirdPosition(li: number, i: number) {
 
                                             <div class="w-5 flex justify-center">
                                                 <button
-                                                    class="btn btn-sm btn-ghost border border-[oklch(var(--bc)/0.2)] w-5 rounded-sm text-center"
+                                                    class="btn btn-sm btn-ghost border border-base-content/30 w-5 rounded-xs text-center"
                                                     title="Add position"
                                                     @click="lower.position.push('00:00:00.000')"
                                                 >
@@ -242,9 +242,9 @@ function removeLowerThirdPosition(li: number, i: number) {
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="border border-[oklch(var(--bc)/0.2)] p-1">
+                                    <td class="border border-base-content/30 p-1">
                                         <button
-                                            class="btn btn-sm btn-ghost border border-[oklch(var(--bc)/0.2)] w-5 rounded-sm text-center"
+                                            class="btn btn-sm btn-ghost border border-base-content/30 w-5 rounded-xs text-center"
                                             title="Delete lower third"
                                             @click="store.currentTemplate.lower_thirds.splice(li, 1)"
                                         >

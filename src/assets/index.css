@@ -1,6 +1,83 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@plugin "daisyui";
+
+@config '../../tailwind.config.js';
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
+
+@plugin "daisyui/theme" {
+    name: "light";
+    default: false;
+    color-scheme: light;
+
+    --color-primary: #e0e0e0;
+    --color-secondary: #c7c7c7;
+    --color-base-content: #222222;
+    --color-accent: #f28c1b;
+    --color-base-100: #ffffff;
+    --color-base-200: #F2F5F7;
+    --color-base-300: #E5E6E6;
+    --color-neutral: #2B3440;
+    --color-neutral-focus: #343232;
+    --color-info: #0000ff;
+    --color-success: #008000;
+    --color-warning: #f28c1b;
+    --color-error: #ff3c00;
+    --my-gray: #888888;
+    --code-punctuation: #383a42;
+    --code-attr: #e45649;
+    --code-string: #50a14f;
+    --code-number': #986801;
+    --code-keyword': #0184bc;
+}
+
+@plugin "daisyui/theme" {
+    name: "dark";
+    default: true;
+    prefersdark: true;
+    color-scheme: dark;
+
+    --color-primary: #3b3b3b;
+    --color-secondary: #d3d3d3;
+    --color-base-content: #DFDFDF;
+    --color-accent: #f28c1b;
+    --color-base-100: #313131;
+    --color-base-200: #222222;
+    --color-base-300: #1c1c1c;
+    --color-neutral: #272626;
+    --color-neutral-focus: #343232;
+    --color-info: #0000ff;
+    --color-success: #008000;
+    --color-warning: #f28c1b;
+    --color-error: #ff3c00;
+    --my-gray: #888888;
+    --code-punctuation: #abb2bf;
+    --code-attr: #e06c75;
+    --code-string: #98c379;
+    --code-number: #d19a66;
+    --code-keyword: #4fb6d5;
+}
+
+@theme {
+    --default-font-family: "Source Sans Pro", "Segoe UI", "Helvetica Neue", "Arial", "sans-serif";
+    --default-mono-font-family: "Roboto Mono";
+}
 
 html {
     font-size: 17px;

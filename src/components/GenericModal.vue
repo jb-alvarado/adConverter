@@ -71,11 +71,11 @@ watch([width, height], () => {
 <template>
     <div
         v-if="show"
-        class="z-[100] fixed inset-0 flex justify-center bg-black/30 overflow-auto py-5"
+        class="z-100 fixed inset-0 flex justify-center bg-black/30 overflow-auto py-5"
     >
         <div
             ref="genericModal"
-            class="fixed flex flex-col bg-base-100 min-w-[600px] min-h-[190px] w-auto max-w-[90%] rounded-sm shadow-xl my-auto"
+            class="fixed flex flex-col bg-base-100 min-w-[600px] min-h-[190px] w-auto max-w-[90%] rounded-xs shadow-xl my-auto"
             :style="style"
         >
             <div class="inline-block">
@@ -96,13 +96,13 @@ watch([width, height], () => {
             <div v-if="!hideButtons" class="flex justify-end my-3 px-3">
                 <div class="join">
                     <button
-                        class="btn btn-sm rounded-sm bg-base-300 hover:bg-base-300/50 join-item"
+                        class="btn btn-sm rounded-xs bg-base-300 hover:bg-base-300/50 join-item"
                         @click="modalAction(false)"
                     >
                         Cancel
                     </button>
                     <button
-                        class="btn btn-sm rounded-sm bg-base-300 hover:bg-base-300/50 join-item"
+                        class="btn btn-sm rounded-xs bg-base-300 hover:bg-base-300/50 join-item"
                         @click="modalAction(true)"
                     >
                         Ok

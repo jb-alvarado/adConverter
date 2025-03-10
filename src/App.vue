@@ -289,17 +289,17 @@ function savePublisher(_save: boolean) {
             </div>
         </main>
 
-        <footer class="relative z-30 h-[100px]">
+        <footer class="relative z-30 h-[103px]">
             <div v-if="!store.openLog" class="absolute w-full flex justify-center -top-[12px]">
                 <button
-                    class="w-20 h-[12px] min-h-[12px] btn bg-base-100 rounded-none border-b-0 hover:border-zinc-600 rounded-t-box border-t border-zinc-600 hover:text-base-content/50"
+                    class="w-20 h-[12px] min-h-[12px] btn bg-base-100 rounded-none border-b-0 hover:border-base-content/30 rounded-t-box border-t border-base-content/30 hover:text-base-content/50"
                     title="Open Logging"
                     @click="store.openLog = true"
                 >
                     <i class="bi-chevron-compact-up" />
                 </button>
             </div>
-            <div class="flex bg-base-100 border-t border-zinc-600">
+            <div class="flex bg-base-100 border-t border-base-content/30">
                 <div class="flex justify-center m-auto item-center w-2/5">
                     <div class="container px-4 flex flex-col gap-0 mb-1">
                         <div class="flex items-center gap-4">
@@ -307,11 +307,11 @@ function savePublisher(_save: boolean) {
                             <div class="relative grow flex items-center">
                                 <progress
                                     v-if="noProgressValues"
-                                    class="progress progress-accent rounded-sm [&::-webkit-progress-value]:rounded-sm h-4"
+                                    class="progress progress-accent rounded-xs [&::-webkit-progress-value]:rounded-xs h-4"
                                 />
                                 <template v-else>
                                     <progress
-                                        class="progress progress-accent rounded-sm [&::-webkit-progress-value]:rounded-sm h-4"
+                                        class="progress progress-accent bg-base-content/20 rounded-xs [&::-webkit-progress-value]:rounded-xs h-4"
                                         :value="store.progressCurrent"
                                         max="100"
                                     />
@@ -325,7 +325,7 @@ function savePublisher(_save: boolean) {
                             <div class="font-semibold w-15">Over All:</div>
                             <div class="relative grow flex items-center">
                                 <progress
-                                    class="progress progress-accent rounded-sm [&::-webkit-progress-value]:rounded-sm h-4"
+                                    class="progress progress-accent bg-base-content/20 rounded-xs [&::-webkit-progress-value]:rounded-xs h-4"
                                     :value="store.progressAll"
                                     max="100"
                                 />
@@ -350,7 +350,7 @@ function savePublisher(_save: boolean) {
                                     <input
                                         type="checkbox"
                                         v-model="targetSubfolder"
-                                        class="checkbox checkbox-sm rounded-sm"
+                                        class="checkbox checkbox-sm checked:shadow-none rounded-xs"
                                     />
                                 </label>
                             </div>
@@ -359,12 +359,12 @@ function savePublisher(_save: boolean) {
                                     <input
                                         v-model="targetFolder"
                                         type="text"
-                                        class="input input-sm input-bordered rounded-sm join-item w-full"
+                                        class="input input-sm input-bordered rounded-xs join-item w-full"
                                         :class="{ 'disabled:input-bordered': jobInProcess }"
                                         :disabled="jobInProcess"
                                     />
                                     <button
-                                        class="btn btn-sm border-[oklch(var(--bc)/0.2)] hover:border-[oklch(var(--bc)/0.15)] rounded-sm join-item"
+                                        class="btn btn-sm border-base-content/30 hover:border-base-content/40 rounded-xs join-item"
                                         @click="getDir()"
                                         :disabled="jobInProcess"
                                     >
@@ -375,7 +375,7 @@ function savePublisher(_save: boolean) {
                         </div>
                         <div class="flex items-end pb-4 pr-4">
                             <button
-                                class="btn btn-lg border-[oklch(var(--bc)/0.2)] hover:border-[oklch(var(--bc)/0.15)] rounded-sm w-20"
+                                class="btn btn-lg border-base-content/30 hover:border-base-content/40 rounded-xs w-20"
                                 @click="jobRun()"
                             >
                                 {{ jobInProcess ? 'Cancel' : 'Run' }}

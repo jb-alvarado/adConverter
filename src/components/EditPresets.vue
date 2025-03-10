@@ -141,13 +141,13 @@ async function savePreset() {
                     <i class="bi bi-x-lg leading-3" />
                 </button>
             </div>
-            <div class="bg-base-100 h-full rounded-sm flex flex-col p-2 gap-2">
+            <div class="bg-base-100 h-full rounded-xs flex flex-col p-2 gap-2">
                 <div class="grow max-h-[calc(100%-42px)] flex flex-row gap-2">
                     <div class="bg-base-100 w-32">
                         <ul class="grow overflow-auto h-full">
                             <li v-for="preset in store.presets" :key="preset.name" class="truncate">
                                 <button
-                                    class="btn btn-xs w-full rounded-sm justify-start"
+                                    class="btn btn-xs w-full rounded-xs justify-start"
                                     :title="preset.tooltip"
                                     @click="editPreset(preset)"
                                 >
@@ -164,7 +164,7 @@ async function savePreset() {
                                 type="text"
                                 ref="textInput"
                                 v-model="preset"
-                                class="textarea textarea-bordered bg-base-200 rounded-sm w-full h-full text-sm leading-5"
+                                class="textarea textarea-bordered bg-base-200 rounded-xs w-full h-full text-sm leading-5"
                                 :spellcheck="false"
                                 @keydown="catchKeyDown"
                                 @keyup="catchKeyUp"
@@ -174,12 +174,12 @@ async function savePreset() {
                 </div>
                 <div class="h-[32px] flex">
                     <div class="grow">
-                        <button class="btn btn-sm w-28 rounded-sm" title="Add preset" @click="addPreset()">+</button>
+                        <button class="btn btn-sm w-28 rounded-xs" title="Add preset" @click="addPreset()">+</button>
                     </div>
                     <div class="join">
-                        <button class="btn btn-sm join-item rounded-sm" @click="reset()">Reset</button>
+                        <button class="btn btn-sm join-item rounded-xs" @click="reset()">Reset</button>
                         <button
-                            class="btn btn-sm join-item rounded-sm"
+                            class="btn btn-sm join-item rounded-xs"
                             :class="changed ? 'btn-error' : ''"
                             @click="savePreset"
                         >

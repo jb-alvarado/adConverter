@@ -68,13 +68,14 @@ async function cancel() {
 </script>
 <template>
     <div class="absolute z-40 top-0 left-0 w-full h-full bg-base-300 p-4">
-        <div class="bg-base-100 h-full rounded-sm flex flex-col p-2">
+        <div class="bg-base-100 h-full rounded-xs flex flex-col p-2">
             <div class="grow flex flex-col gap-2 max-h-[calc(100%-36px)] overflow-auto">
-                <div class="min-h-36 flex gap-2">
+                <div class="min-h-26 flex gap-2">
                     <div class="bg-base-200 p-2">
                         <strong>Audio</strong>
+                        <div>LUFS:</div>
                         <div>
-                            LUFS:
+
                             <label class="label max-w-xs justify-normal p-0">
                                 <input
                                     type="number"
@@ -82,7 +83,7 @@ async function cancel() {
                                     min="-70.0"
                                     max="-5.0"
                                     step="0.1"
-                                    class="input input-xs w-20 rounded-sm"
+                                    class="input input-xs validator w-20 rounded-xs"
                                 />
                                 <span class="pl-3 me-2">Integrated loudness</span>
                             </label>
@@ -93,7 +94,7 @@ async function cancel() {
                                     min="1.0"
                                     max="50.0"
                                     step="0.1"
-                                    class="input input-xs w-20 rounded-sm"
+                                    class="input input-xs w-20 rounded-xs"
                                 />
                                 <span class="pl-3 me-2">Loudness range</span>
                             </label>
@@ -104,7 +105,7 @@ async function cancel() {
                                     min="-9.0"
                                     max="0.0"
                                     step="0.1"
-                                    class="input input-xs w-20 rounded-sm"
+                                    class="input input-xs w-20 rounded-xs"
                                 />
                                 <span class="pl-3 me-2">True peak</span>
                             </label>
@@ -115,17 +116,17 @@ async function cancel() {
                         <label class="form-control mt-2 max-w-64 px-0">
                             <input
                                 v-model="copyright"
-                                class="input input-xs input-bordered rounded-sm w-full"
+                                class="input input-xs input-bordered rounded-xs w-full"
                                 placeholder="Copyright string"
                             />
                         </label>
                     </div>
-                    <div class="bg-base-200 p-2 grow">
+                    <!-- <div class="bg-base-200 p-2 grow">
                         Publish
                         <label class="form-control mt-2 max-w-32 px-0">
                             <select
                                 v-model="store.publishPreset"
-                                class="select select-xs select-bordered rounded-sm w-full"
+                                class="select select-xs select-bordered rounded-xs w-full"
                             >
                                 <option disabled selected>Preset to publish</option>
                                 <option v-for="preset in store.presets" :key="preset.name" :value="preset.name">
@@ -133,7 +134,7 @@ async function cancel() {
                                 </option>
                             </select>
                         </label>
-                    </div>
+                    </div> -->
                 </div>
                 <div class="grow bg-base-200 p-2">
                     <strong>Transcript</strong>
@@ -141,7 +142,7 @@ async function cancel() {
                         <div class="w-48">
                             Languages
                             <table
-                                class="bg-base-300 border-collapse table table-zebra table-fixed border border-zinc-700 rounded-sm mt-2"
+                                class="bg-base-300 border-collapse table table-zebra table-fixed border border-zinc-700 rounded-xs mt-2"
                             >
                                 <thead>
                                     <tr class="bg-base-200 border border-zinc-700">
@@ -197,7 +198,7 @@ async function cancel() {
                                 <input
                                     type="text"
                                     v-model="transcript_cmd"
-                                    class="input input-xs w-full rounded-sm"
+                                    class="input input-xs w-full rounded-xs"
                                     placeholder="/usr/local/bin/transcript.py -c int8 -l %lang% -f %file% -o %output%"
                                 />
                             </label>
@@ -213,8 +214,8 @@ async function cancel() {
             </div>
             <div class="flex justify-end mt-2">
                 <div class="join">
-                    <button class="btn btn-sm join-item rounded-sm" @click="cancel">Cancel</button>
-                    <button class="btn btn-sm join-item rounded-sm" @click="saveConfig">Save</button>
+                    <button class="btn btn-sm join-item rounded-xs" @click="cancel">Cancel</button>
+                    <button class="btn btn-sm join-item rounded-xs" @click="saveConfig">Save</button>
                 </div>
             </div>
         </div>

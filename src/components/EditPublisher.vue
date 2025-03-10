@@ -216,7 +216,7 @@ function addPublisher($event: any) {
         <div class="min-w-[700px]">
             <div>
                 <div class="h-8">
-                    <button class="btn btn-sm rounded-sm" @click="handlePeertube()">
+                    <button class="btn btn-sm rounded-xs" @click="handlePeertube()">
                         Peertube
                         <div
                             class="badge badge-sm"
@@ -246,7 +246,7 @@ function addPublisher($event: any) {
                         <input
                             type="text"
                             v-model="publish.name"
-                            class="input input-bordered input-xs w-full rounded-sm"
+                            class="input input-bordered input-xs w-full rounded-xs"
                             placeholder="Video name"
                         />
                     </label>
@@ -255,11 +255,11 @@ function addPublisher($event: any) {
                     <input
                         v-model="publish.thumbnail"
                         type="text"
-                        class="input input-xs input-bordered rounded-sm join-item w-full"
+                        class="input input-xs input-bordered rounded-xs join-item w-full"
                         placeholder="Thumbnail"
                     />
                     <button
-                        class="btn btn-xs border-[oklch(var(--bc)/0.2)] hover:border-[oklch(var(--bc)/0.15)] rounded-sm join-item"
+                        class="btn btn-xs border-base-content/30 hover:border-base-content/40 rounded-xs join-item"
                         @click="getThumbnail()"
                     >
                         ...
@@ -268,7 +268,7 @@ function addPublisher($event: any) {
                 <label class="form-control mt-2 max-w-full px-0">
                     <textarea
                         v-model="publish.description"
-                        class="textarea textarea-bordered textarea-xs rounded-sm h-24"
+                        class="textarea textarea-bordered textarea-xs rounded-xs h-24"
                         placeholder="Video description"
                     />
                 </label>
@@ -276,7 +276,7 @@ function addPublisher($event: any) {
                     <input
                         type="text"
                         v-model="publish.tags"
-                        class="input input-bordered input-xs w-full rounded-sm"
+                        class="input input-bordered input-xs w-full rounded-xs"
                         placeholder="Video Tags (comma separated list)"
                     />
                 </label>
@@ -289,7 +289,7 @@ function addPublisher($event: any) {
                 type="text"
                 v-model="login.url"
                 name="url"
-                class="input input-bordered input-xs w-full rounded-sm"
+                class="input input-bordered input-xs w-full rounded-xs"
                 placeholder="URL"
             />
         </label>
@@ -298,7 +298,7 @@ function addPublisher($event: any) {
                 type="number"
                 v-model="login.channelID"
                 name="channel"
-                class="input input-bordered input-xs w-full rounded-sm"
+                class="input input-bordered input-xs w-full rounded-xs"
                 min="0"
                 step="1"
             />
@@ -308,7 +308,7 @@ function addPublisher($event: any) {
                 type="text"
                 v-model="login.username"
                 name="username"
-                class="input input-bordered input-xs w-full rounded-sm"
+                class="input input-bordered input-xs w-full rounded-xs"
                 placeholder="Username"
             />
         </label>
@@ -316,7 +316,7 @@ function addPublisher($event: any) {
             <input
                 type="password"
                 v-model="login.password"
-                class="input input-bordered input-xs w-full rounded-sm"
+                class="input input-bordered input-xs w-full rounded-xs"
                 placeholder="Password"
             />
         </label>

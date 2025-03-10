@@ -1,7 +1,7 @@
 <template>
     <div
         id="timeField"
-        class="input input-bordered rounded-sm flex pl-[2px] pr-0 py-0"
+        class="input input-bordered rounded-xs flex pl-[2px] pr-0 py-0"
         :class="`input-${size}`"
     >
         <div class="grow flex items-center">
@@ -10,7 +10,7 @@
                 :value="secToTime(props.modelValue)"
                 type="text"
                 pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]((\.|:)[0-9]{1,3})?"
-                class="w-full px-1 py-0 h-[20px] text-sm"
+                class="w-full px-1 py-0 h-[20px] text-[0.845rem]"
                 @click="setCursorPos"
                 @change="$emit('update:modelValue', timeToSec($event))"
                 :disabled="disabled"

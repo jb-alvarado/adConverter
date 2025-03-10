@@ -32,9 +32,9 @@ watch([logContent.value], () => {
     <div>
         <div v-if="store.openLog" class="fixed top-7 z-50 w-full h-[calc(100%-128px)] bg-base-300 overflow-hidden">
             <div class="h-full">
-                <div class="w-full sticky top-0 flex justify-center border-b border-zinc-600">
+                <div class="w-full sticky top-0 flex justify-center border-b border-base-content/30">
                     <button
-                        class="h-4 leading-3 bg-base-200 hover:bg-base-300 rounded-none min-w-full active:!scale-100"
+                        class="h-4 leading-3 bg-base-200 cursor-pointer hover:bg-base-300 rounded-none min-w-full active:scale-100!"
                         @click="store.openLog = false"
                     >
                         <i class="bi-chevron-compact-down" />

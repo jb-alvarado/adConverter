@@ -2,13 +2,13 @@
     <div>
         <div
             ref="progressContainer"
-            class="toast toast-end fixed top-8 z-50 !h-auto max-h-[calc(100%-134px)] overflow-y-auto gap-1 p-1"
+            class="toast toast-end fixed top-8 z-50 h-auto! max-h-[calc(100%-134px)] overflow-y-auto gap-1 p-1"
             :style="`height: ${store.alertList.length * 80}px`"
         >
             <div
                 v-for="alert in store.alertList"
                 :key="alert.text"
-                class="alert w-auto max-w-[800px] justify-start py-1 rounded-sm"
+                class="alert w-auto max-w-[800px] justify-start py-1 rounded-xs"
                 :class="`alert-${alert.variance}`"
             >
                 <div v-html="alertIcon(alert.variance)" />

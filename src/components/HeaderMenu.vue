@@ -124,39 +124,39 @@ async function shutdown_system() {
 <template>
     <header class="bg-base-100 max-h-[42px] w-full">
         <div class="flex flex-1 justify-start">
-            <div class="flex items-stretch z-[60]">
+            <div class="flex items-stretch z-60">
                 <div class="dropdown dropdown-start">
-                    <button tabindex="0" role="button" class="btn btn-xs btn-ghost !rounded-none">File</button>
-                    <ul tabindex="0" class="menu dropdown-content bg-base-100 rounded-sm w-36 mt-1 p-0 shadow">
-                        <li><button class="hover:rounded-sm !rounded-sm" @click="addFiles()">Open</button></li>
-                        <li><button class="hover:rounded-sm !rounded-sm" @click="resetApp">Reset</button></li>
-                        <li><button class="hover:rounded-sm !rounded-sm" @click="closeApp()">Close</button></li>
+                    <button tabindex="0" role="button" class="btn btn-xs btn-ghost rounded-none!">File</button>
+                    <ul tabindex="0" class="menu dropdown-content bg-base-100 rounded-xs w-36 mt-1 p-0 shadow-sm">
+                        <li><button class="hover:rounded-xs rounded-xs!" @click="addFiles()">Open</button></li>
+                        <li><button class="hover:rounded-xs rounded-xs!" @click="resetApp">Reset</button></li>
+                        <li><button class="hover:rounded-xs rounded-xs!" @click="closeApp()">Close</button></li>
                     </ul>
                 </div>
                 <div class="dropdown dropdown-start">
-                    <button tabindex="0" role="button" class="btn btn-xs btn-ghost !rounded-none">Option</button>
-                    <ul tabindex="0" class="menu dropdown-content bg-base-100 rounded-sm w-36 mt-1 p-0 shadow">
+                    <button tabindex="0" role="button" class="btn btn-xs btn-ghost rounded-none!">Option</button>
+                    <ul tabindex="0" class="menu dropdown-content bg-base-100 rounded-xs w-36 mt-1 p-0 shadow-sm">
                         <li v-if="update">
-                            <div class="hover:rounded-sm !rounded-sm" title="Download and install update">
+                            <div class="hover:rounded-xs rounded-xs!" title="Download and install update">
                                 Update available ({{ update.version }})
                             </div>
                         </li>
                         <li>
-                            <button class="hover:rounded-sm !rounded-sm" @click="openCloseConfig($event, 'presets')">
+                            <button class="hover:rounded-xs rounded-xs!" @click="openCloseConfig($event, 'presets')">
                                 Presets
                             </button>
                         </li>
                         <li>
-                            <button class="hover:rounded-sm !rounded-sm" @click="openCloseConfig($event, 'config')">
+                            <button class="hover:rounded-xs rounded-xs!" @click="openCloseConfig($event, 'config')">
                                 Settings
                             </button>
                         </li>
                         <li>
-                            <label class="label cursor-pointer max-w-xs hover:rounded-sm justify-normal">
+                            <label class="label cursor-pointer max-w-xs hover:rounded-xs justify-normal">
                                 <input
                                     type="checkbox"
                                     v-model="shutdown"
-                                    class="checkbox checkbox-xs rounded-sm"
+                                    class="checkbox checkbox-xs rounded-xs"
                                     title="Shutdown after all jobs are done"
                                 />
                                 <span class="pl-3 me-2">Shutdown</span>
