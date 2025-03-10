@@ -75,11 +75,12 @@
 }
 
 @theme {
+    --font-body: "Source Sans Pro", "Segoe UI", "Helvetica Neue", "Arial", "sans-serif";
     --default-font-family: "Source Sans Pro", "Segoe UI", "Helvetica Neue", "Arial", "sans-serif";
     --default-mono-font-family: "Roboto Mono";
 }
 
-html {
+html, body {
     font-size: 17px;
 }
 
@@ -175,6 +176,10 @@ html {
     font-style: normal;
     font-weight: 700;
     src: url('./fonts/roboto-mono-v23-latin-700.woff2') format('woff2');
+}
+
+input::-webkit-inner-spin-button {
+    height: 2em;
 }
 
 /* ----------------------------------------------------------------------------

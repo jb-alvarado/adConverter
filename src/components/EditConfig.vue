@@ -67,7 +67,7 @@ async function cancel() {
 }
 </script>
 <template>
-    <div class="absolute z-40 top-0 left-0 w-full h-full bg-base-300 p-4">
+    <div class="absolute z-[10012] top-0 left-0 w-full h-full bg-base-300 p-4">
         <div class="bg-base-100 h-full rounded-xs flex flex-col p-2">
             <div class="grow flex flex-col gap-2 max-h-[calc(100%-36px)] overflow-auto">
                 <div class="min-h-26 flex gap-2">
@@ -83,7 +83,7 @@ async function cancel() {
                                     min="-70.0"
                                     max="-5.0"
                                     step="0.1"
-                                    class="input input-xs validator w-20 rounded-xs"
+                                    class="input input-xs focus-within:border-base-content/30 focus-within:outline-base-content/30 validator w-20 rounded-xs"
                                 />
                                 <span class="pl-3 me-2">Integrated loudness</span>
                             </label>
@@ -94,7 +94,7 @@ async function cancel() {
                                     min="1.0"
                                     max="50.0"
                                     step="0.1"
-                                    class="input input-xs w-20 rounded-xs"
+                                    class="input input-xs focus-within:border-base-content/30 focus-within:outline-base-content/30 w-20 rounded-xs"
                                 />
                                 <span class="pl-3 me-2">Loudness range</span>
                             </label>
@@ -105,7 +105,7 @@ async function cancel() {
                                     min="-9.0"
                                     max="0.0"
                                     step="0.1"
-                                    class="input input-xs w-20 rounded-xs"
+                                    class="input input-xs focus-within:border-base-content/30 focus-within:outline-base-content/30 w-20 rounded-xs"
                                 />
                                 <span class="pl-3 me-2">True peak</span>
                             </label>
@@ -116,7 +116,7 @@ async function cancel() {
                         <label class="form-control mt-2 max-w-64 px-0">
                             <input
                                 v-model="copyright"
-                                class="input input-xs input-bordered rounded-xs w-full"
+                                class="input input-xs focus-within:border-base-content/30 focus-within:outline-base-content/30 input-bordered rounded-xs w-full"
                                 placeholder="Copyright string"
                             />
                         </label>
@@ -198,7 +198,7 @@ async function cancel() {
                                 <input
                                     type="text"
                                     v-model="transcript_cmd"
-                                    class="input input-xs w-full rounded-xs"
+                                    class="input input-xs focus-within:border-base-content/30 focus-within:outline-base-content/30 w-full rounded-xs"
                                     placeholder="/usr/local/bin/transcript.py -c int8 -l %lang% -f %file% -o %output%"
                                 />
                             </label>

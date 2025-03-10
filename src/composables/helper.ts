@@ -93,7 +93,7 @@ export const stringFormatter = () => {
 
 export const useVariables = () => {
     const multiSelectClasses = {
-        container: 'relative input input-bordered w-full flex items-center justify-end px-0 min-h-[32px]',
+        container: 'relative input input-bordered focus-within:border-base-content/30 focus-within:outline-base-content/30 w-full flex items-center justify-end px-0 min-h-[32px]',
         containerDisabled: 'cursor-default bg-base',
         containerOpen: 'rounded-b-none',
         containerOpenTop: 'rounded-t-none',
@@ -129,7 +129,7 @@ export const useVariables = () => {
         infiniteSpinner:
             'bg-multiselect-spinner bg-center bg-no-repeat w-4 h-4 z-10 animate-spin shrink-0 grow-0 m-3.5',
         dropdown:
-            'max-h-60 absolute -left-px -right-px bottom-0 transform translate-y-full border border-gray-300 -mt-px overflow-y-scroll z-50 bg-base-100 flex flex-col rounded-b-sm',
+            'max-h-60 absolute -left-px -right-px bottom-0 transform translate-y-full !border-t-none border border-base-content/50 -mt-px overflow-y-scroll bg-base-100 flex flex-col rounded-b-sm',
         dropdownTop: '-translate-y-full top-px bottom-auto rounded-b-none rounded-t-sm',
         dropdownHidden: 'hidden',
         options: 'flex flex-col p-0 m-0 list-none',

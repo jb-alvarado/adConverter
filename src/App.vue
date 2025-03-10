@@ -65,8 +65,10 @@ onBeforeMount(async () => {
 
     await invoke<Preset[]>('presets_get')
         .then((prs: Preset[]) => {
-            for (const preset of prs) {
-                store.presets.push(preset)
+            if (store.presets.length === 0) {
+                for (const preset of prs) {
+                    store.presets.push(preset)
+                }
             }
         })
         .catch((e) => {
@@ -153,7 +155,7 @@ listen<string>('transcript-progress', async (event: Event<string>) => {
 
 listen<string>('transcript-finish', async (event: Event<string>) => {
     store.progressCurrent = 100
-     store.processMsg = `<strong>Transcript (${event.payload}) done: </strong>`
+    store.processMsg = `<strong>Transcript (${event.payload}) done: </strong>`
 })
 
 listen<string>('logging', (event: Event<string>) => {
@@ -292,7 +294,7 @@ function savePublisher(_save: boolean) {
         <footer class="relative z-30 h-[103px]">
             <div v-if="!store.openLog" class="absolute w-full flex justify-center -top-[12px]">
                 <button
-                    class="w-20 h-[12px] min-h-[12px] btn bg-base-100 rounded-none border-b-0 hover:border-base-content/30 rounded-t-box border-t border-base-content/30 hover:text-base-content/50"
+                    class="w-20 h-[12px] min-h-[12px] btn bg-base-100 rounded-none border-b-0 hover:border-base-content/30 rounded-t-box border-t border-base-content/30 hover:text-base-content/50 pt-1"
                     title="Open Logging"
                     @click="store.openLog = true"
                 >
@@ -359,7 +361,7 @@ function savePublisher(_save: boolean) {
                                     <input
                                         v-model="targetFolder"
                                         type="text"
-                                        class="input input-sm input-bordered rounded-xs join-item w-full"
+                                        class="input input-sm input-bordered focus:border-base-content/30 focus:outline-base-content/30 rounded-xs join-item w-full"
                                         :class="{ 'disabled:input-bordered': jobInProcess }"
                                         :disabled="jobInProcess"
                                     />

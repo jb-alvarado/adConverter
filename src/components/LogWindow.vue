@@ -30,7 +30,7 @@ watch([logContent.value], () => {
 </script>
 <template>
     <div>
-        <div v-if="store.openLog" class="fixed top-7 z-50 w-full h-[calc(100%-128px)] bg-base-300 overflow-hidden">
+        <div v-if="store.openLog" class="fixed top-6 z-[10010] w-full h-[calc(100%-128px)] bg-base-300 overflow-hidden">
             <div class="h-full">
                 <div class="w-full sticky top-0 flex justify-center border-b border-base-content/30">
                     <button

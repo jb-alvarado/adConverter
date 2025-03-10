@@ -126,7 +126,7 @@ function removeLowerThirdPosition(li: number, i: number) {
                 <input
                     v-model="store.currentTemplate.intro"
                     type="text"
-                    class="input input-sm input-bordered rounded-xs join-item w-full"
+                    class="input input-sm input-bordered focus-within:border-base-content/30 focus-within:outline-base-content/30 rounded-xs join-item w-full"
                 />
                 <button
                     class="btn btn-sm border-base-content/30 hover:border-base-content/40 rounded-xs join-item"
@@ -137,7 +137,7 @@ function removeLowerThirdPosition(li: number, i: number) {
                 <input
                     v-model="store.currentTemplate.intro_duration"
                     type="number"
-                    class="w-16 pr-0 input bg-base-200 input-bordered input-sm join-item rounded-xs"
+                    class="max-w-14 input bg-base-200 input-bordered focus-within:border-base-content/30 focus-within:outline-base-content/30 input-sm join-item rounded-xs"
                     min="0"
                     max="99"
                     step="0.1"
@@ -150,7 +150,7 @@ function removeLowerThirdPosition(li: number, i: number) {
                 <input
                     v-model="store.currentTemplate.outro"
                     type="text"
-                    class="input input-sm input-bordered rounded-xs join-item w-full"
+                    class="input input-sm input-bordered focus-within:border-base-content/30 focus-within:outline-base-content/30 rounded-xs join-item w-full"
                 />
                 <button
                     class="btn btn-sm border-base-content/30 hover:border-base-content/40 rounded-xs join-item"
@@ -161,7 +161,7 @@ function removeLowerThirdPosition(li: number, i: number) {
                 <input
                     v-model="store.currentTemplate.outro_duration"
                     type="number"
-                    class="w-16 pr-0 input bg-base-200 input-bordered input-sm join-item rounded-xs"
+                    class="max-w-14 input bg-base-200 input-bordered focus-within:border-base-content/30 focus-within:outline-base-content/30 input-sm join-item rounded-xs"
                     min="0"
                     max="99"
                     step="0.1"
@@ -202,14 +202,14 @@ function removeLowerThirdPosition(li: number, i: number) {
                             </thead>
                             <tbody>
                                 <tr v-for="(lower, li) in store.currentTemplate.lower_thirds" :key="lower.path">
-                                    <th class="border border-base-content/30">{{ lower.path }}</th>
+                                    <th class="border border-base-content/30 truncate max-w-96">{{ lower.path }}</th>
                                     <td class="border border-base-content/30 p-1">
                                         <input
                                             type="number"
                                             step="0.1"
                                             min="0.0"
                                             v-model.number="lower.duration"
-                                            class="input input-sm input-bordered rounded-xs w-16 px-1"
+                                            class="input input-sm input-bordered focus-within:border-base-content/30 focus-within:outline-base-content/30 rounded-xs max-w-14"
                                         />
                                     </td>
                                     <td class="border border-base-content/30 p-1">

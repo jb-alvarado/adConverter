@@ -141,28 +141,31 @@ function changePresets(task: Task | undefined) {
 }
 </script>
 <template>
-    <table v-if="store.taskList.length > 0" class="bg-base-300 border-collapse table table-zebra table-fixed">
-        <thead class="top-0 sticky z-40">
+    <table
+        v-if="store.taskList.length > 0"
+        class="bg-base-300 border-collapse table table-zebra table-pin-rows table-fixed"
+    >
+        <thead class="top-0 sticky z-[10000]">
             <tr class="bg-base-200">
-                <th class="p-0 w-auto border-r h-full border-base-content/30">
-                    <div class="px-2 flex items-center w-[calc(100%+1px)] h-[41px] border-b border-r border-base-content/30">
+                <th class="p-0 w-auto border-r h-full border-zinc-700">
+                    <div class="px-2 flex items-center w-[calc(100%+1px)] h-[41px] border-b border-r border-zinc-700">
                         File
                     </div>
                 </th>
-                <th class="p-0 w-[88px] border-r border-base-content/30">
-                    <div class="px-2 flex items-center w-[88px] h-[41px] border-b border-r border-base-content/30">
+                <th class="p-0 w-[88px] border-r border-zinc-700">
+                    <div class="px-2 flex items-center w-[88px] h-[41px] border-b border-r border-zinc-700">
                         Duration
                     </div>
                 </th>
-                <th class="p-0 w-[122px] border-r border-base-content/30">
-                    <div class="px-2 flex items-center w-[122px] h-[41px] border-b border-r border-base-content/30">In</div>
+                <th class="p-0 w-[122px] border-r border-zinc-700">
+                    <div class="px-2 flex items-center w-[122px] h-[41px] border-b border-r border-zinc-700">In</div>
                 </th>
-                <th class="p-0 w-[122px] border-r border-base-content/30">
-                    <div class="px-1 flex items-center w-[122px] h-[41px] border-b border-r border-base-content/30">Out</div>
+                <th class="p-0 w-[122px] border-r border-zinc-700">
+                    <div class="px-1 flex items-center w-[122px] h-[41px] border-b border-r border-zinc-700">Out</div>
                 </th>
-                <th class="p-0 w-[76px] border-r border-base-content/30">
+                <th class="p-0 w-[76px] border-r border-zinc-700">
                     <label
-                        class="label cursor-pointer max-w-xs px-2 h-[41px] w-[76px] border-b border-r border-base-content/30"
+                        class="label cursor-pointer max-w-xs px-2 h-[41px] w-[76px] border-b border-r border-zinc-700"
                     >
                         <input
                             type="checkbox"
@@ -170,12 +173,12 @@ function changePresets(task: Task | undefined) {
                             class="checkbox checkbox-xs checked:shadow-none rounded-xs"
                             @change="changeBoolean(undefined, allFade, 'fade')"
                         />
-                        <span class="pl-3 me-2">Fade</span>
+                        <span class="pl-1 me-2">Fade</span>
                     </label>
                 </th>
-                <th class="p-0 w-[76px] border-r border-base-content/30">
+                <th class="p-0 w-[76px] border-r border-zinc-700">
                     <label
-                        class="label cursor-pointer max-w-xs px-2 h-[41px] w-[76px] border-b border-r border-base-content/30"
+                        class="label cursor-pointer max-w-xs px-2 h-[41px] w-[76px] border-b border-r border-zinc-700"
                     >
                         <input
                             type="checkbox"
@@ -183,17 +186,17 @@ function changePresets(task: Task | undefined) {
                             class="checkbox checkbox-xs checked:shadow-none rounded-xs"
                             @change="changeBoolean(undefined, allLufs, 'lufs')"
                         />
-                        <span class="pl-3 me-2">Lufs</span>
+                        <span class="pl-1 me-2">Lufs</span>
                     </label>
                 </th>
-                <th class="p-0 w-[41px] border-r border-base-content/30">
-                    <div class="px-1 flex items-center w-[41px] h-[41px] border-b border-r border-base-content/30"></div>
+                <th class="p-0 w-[41px] border-r border-zinc-700">
+                    <div class="px-1 flex items-center w-[41px] h-[41px] border-b border-r border-zinc-700"></div>
                 </th>
-                <th v-if="store.showTranscript" class="p-0 w-[138px] border-r border-base-content/30">
-                    <div class="px-1 py-[3px] w-[138px] h-[41px] border-b border-r border-base-content/30">
+                <th v-if="store.showTranscript" class="p-0 w-[138px] border-r border-zinc-700">
+                    <div class="px-1 py-[3px] w-[138px] h-[41px] border-b border-r border-zinc-700">
                         <select
                             v-model="allTranscript"
-                            class="select select-sm select-bordered rounded-xs w-full max-w-xs"
+                            class="select select-sm select-bordered rounded-xs focus:border-base-content/30 focus:outline-base-content/30 w-full max-w-xs"
                             @change="changeTranscription(undefined)"
                         >
                             <option disabled selected>Transcript</option>
@@ -203,9 +206,9 @@ function changePresets(task: Task | undefined) {
                         </select>
                     </div>
                 </th>
-                <th class="p-0 border-r border-base-content/30">
+                <th class="p-0 border-r border-zinc-700">
                     <div
-                        class="relative z-10 px-1 w-[calc(100%+1px)] py-[3px] h-[41px] border-b border-r border-base-content/30"
+                        class="relative z-10 px-1 w-[calc(100%+1px)] py-[3px] h-[41px] border-b border-r border-zinc-700"
                         :style="{ minWidth: `${presetList.length * 58 + 9}px` }"
                     >
                         <Multiselect
@@ -224,12 +227,13 @@ function changePresets(task: Task | undefined) {
                             @select="changePresets(undefined)"
                             @deselect="changePresets(undefined)"
                             @clear="changePresets(undefined)"
+                            :style="{ 'z-index': 10005 }"
                         >
                         </Multiselect>
                     </div>
                 </th>
-                <!-- <th class="p-0 w-[41px] border-r border-base-content/30">
-                    <div class="px-1 flex items-center w-[41px] h-[41px] border-b border-r border-base-content/30"></div>
+                <!-- <th class="p-0 w-[41px] border-r border-zinc-700">
+                    <div class="px-1 flex items-center w-[41px] h-[41px] border-b border-r border-zinc-700"></div>
                 </th> -->
             </tr>
         </thead>
@@ -237,30 +241,30 @@ function changePresets(task: Task | undefined) {
             <tr
                 v-for="(task, i) in store.taskList"
                 :key="task.path"
-                class="p-0 m-0 border-b border-base-content/30"
+                class="p-0 m-0 border-b border-zinc-700"
                 :class="{ 'opacity-50': task.active || task.finished }"
             >
-                <td class="p-0 border-r border-base-content/30">
+                <td class="p-0 border-r border-zinc-700">
                     <div class="m-0 p-[10px] truncate">
                         {{ filename(task.path) }}
                     </div>
                 </td>
-                <td class="p-0 border-r border-base-content/30">
+                <td class="p-0 border-r border-zinc-700">
                     <div class="p-2">
                         {{ secToMin(task.probe.format.duration) }}
                     </div>
                 </td>
-                <td class="p-0 border-r border-base-content/30">
+                <td class="p-0 border-r border-zinc-700">
                     <div class="p-1">
                         <TimePicker v-model="task.in" :disabled="task.active || task.finished" />
                     </div>
                 </td>
-                <td class="p-0 border-r border-base-content/30">
+                <td class="p-0 border-r border-zinc-700">
                     <div class="p-1">
                         <TimePicker v-model="task.out" :disabled="task.active || task.finished" />
                     </div>
                 </td>
-                <td class="p-0 border-r border-base-content/30">
+                <td class="p-0 border-r border-zinc-700">
                     <div class="p-2 flex items-center">
                         <input
                             type="checkbox"
@@ -271,7 +275,7 @@ function changePresets(task: Task | undefined) {
                         />
                     </div>
                 </td>
-                <td class="p-0 border-r border-base-content/30">
+                <td class="p-0 border-r border-zinc-700">
                     <div class="p-2 flex items-center">
                         <input
                             type="checkbox"
@@ -282,17 +286,17 @@ function changePresets(task: Task | undefined) {
                         />
                     </div>
                 </td>
-                <td class="p-0 border-r border-base-content/30">
+                <td class="p-0 border-r border-zinc-700">
                     <div class="p-1">
                         <button class="btn btn-primary btn-sm rounded-xs p-1" @click="editTemplate(task)">
                             <i class="bi-collection text-xl"></i>
                         </button>
                     </div>
                 </td>
-                <th v-if="store.showTranscript" class="py-0 px-1 border-r border-base-content/30">
+                <th v-if="store.showTranscript" class="py-0 px-1 border-r border-zinc-700">
                     <select
                         v-model="task.transcript"
-                        class="select select-sm select-bordered rounded-xs w-full max-w-xs"
+                        class="select select-sm select-bordered focus:border-base-content/30 focus:outline-base-content/30 rounded-xs w-full max-w-xs"
                         @change="changeTranscription(task)"
                         :disabled="task.active || task.finished"
                     >
@@ -302,8 +306,10 @@ function changePresets(task: Task | undefined) {
                         </template>
                     </select>
                 </th>
-                <th class="py-0 px-1 border-r border-base-content/30">
-                    <div :style="{ minWidth: `${presetList.length * 58}px` }" :class="`[&>.absolute]:z-[${500-i}]`">
+                <th class="py-0 px-1 border-r border-zinc-700">
+                    <div
+                        :style="{ minWidth: `${presetList.length * 58}px` }"
+                    >
                         <Multiselect
                             v-model="task.presets"
                             :options="store.presets"
@@ -314,18 +320,19 @@ function changePresets(task: Task | undefined) {
                             valueProp="title"
                             :can-clear="true"
                             :searchable="true"
-                            class="input-sm rounded-xs w-full"
+                            class="presetDiv input-sm rounded-xs w-full"
                             :classes="multiSelectClasses"
                             placeholder="[Presets]"
                             @select="changePresets(task)"
                             @deselect="changePresets(task)"
                             @clear="changePresets(task)"
                             :disabled="task.active || task.finished"
+                            :style="{ 'z-index': 9999 - i }"
                         >
                         </Multiselect>
                     </div>
                 </th>
-                <!-- <td class="p-0 border-r border-base-content/30">
+                <!-- <td class="p-0 border-r border-zinc-700">
                     <div class="p-1">
                         <button class="btn btn-primary btn-sm rounded-xs p-1" @click="editPublisher(task)">
                             <i class="bi-cloud-arrow-up text-xl"></i>

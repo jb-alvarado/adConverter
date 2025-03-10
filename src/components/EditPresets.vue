@@ -133,7 +133,7 @@ async function savePreset() {
 }
 </script>
 <template>
-    <div class="absolute z-40 top-0 left-0 w-full h-full bg-base-300 p-4">
+    <div class="absolute z-[10011] top-0 left-0 w-full h-full bg-base-300 p-4">
         <div class="h-full max-h-[calc(100%-42px)]">
             <div class="flex gap-2 bg-base-200 pl-3 pr-[2px] py-[2px] items-center">
                 <div ref="handler" class="font-bold text-lg truncate flex-1 w-0">Presets</div>
@@ -164,7 +164,7 @@ async function savePreset() {
                                 type="text"
                                 ref="textInput"
                                 v-model="preset"
-                                class="textarea textarea-bordered bg-base-200 rounded-xs w-full h-full text-sm leading-5"
+                                class="textarea textarea-bordered focus-within:border-base-content/30 focus-within:outline-base-content/30 bg-base-200 rounded-xs w-full h-full text-sm leading-5"
                                 :spellcheck="false"
                                 @keydown="catchKeyDown"
                                 @keyup="catchKeyUp"

@@ -54,5 +54,12 @@ export default {
         'alert-warning',
         'alert-info',
         'alert-error',
-    ]
+    ],
+    plugins: [
+        plugin(function({ addBase }) {
+         addBase({
+            'html': { fontSize: "17px" },
+          })
+        }),
+      ],
 }

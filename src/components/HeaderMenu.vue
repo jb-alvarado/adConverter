@@ -124,7 +124,7 @@ async function shutdown_system() {
 <template>
     <header class="bg-base-100 max-h-[42px] w-full">
         <div class="flex flex-1 justify-start">
-            <div class="flex items-stretch z-60">
+            <div class="flex items-stretch z-[10020]">
                 <div class="dropdown dropdown-start">
                     <button tabindex="0" role="button" class="btn btn-xs btn-ghost rounded-none!">File</button>
                     <ul tabindex="0" class="menu dropdown-content bg-base-100 rounded-xs w-36 mt-1 p-0 shadow-sm">
@@ -156,7 +156,7 @@ async function shutdown_system() {
                                 <input
                                     type="checkbox"
                                     v-model="shutdown"
-                                    class="checkbox checkbox-xs rounded-xs"
+                                    class="checkbox checkbox-xs checked:shadow-none rounded-xs"
                                     title="Shutdown after all jobs are done"
                                 />
                                 <span class="pl-3 me-2">Shutdown</span>
