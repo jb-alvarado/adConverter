@@ -160,7 +160,7 @@ pub fn init_logging(app: AppHandle) {
 }
 
 pub fn log_command(title: &str, prefix: Option<String>, mut cmd: Vec<String>) {
-    let max_line_length = 140;
+    let max_line_length = 160;
     let mut formatted_cmd = Vec::new();
     let mut quote_next = false;
     let mut current_line = String::new();
