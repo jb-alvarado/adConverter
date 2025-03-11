@@ -377,7 +377,7 @@ function savePublisher(_save: boolean) {
                         </div>
                         <div class="flex items-end pb-4 pr-4">
                             <button
-                                class="btn btn-lg border-base-content/30 hover:border-base-content/40 rounded-xs w-20"
+                                class="btn btn-lg border-base-content/30 hover:border-base-content/40 rounded-xs w-20 h-16"
                                 @click="jobRun()"
                             >
                                 {{ store.jobInProcess ? 'Cancel' : 'Run' }}
