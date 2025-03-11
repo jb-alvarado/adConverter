@@ -32,7 +32,6 @@ const currentTask = ref<Task | null>(null)
 const targetFolder = ref<string | null>(null)
 const targetSubfolder = ref(false)
 const noProgressValues = ref(false)
-const jobInProcess = ref(false)
 const showTemplateEditor = ref(false)
 const showPublisherEditor = ref(false)
 
@@ -88,13 +87,13 @@ listen<Task>('task-active', (event: Event<Task>) => {
 
 listen<Task>('task-finish', (event: Event<Task>) => {
     for (let i = 0; i < store.taskList.length; i++) {
-        if (jobInProcess.value && store.taskList[i].path === event.payload.path) {
+        if (store.jobInProcess && store.taskList[i].path === event.payload.path) {
             store.progressAll = round(((i + 1) * 100) / store.taskList.length)
             store.taskList[i].active = false
             store.taskList[i].finished = true
 
             if (i === store.taskList.length - 1) {
-                jobInProcess.value = false
+                store.jobInProcess = false
                 store.jobsDone = true
             } else {
                 taskSendNext()
@@ -109,7 +108,7 @@ listen<Task>('task-finish', (event: Event<Task>) => {
             (task: Task) => task.presets.length > 0 || (task.transcript && task.transcript != 'none') || task.publish
         )
     ) {
-        jobInProcess.value = false
+        store.jobInProcess = false
         store.jobsDone = true
     }
 })
@@ -159,6 +158,7 @@ listen<string>('transcript-finish', async (event: Event<string>) => {
 })
 
 listen<string>('logging', (event: Event<string>) => {
+    console.log(event.payload)
     store.logContent.push(event.payload)
 
     if (event.payload.includes('[ERROR]')) {
@@ -192,7 +192,7 @@ async function taskSendNext() {
                 break
             }
 
-            jobInProcess.value = true
+            store.jobInProcess = true
             task.active = true
             task.target = targetFolder.value
             task.target_subfolder = targetSubfolder.value
@@ -212,8 +212,8 @@ async function taskSendNext() {
 }
 
 async function jobRun() {
-    if (jobInProcess.value) {
-        jobInProcess.value = false
+    if (store.jobInProcess) {
+        store.jobInProcess = false
 
         await invoke<Task>('task_cancel', { task: currentTask.value })
             .then(() => {
@@ -309,7 +309,7 @@ function savePublisher(_save: boolean) {
                             <div class="relative grow flex items-center">
                                 <progress
                                     v-if="noProgressValues"
-                                    class="progress progress-accent rounded-xs [&::-webkit-progress-value]:rounded-xs h-4"
+                                    class="progress progress-accent bg-base-content/20 rounded-xs [&::-webkit-progress-value]:rounded-xs h-4"
                                 />
                                 <template v-else>
                                     <progress
@@ -347,7 +347,7 @@ function savePublisher(_save: boolean) {
                                     v-html="store.processMsg + store.processPath"
                                 />
 
-                                <label class="label cursor-pointer pr-0 pt-0 pb-[5px]" :disabled="jobInProcess">
+                                <label class="label cursor-pointer pr-0 pt-0 pb-[5px]" :disabled="store.jobInProcess">
                                     <span class="label-text mr-2">Subfolder</span>
                                     <input
                                         type="checkbox"
@@ -362,13 +362,13 @@ function savePublisher(_save: boolean) {
                                         v-model="targetFolder"
                                         type="text"
                                         class="input input-sm input-bordered focus:border-base-content/30 focus:outline-base-content/30 rounded-xs join-item w-full"
-                                        :class="{ 'disabled:input-bordered': jobInProcess }"
-                                        :disabled="jobInProcess"
+                                        :class="{ 'disabled:input-bordered': store.jobInProcess }"
+                                        :disabled="store.jobInProcess"
                                     />
                                     <button
                                         class="btn btn-sm border-base-content/30 hover:border-base-content/40 rounded-xs join-item"
                                         @click="getDir()"
-                                        :disabled="jobInProcess"
+                                        :disabled="store.jobInProcess"
                                     >
                                         Save As
                                     </button>
@@ -380,7 +380,7 @@ function savePublisher(_save: boolean) {
                                 class="btn btn-lg border-base-content/30 hover:border-base-content/40 rounded-xs w-20"
                                 @click="jobRun()"
                             >
-                                {{ jobInProcess ? 'Cancel' : 'Run' }}
+                                {{ store.jobInProcess ? 'Cancel' : 'Run' }}
                             </button>
                         </div>
                     </div>

@@ -111,30 +111,30 @@ impl LogWriter for LogEmitter {
 fn formatter(now: &mut DeferredNow, record: &Record) -> String {
     let log_line = match record.level() {
         Level::Debug => format!(
-            "<span class=\"text-cyan-600\">[DEBUG]</span> {}",
+            "<span class=\"text-cyan-500\">[DEBUG]</span> {}",
             record.args()
         ),
         Level::Error => format!(
-            "<span class=\"text-red-600\">[ERROR]</span> {}",
+            "<span class=\"text-red-500\">[ERROR]</span> {}",
             record.args()
         ),
         Level::Info => format!(
-            "<span class=\"text-lime-600\">[ INFO]</span> {}",
+            "<span class=\"text-lime-500\">[ INFO]</span> {}",
             record.args()
         ),
         Level::Warn => format!(
-            "<span class=\"text-yellow-600\">[ WARN]</span> {}",
+            "<span class=\"text-yellow-500\">[ WARN]</span> {}",
             record.args()
         ),
         _ => format!(
-            "<span class=\"text-gray-600\">[OTHER]</span> {}",
+            "<span class=\"text-base-content/50\">[OTHER]</span> {}",
             record.args()
         ),
     };
 
     let time = now.now().format("%H:%M:%S%.6f");
 
-    format!("<span class=\"text-gray-600\">{time}</span> {log_line}")
+    format!("<span class=\"text-base-content/50\">{time}</span> {log_line}")
 }
 
 pub fn init_logging(app: AppHandle) {

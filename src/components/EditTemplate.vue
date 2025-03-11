@@ -180,7 +180,7 @@ function removeLowerThirdPosition(li: number, i: number) {
                 <div class="grow bg-base-200 min-h-20 rounded-xs">
                     <div class="overflow-x-auto max-h-[300px]">
                         <table class="table table-zebra rounded-xs border-collapse">
-                            <thead class="top-0 sticky z-101 bg-base-200">
+                            <thead class="top-0 sticky z-50 bg-base-200">
                                 <tr>
                                     <th class="min-w-[200px] p-0">
                                         <div class="w-full h-full border border-base-content/30 p-1">Path</div>

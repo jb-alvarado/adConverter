@@ -93,11 +93,10 @@ export const stringFormatter = () => {
 
 export const useVariables = () => {
     const multiSelectClasses = {
-        container: 'relative input input-bordered focus-within:border-base-content/30 focus-within:outline-base-content/30 w-full flex items-center justify-end px-0 min-h-[32px]',
-        containerDisabled: 'cursor-default bg-base',
+        container: 'relative h-full bg-base-100 mx-auto border border-base-content/20 w-full flex items-center justify-end px-0 min-h-[32px]',
         containerOpen: 'rounded-b-none',
         containerOpenTop: 'rounded-t-none',
-        containerActive: 'ring-3 ring-base-100 ring-opacity-30',
+        containerActive: 'outline outline-2 outline-offset-2 outline-base-content/30',
         wrapper: 'relative mx-auto w-full flex items-center justify-end box-border cursor-pointer outline-hidden',
         singleLabel:
             'flex items-center h-full max-w-full absolute left-0 top-0 pointer-events-none bg-transparent leading-snug pl-3.5 pr-16 box-border rtl:left-auto rtl:right-0 rtl:pl-0 rtl:pr-3.5',
@@ -129,7 +128,7 @@ export const useVariables = () => {
         infiniteSpinner:
             'bg-multiselect-spinner bg-center bg-no-repeat w-4 h-4 z-10 animate-spin shrink-0 grow-0 m-3.5',
         dropdown:
-            'max-h-60 absolute -left-px -right-px bottom-0 transform translate-y-full !border-t-none border border-base-content/50 -mt-px overflow-y-scroll bg-base-100 flex flex-col rounded-b-sm',
+            'max-h-60 absolute -left-px -right-px bottom-0 transform translate-y-full !border-t-none border border-base-content/50 z-50 -mt-px overflow-y-scroll bg-base-100 flex flex-col rounded-b-sm',
         dropdownTop: '-translate-y-full top-px bottom-auto rounded-b-none rounded-t-sm',
         dropdownHidden: 'hidden',
         options: 'flex flex-col p-0 m-0 list-none',

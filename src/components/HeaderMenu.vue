@@ -89,6 +89,7 @@ async function resetApp($event: any,) {
     store.allLufs = { value: false }
     store.allTranscript = 'none'
     store.presetList = []
+    store.jobInProcess = false
 
     setTimeout(() => {
         $event.target.blur()
@@ -124,7 +125,7 @@ async function shutdown_system() {
 <template>
     <header class="bg-base-100 max-h-[42px] w-full">
         <div class="flex flex-1 justify-start">
-            <div class="flex items-stretch z-[10020]">
+            <div class="flex items-stretch z-60">
                 <div class="dropdown dropdown-start">
                     <button tabindex="0" role="button" class="btn btn-xs btn-ghost rounded-none!">File</button>
                     <ul tabindex="0" class="menu dropdown-content bg-base-100 rounded-xs w-36 mt-1 p-0 shadow-sm">

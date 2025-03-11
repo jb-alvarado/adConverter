@@ -145,7 +145,7 @@ function changePresets(task: Task | undefined) {
         v-if="store.taskList.length > 0"
         class="bg-base-300 border-collapse table table-zebra table-pin-rows table-fixed"
     >
-        <thead class="top-0 sticky z-[10000]">
+        <thead class="top-0 sticky z-40">
             <tr class="bg-base-200">
                 <th class="p-0 w-auto border-r h-full border-zinc-700">
                     <div class="px-2 flex items-center w-[calc(100%+1px)] h-[41px] border-b border-r border-zinc-700">
@@ -227,7 +227,6 @@ function changePresets(task: Task | undefined) {
                             @select="changePresets(undefined)"
                             @deselect="changePresets(undefined)"
                             @clear="changePresets(undefined)"
-                            :style="{ 'z-index': 10005 }"
                         >
                         </Multiselect>
                     </div>
@@ -239,7 +238,7 @@ function changePresets(task: Task | undefined) {
         </thead>
         <tbody>
             <tr
-                v-for="(task, i) in store.taskList"
+                v-for="task in store.taskList"
                 :key="task.path"
                 class="p-0 m-0 border-b border-zinc-700"
                 :class="{ 'opacity-50': task.active || task.finished }"
@@ -327,7 +326,6 @@ function changePresets(task: Task | undefined) {
                             @deselect="changePresets(task)"
                             @clear="changePresets(task)"
                             :disabled="task.active || task.finished"
-                            :style="{ 'z-index': 9999 - i }"
                         >
                         </Multiselect>
                     </div>

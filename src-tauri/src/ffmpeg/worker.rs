@@ -107,7 +107,6 @@ async fn work(
     let mut audio_pos = -1;
     let mut has_audio = !task.probe.audio.is_empty();
     let mut has_video = false;
-    let mut transcript_src = None;
 
     let mut task_args = vec_strings![
         "-hide_banner",
@@ -153,6 +152,8 @@ async fn work(
             task_args.extend(length.clone());
         }
     }
+
+    let mut transcript_src = Some(PathBuf::from(&audio_path));
 
     let lufs = if task.lufs {
         let mut src_cmd = seek.clone();

@@ -71,7 +71,7 @@ watch([width, height], () => {
 <template>
     <div
         v-if="show"
-        class="z-[10013] fixed inset-0 flex justify-center bg-black/30 overflow-auto py-5"
+        class="z-50 fixed inset-0 flex justify-center bg-black/30 overflow-auto py-5"
     >
         <div
             ref="genericModal"

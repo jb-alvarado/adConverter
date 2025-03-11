@@ -70,6 +70,7 @@ export const useStore = defineStore('index', {
         progressAll: 0,
         processMsg: '',
         processPath: '',
+        jobInProcess: false,
     }),
 
     actions: {

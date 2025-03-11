@@ -35,31 +35,27 @@ export default {
                 )}")`,
             }),
             boxShadow: {
-                'all': '0 0 15px rgba(0, 0, 0, 0.3)',
-                'b': '0 10px 10px -10px rgba(0, 0, 0, 0.3)',
+                all: '0 0 15px rgba(0, 0, 0, 0.3)',
+                b: '0 10px 10px -10px rgba(0, 0, 0, 0.3)',
             },
             fontFamily: {
                 sans: ['Source Sans Pro', 'Segoe UI', 'Helvetica Neue', 'Arial', 'sans-serif'],
-                mono: ['Roboto Mono']
+                mono: ['Roboto Mono'],
             },
         },
     },
     safelist: [
-        'text-lime-600',
-        'text-cyan-600',
-        'text-red-600',
-        'text-yellow-600',
+        'text-gray-500',
+        'text-gray-600',
+        'text-lime-500',
+        'text-cyan-500',
+        'text-red-500',
+        'text-yellow-500',
+        'text-base-content/50',
         'text-base-content/60',
         'alert-success',
         'alert-warning',
         'alert-info',
         'alert-error',
     ],
-    plugins: [
-        plugin(function({ addBase }) {
-         addBase({
-            'html': { fontSize: "17px" },
-          })
-        }),
-      ],
 }

@@ -67,7 +67,7 @@ async function cancel() {
 }
 </script>
 <template>
-    <div class="absolute z-[10012] top-0 left-0 w-full h-full bg-base-300 p-4">
+    <div class="absolute z-40 top-0 left-0 w-full h-full bg-base-300 p-4">
         <div class="bg-base-100 h-full rounded-xs flex flex-col p-2">
             <div class="grow flex flex-col gap-2 max-h-[calc(100%-36px)] overflow-auto">
                 <div class="min-h-26 flex gap-2">
