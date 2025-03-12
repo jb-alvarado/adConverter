@@ -244,7 +244,10 @@ async fn work(
             None => parent_path.join(&file_name),
         };
 
-        if transcript_src.is_none() && has_audio && !is_empty(&preset.audio) {
+        if transcript_src == Some(PathBuf::from(&audio_path))
+            && has_audio
+            && !is_empty(&preset.audio)
+        {
             transcript_src = Some(output.clone())
         }
 
