@@ -165,7 +165,7 @@ function changePresets(task: Task | undefined) {
                 </th>
                 <th class="p-0 w-[76px] border-r border-zinc-700">
                     <label
-                        class="label cursor-pointer max-w-xs px-2 h-[41px] w-[76px] border-b border-r border-zinc-700"
+                        class="label cursor-pointer max-w-xs px-2 h-[41px] w-[76px] border-b border-r border-zinc-700 text-base-content/60"
                     >
                         <input
                             type="checkbox"
@@ -178,7 +178,7 @@ function changePresets(task: Task | undefined) {
                 </th>
                 <th class="p-0 w-[76px] border-r border-zinc-700">
                     <label
-                        class="label cursor-pointer max-w-xs px-2 h-[41px] w-[76px] border-b border-r border-zinc-700"
+                        class="label cursor-pointer max-w-xs px-2 h-[41px] w-[76px] border-b border-r border-zinc-700 text-base-content/60"
                     >
                         <input
                             type="checkbox"

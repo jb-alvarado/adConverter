@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onBeforeMount } from 'vue'
+import { getVersion } from '@tauri-apps/api/app'
 import { invoke } from '@tauri-apps/api/core'
 import { LazyStore } from '@tauri-apps/plugin-store'
 
@@ -7,6 +8,8 @@ import { useStore } from '../store/index.ts'
 
 const config = new LazyStore('config.json', { autoSave: false })
 const store = useStore()
+
+const appVersion = ref('')
 
 const prop = defineProps({
     logger: {
@@ -26,6 +29,7 @@ const lufs = ref<LufsConfig>({
 const transcript_cmd = ref('')
 
 onBeforeMount(async () => {
+    appVersion.value = await getVersion()
     copyright.value = await config.get('copyright')
     lufs.value = await config.get('lufs')
     transcript_cmd.value = (await config.get('transcript_cmd')) ?? ''
@@ -120,6 +124,9 @@ async function cancel() {
                                 placeholder="Copyright string"
                             />
                         </label>
+                    </div>
+                    <div class="bg-base-200 p-2 grow flex justify-end">
+                        v{{ appVersion }}
                     </div>
                     <!-- <div class="bg-base-200 p-2 grow">
                         Publish

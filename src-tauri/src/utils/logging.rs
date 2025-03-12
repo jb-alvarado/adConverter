@@ -111,11 +111,7 @@ impl LogWriter for LogEmitter {
 fn formatter(now: &mut DeferredNow, record: &Record) -> String {
     let log_line = match record.level() {
         Level::Debug => format!(
-            "<span class=\"text-cyan-500\">[DEBUG]</span> {}",
-            record.args()
-        ),
-        Level::Error => format!(
-            "<span class=\"text-red-500\">[ERROR]</span> {}",
+            "<span class=\"text-cyan-500\">[DEBUG]</span>{}",
             record.args()
         ),
         Level::Info => format!(
@@ -124,6 +120,10 @@ fn formatter(now: &mut DeferredNow, record: &Record) -> String {
         ),
         Level::Warn => format!(
             "<span class=\"text-yellow-500\">[ WARN]</span> {}",
+            record.args()
+        ),
+        Level::Error => format!(
+            "<span class=\"text-red-500\">[ERROR]</span> {}",
             record.args()
         ),
         _ => format!(
@@ -149,8 +149,8 @@ pub fn init_logging(app: AppHandle) {
         .module("winit", LevelFilter::Error)
         .module("winit-gtk", LevelFilter::Error)
         .module("reqwest", LevelFilter::Error)
-        .module("tauri-plugin-http", LevelFilter::Error)
-        .module("tauri-plugin-updater", LevelFilter::Error);
+        .module("tauri_plugin_http", LevelFilter::Error)
+        .module("tauri_plugin_updater", LevelFilter::Error);
 
     let _ = Logger::with(builder.build())
         .log_to_writer(Box::new(LogEmitter::new(app.clone())))
