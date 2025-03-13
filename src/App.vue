@@ -280,7 +280,7 @@ function savePublisher(_save: boolean) {
 </script>
 
 <template>
-    <div class="flex flex-col h-screen justify-between select-none cursor-default">
+    <div class="flex flex-col h-screen justify-between select-none cursor-default overflow-hidden">
         <HeaderMenu :logger="log" />
         <main class="mb-auto bg-base-300 w-full h-full overflow-x-hidden overflow-y-auto">
             <div class="relative bg-base-200 h-full">
