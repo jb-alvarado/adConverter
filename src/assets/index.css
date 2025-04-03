@@ -39,6 +39,7 @@
     --color-success: #008000;
     --color-warning: #f28c1b;
     --color-error: #ff3c00;
+    --my-glow: #c0c0c0;
     --my-gray: #888888;
     --code-punctuation: #383a42;
     --code-attr: #e45649;
@@ -66,6 +67,7 @@
     --color-success: #008000;
     --color-warning: #f28c1b;
     --color-error: #ff3c00;
+    --my-glow: #c0c0c0;
     --my-gray: #888888;
     --code-punctuation: #abb2bf;
     --code-attr: #e06c75;
@@ -180,6 +182,17 @@ html, body {
 
 input::-webkit-inner-spin-button {
     height: 2em;
+}
+
+input, .input, .select, .textarea {
+    &:focus,
+    &:focus-within {
+        --input-color: var(--my-glow);
+        box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000);
+        outline: 2px solid var(--input-color);
+        outline-offset: 2px;
+        isolation: isolate;
+    }
 }
 
 /* ----------------------------------------------------------------------------
