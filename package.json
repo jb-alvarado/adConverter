@@ -1,7 +1,7 @@
 {
   "name": "ad_converter",
   "private": true,
-  "version": "0.5.2",
+  "version": "0.5.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,31 +12,31 @@
   "dependencies": {
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-cli": "^2.2.0",
-    "@tauri-apps/plugin-dialog": "^2.2.0",
-    "@tauri-apps/plugin-http": "^2.4.0",
+    "@tauri-apps/plugin-dialog": "^2.2.1",
+    "@tauri-apps/plugin-http": "^2.4.3",
     "@tauri-apps/plugin-shell": "^2",
     "@tauri-apps/plugin-store": "^2.2.0",
-    "@tauri-apps/plugin-updater": "^2.6.0",
-    "@tauri-apps/plugin-window-state": "^2.2.1",
+    "@tauri-apps/plugin-updater": "^2.7.1",
+    "@tauri-apps/plugin-window-state": "^2.2.2",
     "@vueform/multiselect": "^2.6.11",
-    "@vueuse/core": "^13.0.0",
+    "@vueuse/core": "^13.1.0",
     "bootstrap-icons": "^1.11.3",
     "lodash-es": "^4.17.21",
-    "pinia": "^3.0.1",
+    "pinia": "^3.0.2",
     "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.0.14",
-    "@tailwindcss/vite": "^4.0.14",
+    "@tailwindcss/postcss": "^4.1.5",
+    "@tailwindcss/vite": "^4.1.5",
     "@tauri-apps/cli": "^2",
     "@types/lodash-es": "^4.17.12",
-    "@vitejs/plugin-vue": "^5.2.1",
-    "daisyui": "^5.0.3",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "daisyui": "^5.0.35",
     "mini-svg-data-uri": "^1.4.4",
     "postcss": "^8.5.3",
-    "tailwindcss": "^4.0.14",
-    "typescript": "=5.8.2",
-    "vite": "^6.2.1",
-    "vue-tsc": "^2.2.8"
+    "tailwindcss": "^4.1.5",
+    "typescript": "=5.8.3",
+    "vite": "^6.3.4",
+    "vue-tsc": "^2.2.10"
   }
 }

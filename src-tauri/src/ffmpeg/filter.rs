@@ -6,6 +6,7 @@ use std::{
 // use log::*;
 use regex::Regex;
 use serde_json::Value;
+use tokio::fs;
 
 use super::{analyze::Lufs, prepare_path, probe::MediaProbe};
 use crate::{
@@ -330,7 +331,7 @@ fn fade(task: &Task, chain: &mut Filters, typ: FilterType) {
     }
 }
 
-fn lower_third(
+async fn lower_third(
     path: &str,
     task_probe: &MediaProbe,
     template: &Template,
@@ -347,20 +348,67 @@ fn lower_third(
     for lt in &template.lower_thirds {
         let p = PathBuf::from(&lt.path.replace("\\", "/"));
         let src = if p.is_relative() { path.join(p) } else { p };
+        let extension = src
+            .extension()
+            .unwrap_or_default()
+            .to_string_lossy()
+            .to_lowercase();
+
+        let mut layer_src = src.clone();
+
+        let mut is_image = IMAGE_EXTENSIONS.contains(&extension.as_str());
+        let mut use_sequence = false;
+
+        if is_image {
+            // Regex to detect four digits before the file extension, e.g., image_0000.png
+            let re = Regex::new(r"(.*?)(\d{4})\.(\w+)$").unwrap();
+
+            if let Some(caps) = re.captures(&src.file_name().unwrap_or_default().to_string_lossy())
+            {
+                let prefix = caps.get(1).unwrap().as_str();
+                let suffix = caps.get(3).unwrap().as_str();
+
+                let fallback_dir = PathBuf::from(".");
+                let dir = src.parent().unwrap_or_else(|| fallback_dir.as_path());
+                let mut files = fs::read_dir(dir).await.unwrap();
+
+                // Check if more files with the same prefix and sequential numbers exist
+                let mut count = 0;
+                while let Ok(Some(entry)) = files.next_entry().await {
+                    let file_name = entry.file_name().to_string_lossy().to_string();
+                    if file_name.starts_with(prefix) && file_name.ends_with(&format!(".{}", suffix))
+                    {
+                        if Regex::new(&format!(
+                            r"{}(\d{{4}})\.{}",
+                            regex::escape(prefix),
+                            regex::escape(suffix)
+                        ))
+                        .unwrap()
+                        .is_match(&file_name)
+                        {
+                            count += 1;
+                            if count >= 2 {
+                                use_sequence = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if use_sequence {
+                    let new_filename = format!("{}%04d.{}", prefix, suffix);
+                    layer_src = dir.join(new_filename);
+                    is_image = false;
+                }
+            }
+        }
+
         let mut layer_base = format!(
             "movie='{}'",
-            prepare_path(src.to_string_lossy().to_string())
+            prepare_path(layer_src.to_string_lossy().to_string())
         );
 
-        if lt.duration > 0.0
-            && IMAGE_EXTENSIONS.contains(
-                &src.extension()
-                    .unwrap_or_default()
-                    .to_string_lossy()
-                    .to_lowercase()
-                    .as_str(),
-            )
-        {
+        if lt.duration > 0.0 && is_image {
             layer_base.push_str(&format!(
                 ":loop=0,setpts=N/(FRAME_RATE*TB),trim=duration={},fade=in:d=0.5:alpha=1,fade=out:st={}:d=0.5:alpha=1",
                 lt.duration, lt.duration - 0.5
@@ -671,7 +719,8 @@ pub async fn filter_chain(
                 preset,
                 &target_spec,
                 "[main_v]",
-            );
+            )
+            .await;
             let (i, o) = intro_outro(&task.path, &task.probe, template, preset, &target_spec).await;
 
             if !f.is_empty() {
