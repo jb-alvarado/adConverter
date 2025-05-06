@@ -10,7 +10,7 @@ use tokio::fs;
 
 use super::{analyze::Lufs, prepare_path, probe::MediaProbe};
 use crate::{
-    utils::{is_close, time_to_sec, IMAGE_EXTENSIONS},
+    utils::{find_audio, is_close, time_to_sec, IMAGE_EXTENSIONS},
     vec_strings, Preset, Task, Template,
 };
 
@@ -482,7 +482,14 @@ async fn intro_outro(
         if let Ok(probe) = probe {
             intro_probe = Some(probe.clone());
 
-            if probe.audio.is_empty() {
+            if !probe.audio.is_empty() {
+                intro.push_str(":s=dv+da[intro_v][intro_aout]");
+            } else if let Some(audio_src) = find_audio(&src).await {
+                intro.push_str(&format!(
+                    "[intro_v];amovie={}[intro_aout]",
+                    prepare_path(audio_src.to_string_lossy().to_string())
+                ));
+            } else {
                 intro.push_str(&format!(
                     "[intro_v];aevalsrc=0:channel_layout=stereo:duration={}:sample_rate=48000[intro_aout]",
                     probe
@@ -492,8 +499,6 @@ async fn intro_outro(
                         .filter(|&d| d > 0.0)
                         .unwrap_or(template.intro_duration)
                 ));
-            } else {
-                intro.push_str(":s=dv+da[intro_v][intro_aout]");
             }
         }
     }
@@ -518,7 +523,14 @@ async fn intro_outro(
         if let Ok(probe) = probe {
             outro_probe = Some(probe.clone());
 
-            if probe.audio.is_empty() {
+            if !probe.audio.is_empty() {
+                outro.push_str(":s=dv+da[outro_v][outro_aout]");
+            } else if let Some(audio_src) = find_audio(&src).await {
+                outro.push_str(&format!(
+                    "[outro_v];amovie={}[outro_aout]",
+                    prepare_path(audio_src.to_string_lossy().to_string())
+                ));
+            } else {
                 outro.push_str(&format!(
                     "[outro_v];aevalsrc=0:channel_layout=stereo:duration={}:sample_rate=48000[outro_aout]",
                     probe
@@ -528,8 +540,6 @@ async fn intro_outro(
                         .filter(|&d| d > 0.0)
                         .unwrap_or(template.outro_duration)
                 ));
-            } else {
-                outro.push_str(":s=dv+da[outro_v][outro_aout]");
             }
         }
     }

@@ -165,3 +165,25 @@ pub async fn copy_assets(app: &AppHandle) -> Result<(), ProcessError> {
 
     Ok(())
 }
+
+pub async fn find_audio(src: &Path) -> Option<PathBuf> {
+    let folder = src.parent()?;
+    let mut entries = fs::read_dir(folder).await.ok()?;
+
+    while let Some(entry) = entries.next_entry().await.ok()? {
+        if entry.path().file_stem() == src.file_stem() {
+            let extension = entry
+                .path()
+                .extension()
+                .unwrap_or_default()
+                .to_string_lossy()
+                .to_lowercase();
+
+            if AUDIO_EXTENSIONS.contains(&extension.as_str()) {
+                return Some(entry.path());
+            }
+        }
+    }
+
+    None
+}
