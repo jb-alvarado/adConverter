@@ -486,7 +486,7 @@ async fn intro_outro(
                 intro.push_str(":s=dv+da[intro_v][intro_aout]");
             } else if let Some(audio_src) = find_audio(&src).await {
                 intro.push_str(&format!(
-                    "[intro_v];amovie={}[intro_aout]",
+                    "[intro_v];amovie='{}'[intro_aout]",
                     prepare_path(audio_src.to_string_lossy().to_string())
                 ));
             } else {
@@ -527,7 +527,7 @@ async fn intro_outro(
                 outro.push_str(":s=dv+da[outro_v][outro_aout]");
             } else if let Some(audio_src) = find_audio(&src).await {
                 outro.push_str(&format!(
-                    "[outro_v];amovie={}[outro_aout]",
+                    "[outro_v];amovie='{}'[outro_aout]",
                     prepare_path(audio_src.to_string_lossy().to_string())
                 ));
             } else {
