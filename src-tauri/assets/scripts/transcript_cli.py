@@ -16,7 +16,8 @@ from ctranslate2 import get_supported_compute_types
 if platform.system() == "Darwin":
     from mlx_whisper import transcribe, writers
 else:
-    from faster_whisper import (WhisperModel, BatchedInferencePipeline, format_timestamp)
+    from faster_whisper import (BatchedInferencePipeline, WhisperModel,
+                                format_timestamp)
 
 supported_compute_types = list(get_supported_compute_types(
     "cuda" if torch.cuda.is_available() else "cpu"))
@@ -147,7 +148,7 @@ def transcribe_video(video_path: Path):
         if ARGS.b:
             if lang == 'ml':
                 segments, info = batched_model.transcribe(
-                    ideo_path, vad_filter=True, multilingual=True, batch_size=16)
+                    video_path, vad_filter=True, multilingual=True, batch_size=16)
             else:
                 segments, info = batched_model.transcribe(
                     video_path, vad_filter=True, language=lang, batch_size=16)
