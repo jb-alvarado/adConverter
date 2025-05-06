@@ -93,7 +93,7 @@ impl Filters {
             if filter.starts_with("aevalsrc") || filter.starts_with("movie") {
                 chain.push_str(&format!("{sep}{filter}"));
             } else {
-                let hw_dl = if self.hw_context {
+                let hw_dl = if self.hw_context && filter_type == Video {
                     "hwdownload,format=nv12,"
                 } else {
                     ""
