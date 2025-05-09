@@ -9,6 +9,7 @@
     "main"
   ],
   "permissions": [
+    "clipboard-manager:allow-read-text",
     "store:default",
     "window-state:default",
     "updater:default",

@@ -1,6 +1,6 @@
 [package]
 name = "adConverter"
-version = "0.6.1"
+version = "0.7.0"
 description = "Batch/Preset converter based on ffmpeg."
 authors = ["Jonathan Baecker <jonbae77@gmail.com>"]
 edition = "2021"
@@ -36,6 +36,7 @@ serde_with = "3.8"
 shlex = "1"
 system_shutdown = "*"
 tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-clipboard-manager = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-http = { version = "2", features = ["multipart"] }
 tauri-plugin-shell = "2"

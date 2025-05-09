@@ -1,7 +1,7 @@
 {
   "name": "ad_converter",
   "private": true,
-  "version": "0.6.1",
+  "version": "0.7.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,6 +12,7 @@
   "dependencies": {
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-cli": "^2.2.0",
+    "@tauri-apps/plugin-clipboard-manager": "^2.2.2",
     "@tauri-apps/plugin-dialog": "^2.2.1",
     "@tauri-apps/plugin-http": "^2.4.3",
     "@tauri-apps/plugin-shell": "^2",
@@ -26,15 +27,15 @@
     "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.5",
-    "@tailwindcss/vite": "^4.1.5",
+    "@tailwindcss/postcss": "^4.1.6",
+    "@tailwindcss/vite": "^4.1.6",
     "@tauri-apps/cli": "^2",
     "@types/lodash-es": "^4.17.12",
-    "@vitejs/plugin-vue": "^5.2.3",
+    "@vitejs/plugin-vue": "^5.2.4",
     "daisyui": "^5.0.35",
     "mini-svg-data-uri": "^1.4.4",
     "postcss": "^8.5.3",
-    "tailwindcss": "^4.1.5",
+    "tailwindcss": "^4.1.6",
     "typescript": "=5.8.3",
     "vite": "^6.3.5",
     "vue-tsc": "^2.2.10"
