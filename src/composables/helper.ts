@@ -68,22 +68,22 @@ export const stringFormatter = () => {
         }
 
         debug(msg: string | object) {
-            let line = `<span class="text-cyan-600">${logTime()}</span> <span class="text-lime-600">[DEBUG]</span> ${this.fmt(msg)}`
+            let line = `<span class="text-base-content/50">[${logTime()}]</span> <span class="text-cyan-600">[DEBUG]</span> ${this.fmt(msg)}`
             this.store.logContent.push(line)
         }
 
         error(msg: string | object) {
-            let line = `<span class="text-gray-600">${logTime()}</span> <span class="text-red-600">[ERROR]</span> ${this.fmt(msg)}`
+            let line = `<span class="text-base-content/50">[${logTime()}]</span> <span class="text-red-600">[ERROR]</span> ${this.fmt(msg)}`
             this.store.logContent.push(line)
         }
 
         info(msg: string | object) {
-            let line = `<span class="text-gray-600">${logTime()}</span> <span class="text-lime-600">[ INFO]</span> ${this.fmt(msg)}`
+            let line = `<span class="text-base-content/50">[${logTime()}]</span> <span class="text-lime-600">[ INFO]</span> ${this.fmt(msg)}`
             this.store.logContent.push(line)
         }
 
         warn(msg: string | object) {
-            let line = `<span class="text-yellow-600">${logTime()}</span> <span class="text-lime-600">[ WARN]</span> ${this.fmt(msg)}`
+            let line = `<span class="text-base-content/50">[${logTime()}]</span> <span class="text-yellow-600">[ WARN]</span> ${this.fmt(msg)}`
             this.store.logContent.push(line)
         }
     }

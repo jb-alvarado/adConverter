@@ -134,7 +134,7 @@ fn formatter(now: &mut DeferredNow, record: &Record) -> String {
 
     let time = now.now().format("%H:%M:%S%.6f");
 
-    format!("<span class=\"text-base-content/50\">{time}</span> {log_line}")
+    format!("<span class=\"text-base-content/50\">[{time}]</span> {log_line}")
 }
 
 pub fn init_logging(app: AppHandle) {

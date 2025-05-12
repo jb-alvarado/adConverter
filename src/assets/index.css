@@ -1,7 +1,7 @@
 @import 'tailwindcss';
-@plugin "daisyui";
-
-/* @config '../../tailwind.config.js'; */
+@plugin "daisyui" {
+    themes: light --default, dark --prefersdark;
+}
 
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
@@ -12,33 +12,38 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
-  }
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentColor);
+    }
 }
 
 @plugin "daisyui/theme" {
-    name: "light";
-    default: false;
+    name: 'light';
+    default: true;
     color-scheme: light;
 
     --color-primary: #e0e0e0;
+    --color-primary-content: #111111;
     --color-secondary: #c7c7c7;
     --color-base-content: #222222;
     --color-accent: #f28c1b;
     --color-base-100: #ffffff;
-    --color-base-200: #F2F5F7;
-    --color-base-300: #E5E6E6;
-    --color-neutral: #2B3440;
+    --color-base-200: #f2f5f7;
+    --color-base-300: #e5e6e6;
+    --color-neutral: #2b3440;
     --color-neutral-focus: #343232;
     --color-info: #0000ff;
+    --color-info-content: #ffffff;
     --color-success: #008000;
+    --color-success-content: #ffffff;
     --color-warning: #f28c1b;
+    --color-warning-content: #000000;
     --color-error: #ff3c00;
+    --color-error-content: #000000;
     --my-glow: #c0c0c0;
     --my-gray: #888888;
     --code-punctuation: #383a42;
@@ -49,14 +54,15 @@
 }
 
 @plugin "daisyui/theme" {
-    name: "dark";
-    default: true;
+    name: 'dark';
+    default: false;
     prefersdark: true;
     color-scheme: dark;
 
     --color-primary: #3b3b3b;
+    --color-primary-content: #efefef;
     --color-secondary: #d3d3d3;
-    --color-base-content: #DFDFDF;
+    --color-base-content: #dfdfdf;
     --color-accent: #f28c1b;
     --color-base-100: #313131;
     --color-base-200: #222222;
@@ -64,10 +70,14 @@
     --color-neutral: #272626;
     --color-neutral-focus: #343232;
     --color-info: #0000ff;
+    --color-info-content: #ffffff;
     --color-success: #008000;
+    --color-success-content: #ffffff;
     --color-warning: #f28c1b;
+    --color-warning-content: #000000;
     --color-error: #ff3c00;
-    --my-glow: #c0c0c0;
+    --color-error-content: #000000;
+    --my-glow: #606060;
     --my-gray: #888888;
     --code-punctuation: #abb2bf;
     --code-attr: #e06c75;
@@ -77,12 +87,13 @@
 }
 
 @theme {
-    --font-body: "Source Sans Pro", "Segoe UI", "Helvetica Neue", "Arial", "sans-serif";
-    --default-font-family: "Source Sans Pro", "Segoe UI", "Helvetica Neue", "Arial", "sans-serif";
-    --default-mono-font-family: "Roboto Mono";
+    --font-body: 'Source Sans Pro', 'Segoe UI', 'Helvetica Neue', 'Arial', 'sans-serif';
+    --default-font-family: 'Source Sans Pro', 'Segoe UI', 'Helvetica Neue', 'Arial', 'sans-serif';
+    --default-mono-font-family: 'Roboto Mono';
 }
 
-html, body {
+html,
+body {
     font-size: 17px;
 }
 
@@ -184,7 +195,10 @@ input::-webkit-inner-spin-button {
     height: 2em;
 }
 
-input, .input, .select, .textarea {
+input,
+.input,
+.select,
+.textarea {
     &:focus,
     &:focus-within {
         --input-color: var(--my-glow);
@@ -193,6 +207,26 @@ input, .input, .select, .textarea {
         outline-offset: 2px;
         isolation: isolate;
     }
+}
+
+.alert-info {
+    @apply text-info-content border-info;
+    --alert-color: var(--color-info);
+}
+
+.alert-success {
+    @apply text-success-content border-success;
+    --alert-color: var(--color-success);
+}
+
+.alert-warning {
+    @apply text-warning-content border-warning;
+    --alert-color: var(--color-warning);
+}
+
+.alert-error {
+    @apply text-error-content border-error;
+    --alert-color: var(--color-error);
 }
 
 /* ----------------------------------------------------------------------------
