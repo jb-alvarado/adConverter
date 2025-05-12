@@ -129,8 +129,9 @@ listen<String>('preset-start', async (event: Event<Preset>) => {
 })
 
 listen<String>('preset-progress', async (event: Event<FFmpegProgress>) => {
+    const progress = event.payload.fps ? `${event.payload.fps} FPS` : `${event.payload.speed} Speed`
     store.progressCurrent = event.payload.elapsed_pct
-    store.processMsg = `<strong>Encode (${event.payload.title} ${event.payload.fps} FPS): </strong>`
+    store.processMsg = `<strong>Encode (${event.payload.title} ${progress}): </strong>`
 })
 
 listen<String>('preset-finish', async (event: Event<Preset>) => {
