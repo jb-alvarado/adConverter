@@ -278,6 +278,7 @@ if __name__ == "__main__":
         log.info("Use batched model to transcript")
 
     for f in ARGS.f:
+        print("----file:", f)
         if f.is_file():
             if platform.system() == "Darwin":
                 transcribe_video_mlx(f)

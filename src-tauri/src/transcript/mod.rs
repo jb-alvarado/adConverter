@@ -16,7 +16,10 @@ use tokio::{
     sync::Mutex,
 };
 
+mod process;
+
 use crate::{
+    transcript::process::optimize_vtt,
     utils::logging::{log_command, CommandLogger},
     AppState, ProcessError, Task,
 };
@@ -56,13 +59,14 @@ pub async fn run(
 
     if transcript_cmd.contains("%mount%") {
         if let Some(parent) = Path::new(&task.path).parent() {
-            transcript_cmd = transcript_cmd.replace("%mount%", &format!("{parent:?}"))
+            transcript_cmd =
+                transcript_cmd.replace("%mount%", &format!("\"{}\"", parent.to_string_lossy()))
         };
     }
 
     transcript_cmd = transcript_cmd.replace("%lang%", lang);
 
-    transcript_cmd = transcript_cmd.replace("%file%", &format!("{source_str:?}"));
+    transcript_cmd = transcript_cmd.replace("%file%", &format!("\"{source_str}\""));
 
     if transcript_cmd.contains("%output%") {
         transcript_cmd = transcript_cmd.replace("%output%", &format!("{:?}", env::temp_dir()));
@@ -142,7 +146,10 @@ pub async fn run(
     *child.lock().await = None;
 
     if temp_out.is_file() {
-        fs::copy(&temp_out, output_path).await?;
+        let duration = (task.probe.clone().format_duration() * 1000.0) as u64;
+
+        optimize_vtt(&temp_out, &output_path, duration).await?;
+
         fs::remove_file(temp_out).await?;
     }
 
