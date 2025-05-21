@@ -79,11 +79,14 @@ async fn calc_duration(task: &Task) -> (f64, f64, f64) {
         }
     }
 
-    let duration = if task.r#in > 0.0 || task.out > 0.0 {
-        task.out - task.r#in
-    } else {
-        task.probe.format.duration.unwrap_or_default()
-    };
+    let mut duration = task.probe.format.duration.unwrap_or_default();
+
+    match (task.r#in > 0.0, task.out > 0.0) {
+        (true, true) => duration = (task.out - task.r#in).max(0.0),
+        (true, false) => duration = (duration - task.r#in).max(0.0),
+        (false, true) => duration = (duration - task.out).max(0.0),
+        _ => {}
+    }
 
     (duration_intro, duration, duration_outro)
 }
@@ -100,8 +103,8 @@ async fn work(
     // let mut presets = mem::take(&mut task_clone.presets);
     let sources = Sources::new(&task.path).await;
     let path = Path::new(&task.path);
-    let (i_dur, m_dur, o_dur) = calc_duration(&task).await;
-    let duration = i_dur + m_dur + o_dur;
+    let (intro_dur, video_dur, outro_dur) = calc_duration(&task).await;
+    let duration = intro_dur + video_dur + outro_dur;
     let year = Local::now().year();
     let cmd_logger = CommandLogger::new();
     let mut audio_pos = -1;
@@ -162,7 +165,7 @@ async fn work(
 
         Lufs::new(
             app.clone(),
-            m_dur,
+            video_dur,
             is_running.clone(),
             child.clone(),
             src_cmd,
