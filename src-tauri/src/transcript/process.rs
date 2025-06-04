@@ -6,6 +6,7 @@ use tokio::{
     io::{self, AsyncBufReadExt, AsyncWriteExt, BufReader},
 };
 
+const MAX_DUPLICATE_DURATION_MS: u64 = 50;
 const MAX_LEN: usize = 200;
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
@@ -151,24 +152,31 @@ fn process_vtt(subtitles: Vec<Subtitle>, duration: u64) -> Vec<Subtitle> {
 
     for current in subtitles {
         if let Some(prev_sub) = prev.take() {
-            if prev_sub.text.len() + current.text.len() < 121
-                && !prev_sub.text.trim_end().ends_with('.')
-                && !prev_sub.text.trim_end().ends_with('?')
-                && !prev_sub.text.trim_end().ends_with('!')
-            {
-                let prev_text = prev_sub.text.trim();
-                let curr_text = current.text.trim();
+            let prev_text = prev_sub.text.trim();
+            let curr_text = current.text.trim();
 
-                let text = if prev_text == curr_text && !prev_text.ends_with(',') {
-                    curr_text.to_string()
+            if prev_text == curr_text {
+                let total_span = current.start.saturating_sub(prev_sub.end);
+                if total_span <= MAX_DUPLICATE_DURATION_MS {
+                    let merged = Subtitle {
+                        start: prev_sub.start,
+                        end: current.end,
+                        text: curr_text.to_string(),
+                    };
+                    prev = Some(merged);
+                    continue;
                 } else {
-                    format!("{prev_text} {curr_text}")
-                };
-
+                    processed.push(prev_sub);
+                }
+            } else if prev_sub.text.len() + current.text.len() < 121
+                && !prev_text.ends_with('.')
+                && !prev_text.ends_with('?')
+                && !prev_text.ends_with('!')
+            {
                 let merged = Subtitle {
                     start: prev_sub.start,
                     end: current.end,
-                    text,
+                    text: format!("{prev_text} {curr_text}"),
                 };
                 prev = Some(merged);
                 continue;

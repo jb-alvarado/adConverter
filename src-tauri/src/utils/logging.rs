@@ -1,4 +1,4 @@
-use std::io::{self, ErrorKind};
+use std::io;
 
 use flexi_logger::{writers::LogWriter, DeferredNow, Level, LogSpecification, Logger};
 use log::*;
@@ -156,7 +156,7 @@ pub fn init_logging(app: AppHandle) {
         .log_to_writer(Box::new(LogEmitter::new(app.clone())))
         .add_writer("plain", Box::new(LogPlain::new(app)))
         .start()
-        .map_err(|e| io::Error::new(ErrorKind::Other, e.to_string()));
+        .map_err(|e| io::Error::other(e.to_string()));
 }
 
 pub fn log_command(title: &str, prefix: Option<String>, mut cmd: Vec<String>) {

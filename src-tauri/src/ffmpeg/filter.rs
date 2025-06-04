@@ -345,6 +345,9 @@ async fn lower_third(
     let mut base_index = 0;
     let mut layer_index = 0;
 
+    // Regex to detect four digits before the file extension, e.g., image_0000.png
+    let re = Regex::new(r"(.*?)(\d{4})\.(\w+)$").unwrap();
+
     for lt in &template.lower_thirds {
         let p = PathBuf::from(&lt.path.replace("\\", "/"));
         let src = if p.is_relative() { path.join(p) } else { p };
@@ -360,37 +363,33 @@ async fn lower_third(
         let mut use_sequence = false;
 
         if is_image {
-            // Regex to detect four digits before the file extension, e.g., image_0000.png
-            let re = Regex::new(r"(.*?)(\d{4})\.(\w+)$").unwrap();
-
             if let Some(caps) = re.captures(&src.file_name().unwrap_or_default().to_string_lossy())
             {
                 let prefix = caps.get(1).unwrap().as_str();
                 let suffix = caps.get(3).unwrap().as_str();
 
                 let fallback_dir = PathBuf::from(".");
-                let dir = src.parent().unwrap_or_else(|| fallback_dir.as_path());
+                let dir = src.parent().unwrap_or(fallback_dir.as_path());
                 let mut files = fs::read_dir(dir).await.unwrap();
 
                 // Check if more files with the same prefix and sequential numbers exist
                 let mut count = 0;
                 while let Ok(Some(entry)) = files.next_entry().await {
                     let file_name = entry.file_name().to_string_lossy().to_string();
-                    if file_name.starts_with(prefix) && file_name.ends_with(&format!(".{}", suffix))
-                    {
-                        if Regex::new(&format!(
+                    if file_name.starts_with(prefix)
+                        && file_name.ends_with(&format!(".{}", suffix))
+                        && Regex::new(&format!(
                             r"{}(\d{{4}})\.{}",
                             regex::escape(prefix),
                             regex::escape(suffix)
                         ))
                         .unwrap()
                         .is_match(&file_name)
-                        {
-                            count += 1;
-                            if count >= 2 {
-                                use_sequence = true;
-                                break;
-                            }
+                    {
+                        count += 1;
+                        if count >= 2 {
+                            use_sequence = true;
+                            break;
                         }
                     }
                 }

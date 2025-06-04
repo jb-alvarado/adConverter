@@ -1,6 +1,6 @@
 [package]
 name = "adConverter"
-version = "0.8.1"
+version = "0.8.2"
 description = "Batch/Preset converter based on ffmpeg."
 authors = ["Jonathan Baecker <jonbae77@gmail.com>"]
 edition = "2021"
@@ -45,7 +45,7 @@ thiserror = "2"
 tokio = { version = "1", features = ["full"] }
 tokio-stream = "0.1"
 tokio-util = "0.7"
-ts-rs = { version = "10", features = ["chrono-impl", "no-serde-warnings", "serde-json-impl"] }
+ts-rs = { version = "11", features = ["chrono-impl", "no-serde-warnings", "serde-json-impl"] }
 
 [profile.release]
 opt-level = 3

@@ -205,7 +205,7 @@ async fn task_cancel(task: Task, state: State<'_, AppState>) -> Result<(), Proce
         if let Some(path) = preset.output_path {
             match delete_files(&path).await {
                 Ok(_) => info!("Delete unfinished file: {path:?}"),
-                Err(e) => error!("{}", e.to_string()),
+                Err(e) => error!("{e}"),
             };
         }
     }
