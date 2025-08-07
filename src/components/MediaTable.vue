@@ -263,7 +263,7 @@ function deleteEntry(task: Task) {
                             </Multiselect>
                         </div>
                     </th>
-                   <th class="p-0 w-[32px] border-r border-zinc-700">
+                    <th class="p-0 w-[32px] border-r border-zinc-700">
                         <div class="px-1 flex items-center w-[32px] h-[41px] border-b border-r border-zinc-700"></div>
                     </th>
                 </tr>
@@ -319,7 +319,11 @@ function deleteEntry(task: Task) {
                     </td>
                     <td class="p-0 border-r border-zinc-700">
                         <div class="p-1">
-                            <button class="btn btn-primary btn-sm rounded-xs p-1" @click="editTemplate(task)">
+                            <button
+                                class="btn btn-primary btn-sm rounded-xs p-1"
+                                @click="editTemplate(task)"
+                                :disabled="task.active || task.finished"
+                            >
                                 <i class="bi-collection text-xl"></i>
                             </button>
                         </div>
@@ -362,7 +366,12 @@ function deleteEntry(task: Task) {
                     </th>
                     <td class="p-0 border-r border-zinc-700">
                         <div class="p-1">
-                            <button class="btn btn-primary btn-sm rounded-xs p-1" @click="deleteEntry(task)" title="Remove">
+                            <button
+                                class="btn btn-primary btn-sm rounded-xs p-1"
+                                @click="deleteEntry(task)"
+                                title="Remove"
+                                :disabled="task.active || task.finished"
+                            >
                                 <i class="bi-x-lg"></i>
                             </button>
                         </div>

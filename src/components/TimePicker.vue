@@ -23,12 +23,14 @@
                     class="bg-base-300 hover:bg-base-300/50 px-1 leading-0 text-[9px] h-[15px] rounded-t-sm"
                     tabindex="0"
                     @click="countUp"
+                    :disabled="disabled"
                 >
                     <i class="bi-chevron-up" />
                 </button>
                 <button
                     class="bg-base-300 hover:bg-base-300/50 px-1 leading-3 pb-[2px] text-[9px] h-[15px] rounded-b-sm"
                     @click="countDown"
+                    :disabled="disabled"
                 >
                     <i class="bi-chevron-down" />
                 </button>
@@ -57,7 +59,7 @@ const props = defineProps({
     isNumber: {
         type: Boolean,
         default: true,
-    }
+    },
 })
 
 const timeInput = ref()
