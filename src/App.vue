@@ -159,7 +159,6 @@ listen<string>('transcript-finish', async (event: Event<string>) => {
 })
 
 listen<string>('logging', (event: Event<string>) => {
-    console.log(event.payload)
     store.logContent.push(event.payload)
 
     if (event.payload.includes('[ERROR]')) {

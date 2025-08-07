@@ -49,8 +49,8 @@
     --code-punctuation: #383a42;
     --code-attr: #e45649;
     --code-string: #50a14f;
-    --code-number': #986801;
-    --code-keyword': #0184bc;
+    --code-number: #986801;
+    --code-keyword: #0184bc;
 }
 
 @plugin "daisyui/theme" {

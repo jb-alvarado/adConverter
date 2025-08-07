@@ -152,6 +152,13 @@ function changePresets(task: Task | undefined) {
         }
     })
 }
+
+function deleteEntry(task: Task) {
+    const index = store.taskList.findIndex((t: Task) => t.path === task.path)
+    if (index !== -1) {
+        store.taskList.splice(index, 1)
+    }
+}
 </script>
 <template>
     <div
@@ -256,9 +263,9 @@ function changePresets(task: Task | undefined) {
                             </Multiselect>
                         </div>
                     </th>
-                    <!-- <th class="p-0 w-[41px] border-r border-zinc-700">
-                    <div class="px-1 flex items-center w-[41px] h-[41px] border-b border-r border-zinc-700"></div>
-                </th> -->
+                   <th class="p-0 w-[32px] border-r border-zinc-700">
+                        <div class="px-1 flex items-center w-[32px] h-[41px] border-b border-r border-zinc-700"></div>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -353,6 +360,13 @@ function changePresets(task: Task | undefined) {
                             </Multiselect>
                         </div>
                     </th>
+                    <td class="p-0 border-r border-zinc-700">
+                        <div class="p-1">
+                            <button class="btn btn-primary btn-sm rounded-xs p-1" @click="deleteEntry(task)" title="Remove">
+                                <i class="bi-x-lg"></i>
+                            </button>
+                        </div>
+                    </td>
                     <!-- <td class="p-0 border-r border-zinc-700">
                     <div class="p-1">
                         <button class="btn btn-primary btn-sm rounded-xs p-1" @click="editPublisher(task)">
