@@ -24,7 +24,7 @@ chrono = { version = "0.4", default-features = false, features = ["clock", "std"
 clap = { version = "4.3", features = ["derive", "env"] }
 derive_more = { version = "2", features = ["display"] }
 faccess = "0.2"
-flexi_logger = { version = "0.30", features = ["kv", "colors"] }
+flexi_logger = { version = "0.31", features = ["kv", "colors"] }
 lazy_static = "1.4"
 log = { version = "0.4", features = ["std", "serde", "kv", "kv_std", "kv_sval", "kv_serde"] }
 num-traits = "0.2"
