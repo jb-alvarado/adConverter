@@ -15,7 +15,11 @@
     "window-state:default",
     {
       "identifier": "http:default",
-      "allow": [{ "url": "https://*" }],
+      "allow": [
+        {
+          "url": "https://*"
+        }
+      ],
       "deny": []
     }
   ]

@@ -14,7 +14,7 @@ import GenericModal from '../components/GenericModal.vue'
 const { folderPath } = stringFormatter()
 const store = useStore()
 
-const config = new LazyStore('config.json', { autoSave: false })
+const config = new LazyStore('config.json', { autoSave: false, defaults: {} })
 
 const loginDefault = {
     url: '',

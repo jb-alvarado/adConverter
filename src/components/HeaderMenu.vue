@@ -2,15 +2,10 @@
 import { ref, watch, onBeforeMount } from 'vue'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { invoke } from '@tauri-apps/api/core'
-import { open } from '@tauri-apps/plugin-dialog'
 import { check, type Update } from '@tauri-apps/plugin-updater'
 import { storeToRefs } from 'pinia'
-import { cloneDeep } from 'lodash-es'
 
-import { stringFormatter } from '../composables/helper'
 import { useStore } from '../store/index.ts'
-
-const { folderPath, filename } = stringFormatter()
 
 const store = useStore()
 const { jobsDone } = storeToRefs(useStore())
@@ -24,6 +19,12 @@ const prop = defineProps({
             return {}
         },
     },
+    addFiles: {
+        type: Function,
+        default() {
+            return
+        },
+    }
 })
 
 onBeforeMount(async () => {
@@ -35,49 +36,6 @@ watch([jobsDone], () => {
         shutdown_system()
     }
 })
-
-async function addFiles() {
-    const path = store.taskList[store.taskList.length - 1]?.path
-    let options = {
-        multiple: true,
-        directory: false,
-        filters: [
-            {
-                name: 'File Types',
-                extensions: store.ALLOWED_EXTENSIONS,
-            },
-        ],
-    } as any
-
-    if (path) {
-        options.defaultPath = folderPath(path)
-    }
-
-    let files = (await open(options)) || []
-
-    for (const file of files) {
-        const task = cloneDeep(store.defaultTask)
-
-        if (store.taskList.some((task: Task) => task.path === file)) {
-            store.msgAlert('warning', `File: <strong>${filename(file)}</strong> already in list!`, 5)
-            continue
-        }
-
-        task.path = file
-
-        await invoke<Task>('file_drop', { task })
-            .then((task: Task) => {
-                if (!task.template) {
-                    task.template = cloneDeep(store.defaultTemplate)
-                }
-                store.taskList.push(task)
-            })
-            .catch((e) => {
-                store.msgAlert('error', e, 5)
-                prop.logger.error(e)
-            })
-    }
-}
 
 async function resetApp($event: any,) {
     store.taskList.length = 0

@@ -6,7 +6,7 @@ import { LazyStore } from '@tauri-apps/plugin-store'
 
 import { useStore } from '../store/index.ts'
 
-const config = new LazyStore('config.json', { autoSave: false })
+const config = new LazyStore('config.json', { autoSave: false, defaults: {} })
 const store = useStore()
 
 const appVersion = ref('')

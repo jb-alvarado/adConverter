@@ -43,7 +43,7 @@ onBeforeMount(async () => {
         log.error(e)
     })
 
-    const config = await load('config.json', { autoSave: false })
+    const config = await load('config.json', { autoSave: false, defaults: {} })
     store.showTranscript = (await config.get('transcript_cmd')) ? true : false
     store.transcriptLanguages = (await config.get('transcript_lang')) ?? []
     store.publishPreset = (await config.get('publish_preset')) ?? ''
@@ -277,14 +277,57 @@ function savePublisher(_save: boolean) {
 
     // store.currentPublisher = cloneDeep(task.template)
 }
+
+async function addFiles() {
+    const path = store.taskList[store.taskList.length - 1]?.path
+    let options = {
+        multiple: true,
+        directory: false,
+        filters: [
+            {
+                name: 'File Types',
+                extensions: store.ALLOWED_EXTENSIONS,
+            },
+        ],
+    } as any
+
+    if (path) {
+        options.defaultPath = folderPath(path)
+    }
+
+    let files = (await open(options)) || []
+
+    for (const file of files) {
+        const task = cloneDeep(store.defaultTask)
+
+        if (store.taskList.some((task: Task) => task.path === file)) {
+            store.msgAlert('warning', `File: <strong>${filename(file)}</strong> already in list!`, 5)
+            continue
+        }
+
+        task.path = file
+
+        await invoke<Task>('file_drop', { task })
+            .then((task: Task) => {
+                if (!task.template) {
+                    task.template = cloneDeep(store.defaultTemplate)
+                }
+                store.taskList.push(task)
+            })
+            .catch((e) => {
+                store.msgAlert('error', e, 5)
+                log.error(e)
+            })
+    }
+}
 </script>
 
 <template>
     <div class="flex flex-col h-screen justify-between select-none cursor-default overflow-hidden">
-        <HeaderMenu :logger="log" />
+        <HeaderMenu :logger="log" :add-files="addFiles" />
         <main class="mb-auto bg-base-300 w-full h-full overflow-x-hidden overflow-y-auto">
             <div class="relative bg-base-200 h-full">
-                <MediaTable :logger="log" :editTemplate="editTemplate" :editPublisher="editPublisher" />
+                <MediaTable :logger="log" :editTemplate="editTemplate" :editPublisher="editPublisher" :add-files="addFiles" />
                 <LogWindow v-if="store.openLog" />
                 <EditConfig v-if="store.showConfig" :logger="log" />
                 <EditPresets v-if="store.showPresets" :logger="log" />
