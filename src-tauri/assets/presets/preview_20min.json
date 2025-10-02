@@ -6,7 +6,9 @@
         "scale": "640:360",
         "fade": "out:st=1199:d=1.0"
     },
-    "filter_audio": {},
+    "filter_audio": {
+        "afade": "out:st=1199:d=1.0"
+    },
     "video": {
         "-t": 1200,
         "-pix_fmt": "yuv420p",
