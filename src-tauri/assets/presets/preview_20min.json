@@ -3,7 +3,8 @@
     "title": "Preview 20min",
     "tooltip": "20min encoding for previews",
     "filter_video": {
-        "scale": "640:360"
+        "scale": "640:360",
+        "fade": "out:st=1199:d=1.0"
     },
     "filter_audio": {},
     "video": {
