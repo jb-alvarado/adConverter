@@ -10,10 +10,11 @@ use std::{
 };
 
 use chrono::{Datelike, Local};
+use indicatif::ProgressBar;
 use log::*;
 use serde_json::Value;
 use shlex::split;
-use tauri::{AppHandle, Emitter, Manager, State};
+use tauri::{AppHandle, Emitter, State};
 use tokio::{
     fs,
     io::{AsyncBufReadExt, BufReader},
@@ -22,14 +23,14 @@ use tokio::{
 };
 
 use super::{analyze::Lufs, filter::filter_chain, probe::MediaProbe, FFmpegProgress};
+use crate::{transcript, vec_strings, AppState, ProcessError, Task};
 use crate::{
-    publisher,
     utils::{
         logging::{log_command, CommandLogger},
         Sources,
     },
+    Config,
 };
-use crate::{transcript, vec_strings, AppState, ProcessError, Task};
 
 #[cfg(target_os = "macos")]
 use crate::MACOS_PATH;
@@ -91,14 +92,15 @@ async fn calc_duration(task: &Task) -> (f64, f64, f64) {
     (duration_intro, duration, duration_outro)
 }
 
-async fn work(
-    app: AppHandle,
+pub async fn work(
+    app: Option<AppHandle>,
+    config: Config,
     child: Arc<Mutex<Option<Child>>>,
     is_running: Arc<AtomicBool>,
     task: Task,
+    progress_bar: Option<ProgressBar>,
 ) -> Result<(), ProcessError> {
-    let state = app.state::<AppState>().to_owned();
-    let config = state.config.lock().await.clone();
+    let app_some = app.is_some();
     let mut task_clone = task.clone();
     // let mut presets = mem::take(&mut task_clone.presets);
     let sources = Sources::new(&task.path).await;
@@ -118,10 +120,15 @@ async fn work(
         "-stats_period",
         "1",
         "-nostats",
-        "-v",
-        "level+info",
-        "-y"
+        "-y",
+        "-v"
     ];
+
+    if app.is_some() {
+        task_args.push("level+info".to_string());
+    } else {
+        task_args.push("level+warning".to_string());
+    }
 
     let seek = if task.r#in > 0.0 {
         vec_strings!["-ss", task.r#in]
@@ -169,7 +176,7 @@ async fn work(
             is_running.clone(),
             child.clone(),
             src_cmd,
-            config.lufs,
+            config.lufs.clone(),
             cmd_logger.clone(),
         )
         .await?
@@ -206,6 +213,7 @@ async fn work(
         let title = preset.title.clone();
         let finished = preset.finished.clone();
         let mut cmd_logger = cmd_logger.clone();
+        let progress_clone = progress_bar.clone();
 
         let parent_path = path.parent().expect("Path should have a parent");
         let file_stem = path
@@ -312,7 +320,10 @@ async fn work(
             args.clone(),
         );
 
-        app.emit("preset-start", &preset).expect("Emit Preset");
+        match &app {
+            Some(a) => a.emit("preset-start", &preset).expect("Emit Preset"),
+            None => (),
+        };
 
         let mut cmd = Command::new("ffmpeg");
 
@@ -339,7 +350,9 @@ async fn work(
                     break;
                 }
 
-                if !IGNORE_LINES.iter().any(|&s| line.contains(s)) {
+                if !IGNORE_LINES.iter().any(|&s| line.contains(s))
+                    && (app_some || !line.contains("[info]"))
+                {
                     cmd_logger.log(Some("[ffmpeg]"), &line);
                 }
             }
@@ -347,6 +360,12 @@ async fn work(
 
         let mut stat_map = HashMap::new();
         stat_map.insert("title".to_string(), title.clone());
+
+        if let Some(ref current) = progress_clone {
+            println!();
+            current.set_prefix("Current");
+            // current.finish_with_message("all jobs started");
+        }
 
         let stdout_task = tokio::spawn(async move {
             let mut reader = BufReader::new(stdout).lines();
@@ -371,9 +390,23 @@ async fn work(
                     stat_map.insert("title".to_string(), title.clone());
 
                     if &process != "end" {
-                        app_clone1
-                            .emit("preset-progress", &progress)
-                            .expect("Emit progress");
+                        match &app_clone1 {
+                            Some(a) => a.emit("preset-progress", &progress).expect("Emit progress"),
+
+                            None => {
+                                if let Some(ref current) = progress_clone {
+                                    let msg = if progress.fps > 0.0 {
+                                        format!("{} FPS", progress.fps)
+                                    } else if progress.speed > 0.0 {
+                                        format!("{} Speed", progress.speed)
+                                    } else {
+                                        String::new()
+                                    };
+                                    current.set_message(msg);
+                                    current.set_position(progress.elapsed_pct as u64);
+                                }
+                            }
+                        };
                     }
                 }
             }
@@ -386,13 +419,21 @@ async fn work(
             proc.wait().await?;
         }
 
+        if let Some(ref current) = progress_bar {
+            current.finish_with_message("done...");
+        }
+
         info!("Copy output file to: {output:?}");
 
         fs::copy(&temp_out, output).await?;
         fs::remove_file(temp_out).await?;
 
         finished.store(true, Ordering::SeqCst);
-        app.emit("preset-finish", &preset).expect("Emit progress");
+
+        match &app {
+            Some(a) => a.emit("preset-finish", &preset).expect("Emit progress"),
+            None => (),
+        };
     }
 
     if let Some(src) = transcript_src {
@@ -403,6 +444,7 @@ async fn work(
         {
             transcript::run(
                 app.clone(),
+                config,
                 child.clone(),
                 is_running.clone(),
                 cmd_logger.clone(),
@@ -415,9 +457,9 @@ async fn work(
 
     *child.lock().await = None;
 
-    if task.publish.is_some() && is_running.load(Ordering::SeqCst) {
-        publisher::peertube::publish(app, &task_clone, is_running).await?;
-    }
+    // if task.publish.is_some() && is_running.load(Ordering::SeqCst) {
+    //     publisher::peertube::publish(app, &task_clone, is_running).await?;
+    // }
 
     Ok(())
 }
@@ -427,6 +469,8 @@ pub async fn run(
     state: State<'_, AppState>,
     mut rx: Receiver<Task>,
 ) -> Result<(), ProcessError> {
+    let config = state.config.lock().await.clone();
+
     while let Some(task) = rx.recv().await {
         task.active.store(true, Ordering::SeqCst);
 
@@ -434,10 +478,12 @@ pub async fn run(
             app.emit("task-active", &task)?;
 
             work(
-                app.clone(),
+                Some(app.clone()),
+                config.clone(),
                 state.encoder.clone(),
                 state.run.clone(),
                 task.clone(),
+                None,
             )
             .await?;
             task.active.store(false, Ordering::SeqCst);

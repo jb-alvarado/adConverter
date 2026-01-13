@@ -8,7 +8,7 @@ use std::{
     },
 };
 
-use tauri::{AppHandle, Emitter, Manager};
+use tauri::{AppHandle, Emitter};
 use tokio::{
     fs,
     io::{AsyncBufReadExt, BufReader},
@@ -21,14 +21,15 @@ mod process;
 use crate::{
     transcript::process::optimize_vtt,
     utils::logging::{log_command, CommandLogger},
-    AppState, ProcessError, Task,
+    Config, ProcessError, Task,
 };
 
 #[cfg(target_os = "macos")]
 use crate::MACOS_PATH;
 
 pub async fn run(
-    app: AppHandle,
+    app: Option<AppHandle>,
+    config: Config,
     child: Arc<Mutex<Option<Child>>>,
     is_running: Arc<AtomicBool>,
     mut cmd_logger: CommandLogger,
@@ -36,9 +37,8 @@ pub async fn run(
     task: &Task,
 ) -> Result<(), ProcessError> {
     let app_clone = app.clone();
-    let state = app.state::<AppState>().to_owned();
     let running_clone = is_running.clone();
-    let mut transcript_cmd = state.config.lock().await.transcript_cmd.clone();
+    let mut transcript_cmd = config.transcript_cmd.clone();
     let lang = task.transcript.as_ref().map_or("auto", |v| v);
     let file_name = source.file_name().unwrap();
     let source_str = source.to_string_lossy().to_string();
@@ -87,9 +87,11 @@ pub async fn run(
     #[cfg(target_os = "windows")]
     cmd.creation_flags(0x08000000);
 
-    app_clone
-        .emit("transcript-start", 0)
-        .expect("Emit progress");
+    match &app {
+        Some(a) => a.emit("transcript-start", 0).expect("Emit progress"),
+        // TODO: handle status in cli mode
+        None => (),
+    };
 
     let mut proc = cmd.spawn()?;
 
@@ -129,9 +131,14 @@ pub async fn run(
                 break;
             }
 
-            app_clone
-                .emit("transcript-progress", &String::from_utf8_lossy(&buffer))
-                .expect("Emit progress");
+            match &app_clone {
+                Some(a) => a
+                    .emit("transcript-progress", &String::from_utf8_lossy(&buffer))
+                    .expect("Emit progress"),
+                // TODO: handle status in cli mode
+                None => (),
+            };
+
             buffer.clear();
         }
     });
@@ -153,7 +160,11 @@ pub async fn run(
         fs::remove_file(temp_out).await?;
     }
 
-    app.emit("transcript-finish", lang).expect("Emit progress");
+    match &app {
+        Some(a) => a.emit("transcript-finish", lang).expect("Emit progress"),
+        // TODO: handle status in cli mode
+        None => (),
+    };
 
     Ok(())
 }

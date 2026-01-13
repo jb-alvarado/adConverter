@@ -10,6 +10,9 @@ pub enum ProcessError {
     Custom(String),
 
     #[error("{0}")]
+    Module(String),
+
+    #[error("{0}")]
     Tauri(String),
 
     #[error("IO error: {0}")]
@@ -100,6 +103,18 @@ impl From<tauri_plugin_http::reqwest::Error> for ProcessError {
 impl From<Box<dyn std::any::Any + std::marker::Send>> for ProcessError {
     fn from(err: Box<dyn std::any::Any + std::marker::Send>) -> Self {
         Self::Thread(format!("{err:?}"))
+    }
+}
+
+impl From<Box<dyn std::error::Error>> for ProcessError {
+    fn from(err: Box<dyn std::error::Error>) -> Self {
+        Self::Thread(format!("{err:?}"))
+    }
+}
+
+impl From<inquire::InquireError> for ProcessError {
+    fn from(err: inquire::InquireError) -> ProcessError {
+        Self::Module(err.to_string())
     }
 }
 

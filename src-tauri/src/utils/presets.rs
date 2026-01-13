@@ -4,12 +4,10 @@ use std::{
     sync::{atomic::AtomicBool, Arc},
 };
 
-use path_clean::PathClean;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_with::serde_as;
 use tauri::{AppHandle, Manager};
-use tauri_plugin_cli::CliExt;
 use tokio::{fs, io::AsyncWriteExt};
 use ts_rs::TS;
 
@@ -54,30 +52,13 @@ impl Preset {
     }
 }
 
-pub fn preset_path(app: &AppHandle) -> Result<PathBuf, Box<dyn std::error::Error>> {
-    if let Ok(Some(presets_path)) = app.cli().matches().and_then(|m| {
-        m.args
-            .get("presets-path")
-            .map(|arg| Ok(arg.value.clone()))
-            .transpose()
-    }) {
-        if let Some(p) = presets_path.as_str() {
-            let path = PathBuf::from(p);
-            let absolute_path = if path.is_absolute() {
-                path.clone()
-            } else {
-                env::current_dir()?.join(path)
-            }
-            .clean();
-
-            return Ok(absolute_path);
-        }
-    }
-
+pub fn preset_path(app: &Option<AppHandle>) -> Result<PathBuf, Box<dyn std::error::Error>> {
     let mut directory = if cfg!(debug_assertions) {
         env::current_dir()?.join("assets")
+    } else if let Some(a) = app {
+        a.path().app_data_dir()?
     } else {
-        app.path().app_data_dir()?
+        dirs::data_dir().unwrap_or(env::current_dir()?)
     };
 
     directory = directory.join("presets");
@@ -85,7 +66,9 @@ pub fn preset_path(app: &AppHandle) -> Result<PathBuf, Box<dyn std::error::Error
     Ok(directory)
 }
 
-pub async fn collect_presets(app: &AppHandle) -> Result<Vec<Preset>, Box<dyn std::error::Error>> {
+pub async fn collect_presets(
+    app: &Option<AppHandle>,
+) -> Result<Vec<Preset>, Box<dyn std::error::Error>> {
     let path = preset_path(app)?;
     let mut entries = fs::read_dir(path).await?;
     let mut presets = vec![];

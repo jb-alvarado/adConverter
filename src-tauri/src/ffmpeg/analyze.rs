@@ -57,7 +57,7 @@ pub struct Lufs {
 
 impl Lufs {
     pub async fn new(
-        app: AppHandle,
+        app: Option<AppHandle>,
         duration: f64,
         is_running: Arc<AtomicBool>,
         child: Arc<Mutex<Option<Child>>>,
@@ -167,9 +167,11 @@ impl Lufs {
                     stat_map.clear();
                     stat_map.insert("title".to_string(), "LUFS".to_string());
 
-                    app_clone1
-                        .emit("lufs-progress", &progress)
-                        .expect("Emit progress");
+                    match &app_clone1 {
+                        Some(app) => app.emit("lufs-progress", &progress).expect("Emit progress"),
+                        // TODO: handle status in cli mode
+                        None => (),
+                    }
                 }
             }
         });

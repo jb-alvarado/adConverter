@@ -334,10 +334,10 @@ async function addFiles() {
             </div>
         </main>
 
-        <footer class="relative z-30 h-[103px]">
-            <div v-if="!store.openLog" class="absolute w-full flex justify-center -top-[12px]">
+        <footer class="relative z-30 h-25.75">
+            <div v-if="!store.openLog" class="absolute w-full flex justify-center -top-3">
                 <button
-                    class="w-20 h-[12px] min-h-[12px] btn bg-base-100 rounded-none border-b-0 hover:border-base-content/30 rounded-t-box border-t border-base-content/30 hover:text-base-content/50 pt-1"
+                    class="w-20 h-3 min-h-3 btn bg-base-100 rounded-none border-b-0 hover:border-base-content/30 rounded-t-box border-t border-base-content/30 hover:text-base-content/50 pt-1"
                     title="Open Logging"
                     @click="store.openLog = true"
                 >
@@ -386,11 +386,11 @@ async function addFiles() {
                         <div class="p-4 flex flex-col gap-1 w-[calc(100%-102px)]">
                             <div class="flex items-center">
                                 <div
-                                    class="grow font-semibold truncate pr-2 h-[25px]"
+                                    class="grow font-semibold truncate pr-2 h-6.25"
                                     v-html="store.processMsg + store.processPath"
                                 />
 
-                                <label class="label cursor-pointer pr-0 pt-0 pb-[5px]" :disabled="store.jobInProcess">
+                                <label class="label cursor-pointer pr-0 pt-0 pb-1.25" :disabled="store.jobInProcess">
                                     <span class="label-text mr-2">Subfolder</span>
                                     <input
                                         type="checkbox"

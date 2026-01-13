@@ -1,0 +1,67 @@
+use std::sync::{atomic::AtomicBool, Arc};
+
+use dirs::data_dir;
+use serde_json;
+use tokio::{fs::File, io::AsyncReadExt};
+
+use crate::{
+    cli::{args::Args, IDENTIFIER},
+    collect_presets,
+    ffmpeg::probe::MediaProbe,
+    utils::errors::ProcessError,
+    Config, Task,
+};
+
+pub async fn read_config() -> Result<Config, ProcessError> {
+    let config_path = data_dir()
+        .expect("Data dir")
+        .join(IDENTIFIER)
+        .join("config.json");
+
+    if !config_path.is_file() {
+        return Err(ProcessError::Custom("No config file found!".to_string()));
+    }
+
+    let mut file = File::open(config_path).await?;
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer).await?;
+
+    let config: Config = serde_json::from_slice(&buffer)?;
+
+    Ok(config)
+}
+
+pub async fn create_tasks(args: Args) -> Vec<Task> {
+    let preset_list = collect_presets(&None).await.unwrap_or_default();
+    let selected_presets = args.presets.unwrap_or_default();
+    let mut presets = vec![];
+    let mut tasks = vec![];
+
+    for preset in preset_list {
+        if selected_presets.contains(&preset.name) {
+            presets.push(preset);
+        }
+    }
+
+    for file in args.files {
+        let task = Task {
+            path: file.clone(),
+            r#in: 0.0,
+            out: 0.0,
+            fade: args.fade.unwrap_or_default(),
+            lufs: args.lufs.unwrap_or_default(),
+            transcript: args.lang.clone(),
+            probe: MediaProbe::new(file).await.unwrap_or_default(),
+            presets: presets.clone(),
+            template: None,
+            target: None,
+            target_subfolder: false,
+            publish: None,
+            active: Arc::new(AtomicBool::new(false)),
+            finished: Arc::new(AtomicBool::new(false)),
+        };
+        tasks.push(task);
+    }
+
+    tasks
+}

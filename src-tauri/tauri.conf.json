@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "adConverter",
-  "version": "0.10.3",
+  "version": "0.11.0",
   "identifier": "com.adconverter",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -56,15 +56,15 @@
       "description": "adConverter input arguments",
       "args": [
         {
+          "name": "cli",
+          "description": "Run adConverter in CLI mode.",
+          "takesValue": false
+        },
+        {
           "name": "files",
           "description": "Files to process",
           "index": 1,
           "multiple": true,
-          "takesValue": true
-        },
-        {
-          "name": "presets-path",
-          "description": "Path to presets folder",
           "takesValue": true
         }
       ]

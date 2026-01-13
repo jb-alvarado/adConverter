@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use ts_rs::TS;
 
-pub mod peertube;
+// pub mod peertube;
 
 #[serde_as]
 #[derive(Clone, Debug, Default, Deserialize, Serialize, TS)]

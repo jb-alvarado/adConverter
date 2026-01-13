@@ -27,6 +27,7 @@ use tokio::{
 };
 use ts_rs::TS;
 
+pub mod cli;
 mod ffmpeg;
 mod macros;
 mod publisher;
@@ -51,30 +52,30 @@ const MACOS_PATH: &str = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
 #[serde_as]
 #[derive(Clone, Debug, Default, Deserialize, Serialize, TS)]
 #[ts(export, export_to = "backend.d.ts")]
-struct Task {
-    path: String,
-    r#in: f64,
-    out: f64,
-    fade: bool,
-    lufs: bool,
+pub struct Task {
+    pub path: String,
+    pub r#in: f64,
+    pub out: f64,
+    pub fade: bool,
+    pub lufs: bool,
     #[serde(default)]
-    transcript: Option<String>,
+    pub transcript: Option<String>,
     #[serde(default)]
-    probe: MediaProbe,
-    presets: Vec<Preset>,
+    pub probe: MediaProbe,
+    pub presets: Vec<Preset>,
     #[serde(default)]
-    template: Option<Template>,
+    pub template: Option<Template>,
     #[ts(type = "string")]
     #[serde_as(as = "NoneAsEmptyString")]
-    target: Option<String>,
+    pub target: Option<String>,
     #[serde(default)]
-    target_subfolder: bool,
+    pub target_subfolder: bool,
     #[serde(default)]
-    publish: Option<Publish>,
+    pub publish: Option<Publish>,
     #[ts(type = "bool")]
-    active: Arc<AtomicBool>,
+    pub active: Arc<AtomicBool>,
     #[ts(type = "bool")]
-    finished: Arc<AtomicBool>,
+    pub finished: Arc<AtomicBool>,
 }
 
 #[derive(Clone)]
@@ -87,7 +88,7 @@ struct AppState {
 
 #[derive(Debug, Clone, Default, Deserialize, Serialize, TS)]
 #[ts(export, export_to = "backend.d.ts")]
-struct Config {
+pub struct Config {
     pub copyright: String,
     pub lufs: LufsConfig,
     pub transcript_cmd: String,
@@ -98,16 +99,26 @@ struct Config {
     pub publisher: Option<Value>,
 }
 
+impl Config {
+    pub fn code_from(self, lang: &str) -> String {
+        self.transcript_lang
+            .iter()
+            .find(|l| l.name == lang)
+            .map(|l| l.code.clone())
+            .unwrap_or_default()
+    }
+}
+
 #[derive(Debug, Clone, Default, Deserialize, Serialize, TS)]
 #[ts(export, export_to = "backend.d.ts")]
-struct LangConfig {
+pub struct LangConfig {
     pub name: String,
     pub code: String,
 }
 
 #[derive(Debug, Clone, Default, Deserialize, Serialize, TS)]
 #[ts(export, export_to = "backend.d.ts")]
-struct LufsConfig {
+pub struct LufsConfig {
     pub i: f64,
     pub lra: f64,
     pub tp: f64,
@@ -153,7 +164,7 @@ impl Drop for AppState {
 
 #[tauri::command]
 async fn presets_get(app: AppHandle) -> tauri::Result<Vec<Preset>> {
-    let presets = collect_presets(&app)
+    let presets = collect_presets(&Some(app))
         .await
         .map_err(|e| tauri::Error::AssetNotFound(e.to_string()))?;
 
@@ -359,7 +370,7 @@ pub async fn run() -> tauri::Result<()> {
                 .restore_state(StateFlags::SIZE)
                 .expect("Restore window size");
 
-            init_logging(app_handle.clone());
+            let _logger = init_logging(Some(app_handle.clone()));
 
             tokio::spawn(async move {
                 let state = app_handle_clone.state::<AppState>().to_owned();
