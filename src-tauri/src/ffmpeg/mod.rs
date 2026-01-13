@@ -16,7 +16,7 @@ pub struct FFmpegProgress {
     pub bitrate: String,
     pub total_size: u64,
     pub elapsed_sec: f64,
-    pub elapsed_pct: i64,
+    pub elapsed_pct: u64,
     pub speed: f32,
     pub progress: String,
 }
@@ -41,7 +41,7 @@ impl FFmpegProgress {
                 .and_then(|v| v.parse().ok())
                 .unwrap_or_default(),
             elapsed_sec: seconds,
-            elapsed_pct: (seconds * 100.0 / duration).round() as i64,
+            elapsed_pct: (seconds * 100.0 / duration).round() as u64,
             speed: map
                 .get("speed")
                 .and_then(|v| v.trim_end_matches('x').parse().ok())

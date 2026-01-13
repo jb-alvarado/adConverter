@@ -407,6 +407,8 @@ pub async fn work(
                                 }
                             }
                         };
+                    } else if let Some(ref current) = progress_clone {
+                        current.finish_with_message("done...");
                     }
                 }
             }
@@ -419,11 +421,7 @@ pub async fn work(
             proc.wait().await?;
         }
 
-        if let Some(ref current) = progress_bar {
-            current.finish_with_message("done...");
-        }
-
-        info!("Copy output file to: {output:?}");
+        // info!("Copy output file to: {output:?}");
 
         fs::copy(&temp_out, output).await?;
         fs::remove_file(temp_out).await?;

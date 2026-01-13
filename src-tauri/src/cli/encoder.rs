@@ -52,11 +52,15 @@ pub async fn run() -> Result<(), ProcessError> {
         )
         .await?;
 
+        let prog = ((i + 1) * 100 / task_length) as u64;
+
+        current.finish_with_message("done...");
         all.set_prefix("OverAll");
-        all.set_position(((i + 1) * 100 / task_length) as u64);
+        all.set_position(prog);
     }
 
     all.finish_with_message("all jobs done");
+    println!("\n");
     multi_prog.clear().unwrap();
 
     Ok(())
