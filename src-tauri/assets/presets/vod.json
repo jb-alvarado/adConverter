@@ -16,7 +16,7 @@
     },
     "audio": {
         "-c:a": "libfdk_aac",
-        "-vbr": 4,
+        "-b:a": "128k",
         "-ar": 44100
     },
     "container_video": "mp4",

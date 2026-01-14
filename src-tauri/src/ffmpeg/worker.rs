@@ -178,6 +178,7 @@ pub async fn work(
             src_cmd,
             config.lufs.clone(),
             cmd_logger.clone(),
+            progress_bar.clone(),
         )
         .await?
     } else {
@@ -351,6 +352,8 @@ pub async fn work(
                 }
 
                 if !IGNORE_LINES.iter().any(|&s| line.contains(s))
+                    && !line.is_empty()
+                    && !line.starts_with("encoded")
                     && (app_some || !line.contains("[info]"))
                 {
                     cmd_logger.log(Some("[ffmpeg]"), &line);
@@ -362,9 +365,7 @@ pub async fn work(
         stat_map.insert("title".to_string(), title.clone());
 
         if let Some(ref current) = progress_clone {
-            println!();
-            current.set_prefix("Current");
-            // current.finish_with_message("all jobs started");
+            current.set_prefix("Encode ");
         }
 
         let stdout_task = tokio::spawn(async move {
@@ -448,6 +449,7 @@ pub async fn work(
                 cmd_logger.clone(),
                 &src,
                 &task,
+                progress_bar,
             )
             .await?;
         }

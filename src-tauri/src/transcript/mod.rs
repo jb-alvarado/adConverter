@@ -8,6 +8,7 @@ use std::{
     },
 };
 
+use indicatif::ProgressBar;
 use tauri::{AppHandle, Emitter};
 use tokio::{
     fs,
@@ -35,7 +36,9 @@ pub async fn run(
     mut cmd_logger: CommandLogger,
     source: &Path,
     task: &Task,
+    progress_bar: Option<ProgressBar>,
 ) -> Result<(), ProcessError> {
+    let progress_clone = progress_bar.clone();
     let app_clone = app.clone();
     let running_clone = is_running.clone();
     let mut transcript_cmd = config.transcript_cmd.clone();
@@ -89,7 +92,6 @@ pub async fn run(
 
     match &app {
         Some(a) => a.emit("transcript-start", 0).expect("Emit progress"),
-        // TODO: handle status in cli mode
         None => (),
     };
 
@@ -113,10 +115,21 @@ pub async fn run(
                 break;
             }
 
-            cmd_logger.log(Some("[transcript]"), &String::from_utf8_lossy(&buffer));
+            let log_line = String::from_utf8_lossy(&buffer);
+
+            if log_line.contains("Transcription completed") {
+                if let Some(ref current) = progress_clone {
+                    current.set_position(100);
+                    current.finish_with_message("Transcription done...");
+                }
+            }
+
+            cmd_logger.log(Some("[transcript]"), &log_line.trim());
             buffer.clear();
         }
     });
+
+    let mut set_prefix = true;
 
     let stdout_task = tokio::spawn(async move {
         let mut reader = BufReader::new(stdout);
@@ -131,12 +144,28 @@ pub async fn run(
                 break;
             }
 
+            let progress = String::from_utf8_lossy(&buffer)
+                .trim()
+                .parse::<u64>()
+                .unwrap_or_default();
+
             match &app_clone {
                 Some(a) => a
-                    .emit("transcript-progress", &String::from_utf8_lossy(&buffer))
+                    .emit("transcript-progress", &progress)
                     .expect("Emit progress"),
-                // TODO: handle status in cli mode
-                None => (),
+                None => {
+                    if let Some(ref current) = progress_bar {
+                        if set_prefix {
+                            current.set_prefix("Dictate");
+                            current.set_message("Transcribe audio");
+                            set_prefix = false;
+                        }
+
+                        if progress < 100 {
+                            current.set_position(progress);
+                        }
+                    }
+                }
             };
 
             buffer.clear();
@@ -162,7 +191,6 @@ pub async fn run(
 
     match &app {
         Some(a) => a.emit("transcript-finish", lang).expect("Emit progress"),
-        // TODO: handle status in cli mode
         None => (),
     };
 

@@ -7,10 +7,9 @@ import subprocess
 import sys
 import threading
 import time
+import torch
 from argparse import ArgumentParser
 from pathlib import Path
-
-import torch
 from ctranslate2 import get_supported_compute_types
 
 if platform.system() == "Darwin":
@@ -36,6 +35,12 @@ stdin_parser.add_argument(
         supported_compute_types}",
     default="default",
     choices=supported_compute_types
+)
+stdin_parser.add_argument(
+    "-d",
+    metavar="device",
+    help="Set device for whisper (cuda or cpu)",
+    default=None
 )
 stdin_parser.add_argument(
     "-l",
@@ -131,14 +136,20 @@ def unlock_video(video_path: Path):
 
 def transcribe_video(video_path: Path):
     lang = ARGS.l
+    dev = None
 
     if lang.lower() == "auto":
         lang = None
 
+    if ARGS.d:
+        dev = ARGS.d
+    else:
+        dev = "cuda" if torch.cuda.is_available() else "cpu"
+
     # Load Faster Whisper model (e.g., use GPU if available)
     model = WhisperModel(
         MODEL_NAME,
-        device="cuda" if torch.cuda.is_available() else "cpu",
+        device=dev,
         compute_type=ARGS.c,
         download_root=Path.home().joinpath('.cache/huggingface/hub')
     )
@@ -269,7 +280,7 @@ if __name__ == "__main__":
 
     if platform.system() == "Darwin":
         log.info("Whisper will run with MLX support")
-    elif torch.cuda.is_available():
+    elif (ARGS.d is None or ARGS.d == "cuda") and torch.cuda.is_available():
         log.info("Whisper will run with CUDA on GPU")
     else:
         log.warning("Whisper will run on CPU")

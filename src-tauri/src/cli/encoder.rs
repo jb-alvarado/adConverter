@@ -25,6 +25,7 @@ pub async fn run() -> Result<(), ProcessError> {
         exit(1);
     }
 
+    // let preset_length = args.presets.as_ref().unwrap_or(&vec![]).len();
     let tasks = create_tasks(args).await;
     let task_length = tasks.len();
 
@@ -41,6 +42,8 @@ pub async fn run() -> Result<(), ProcessError> {
     let all = multi_prog.add(ProgressBar::new(n));
     all.set_style(sty.clone());
 
+    // let length = tasks.len() * preset_length;
+
     for (i, task) in tasks.iter().enumerate() {
         work(
             None,
@@ -54,6 +57,7 @@ pub async fn run() -> Result<(), ProcessError> {
 
         let prog = ((i + 1) * 100 / task_length) as u64;
 
+        current.set_prefix("Current");
         current.finish_with_message("done...");
         all.set_prefix("OverAll");
         all.set_position(prog);

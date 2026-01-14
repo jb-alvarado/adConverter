@@ -7,6 +7,7 @@ use std::{
     },
 };
 
+use indicatif::ProgressBar;
 use serde::de::Error;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::Value;
@@ -64,7 +65,9 @@ impl Lufs {
         src_cmd: Vec<String>,
         lufs_c: LufsConfig,
         mut cmd_logger: CommandLogger,
+        progress_bar: Option<ProgressBar>,
     ) -> Result<Self, ProcessError> {
+        let progress_clone = progress_bar.clone();
         let running = is_running.clone();
         let running_clone = is_running.clone();
         let app_clone1 = app.clone();
@@ -80,10 +83,15 @@ impl Lufs {
             "-stats_period",
             "1",
             "-nostats",
-            "-v",
-            "level+info",
-            "-y"
+            "-y",
+            "-v"
         ];
+
+        if app.is_some() {
+            args.push("level+info".to_string());
+        } else {
+            args.push("level+warning".to_string());
+        }
 
         args.extend(src_cmd);
         args.extend(vec_strings![
@@ -149,6 +157,10 @@ impl Lufs {
         let mut stat_map = HashMap::new();
         stat_map.insert("title".to_string(), "LUFS".to_string());
 
+        if let Some(ref current) = progress_bar {
+            current.set_prefix("Analyze");
+        }
+
         let stdout_task = tokio::spawn(async move {
             let mut reader = BufReader::new(stdout).lines();
 
@@ -169,8 +181,19 @@ impl Lufs {
 
                     match &app_clone1 {
                         Some(app) => app.emit("lufs-progress", &progress).expect("Emit progress"),
-                        // TODO: handle status in cli mode
-                        None => (),
+                        None => {
+                            if let Some(ref current) = progress_bar {
+                                let msg = if progress.fps > 0.0 {
+                                    format!("Analyzing LUFS {} FPS", progress.fps)
+                                } else if progress.speed > 0.0 {
+                                    format!("Analyzing LUFS {} Speed", progress.speed)
+                                } else {
+                                    String::new()
+                                };
+                                current.set_message(msg);
+                                current.set_position(progress.elapsed_pct as u64);
+                            }
+                        }
                     }
                 }
             }
@@ -181,6 +204,10 @@ impl Lufs {
 
         if let Some(proc) = child.lock().await.as_mut() {
             proc.wait().await?;
+        }
+
+        if let Some(ref current) = progress_clone {
+            current.finish_with_message("Analyzing done...");
         }
 
         *child.lock().await = None;
