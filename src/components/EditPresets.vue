@@ -135,7 +135,7 @@ async function savePreset() {
 <template>
     <div class="absolute z-40 top-0 left-0 w-full h-full bg-base-300 p-4">
         <div class="h-full max-h-[calc(100%-42px)]">
-            <div class="flex gap-2 bg-base-200 pl-3 pr-[2px] py-[2px] items-center">
+            <div class="flex gap-2 bg-base-200 pl-3 pr-0.5 py-0.5 items-center">
                 <div ref="handler" class="font-bold text-lg truncate flex-1 w-0">Presets</div>
                 <button class="btn btn-sm w-8 h-8 rounded-full text-center" @click="close()">
                     <i class="bi bi-x-lg leading-3" />
@@ -172,7 +172,7 @@ async function savePreset() {
                         </div>
                     </div>
                 </div>
-                <div class="h-[32px] flex">
+                <div class="h-8 flex">
                     <div class="grow">
                         <button class="btn btn-sm w-28 rounded-xs" title="Add preset" @click="addPreset()">+</button>
                     </div>

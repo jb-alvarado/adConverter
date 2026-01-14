@@ -75,11 +75,11 @@ watch([width, height], () => {
     >
         <div
             ref="genericModal"
-            class="fixed flex flex-col bg-base-100 min-w-[600px] min-h-[190px] w-auto max-w-[90%] rounded-xs shadow-xl my-auto"
+            class="fixed flex flex-col bg-base-100 min-w-150 min-h-47.5 w-auto max-w-[90%] rounded-xs shadow-xl my-auto"
             :style="style"
         >
             <div class="inline-block">
-                <div class="flex gap-2 bg-base-200 pl-3 pr-[2px] py-[2px] items-center">
+                <div class="flex gap-2 bg-base-200 pl-3 pr-0.5 py-0.5 items-center">
                     <div ref="handler" class="font-bold text-lg truncate flex-1 w-0">{{ title }}</div>
                     <button class="btn btn-sm w-8 h-8 rounded-full text-center" @click="modalAction(false)">
                         <i class="bi bi-x-lg leading-3" />

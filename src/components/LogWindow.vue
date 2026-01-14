@@ -45,7 +45,7 @@ watch([logContent.value], () => {
                     <ul
                         id="logContainer"
                         v-bind="wrapperProps"
-                        class="h-full p-1 select-text text-base-content/90 font-['Roboto_Mono'] text-sm font-[300] whitespace-pre cursor-text"
+                        class="h-full p-1 select-text text-base-content/90 font-['Roboto_Mono'] text-sm font-light whitespace-pre cursor-text"
                     >
                         <li v-for="line in list" :key="line.index" v-html="line.data" style="height: 22px" />
                     </ul>

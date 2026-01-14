@@ -234,29 +234,29 @@ function changePresets(task: Task | undefined) {
                     <tr class="bg-base-200">
                         <th class="p-0 w-auto border-r h-full border-zinc-700">
                             <div
-                                class="px-2 flex items-center w-[calc(100%+1px)] h-[41px] border-b border-r border-zinc-700"
+                                class="px-2 flex items-center w-[calc(100%+1px)] h-10.25 border-b border-r border-zinc-700"
                             >
                                 File
                             </div>
                         </th>
-                        <th class="p-0 w-[88px] border-r border-zinc-700">
-                            <div class="px-2 flex items-center w-[88px] h-[41px] border-b border-r border-zinc-700">
+                        <th class="p-0 w-22 border-r border-zinc-700">
+                            <div class="px-2 flex items-center w-22 h-10.25 border-b border-r border-zinc-700">
                                 Duration
                             </div>
                         </th>
-                        <th class="p-0 w-[122px] border-r border-zinc-700">
-                            <div class="px-2 flex items-center w-[122px] h-[41px] border-b border-r border-zinc-700">
+                        <th class="p-0 w-30.5 border-r border-zinc-700">
+                            <div class="px-2 flex items-center w-30.5 h-10.25 border-b border-r border-zinc-700">
                                 In
                             </div>
                         </th>
-                        <th class="p-0 w-[122px] border-r border-zinc-700">
-                            <div class="px-1 flex items-center w-[122px] h-[41px] border-b border-r border-zinc-700">
+                        <th class="p-0 w-30.5 border-r border-zinc-700">
+                            <div class="px-1 flex items-center w-30.5 h-10.25 border-b border-r border-zinc-700">
                                 Out
                             </div>
                         </th>
-                        <th class="p-0 w-[76px] border-r border-zinc-700">
+                        <th class="p-0 w-19 border-r border-zinc-700">
                             <label
-                                class="label cursor-pointer max-w-xs px-2 h-[41px] w-[76px] border-b border-r border-zinc-700 text-base-content/60"
+                                class="label cursor-pointer max-w-xs px-2 h-10.25 w-19 border-b border-r border-zinc-700 text-base-content/60"
                             >
                                 <input
                                     type="checkbox"
@@ -267,9 +267,9 @@ function changePresets(task: Task | undefined) {
                                 <span class="pl-1 me-2">Fade</span>
                             </label>
                         </th>
-                        <th class="p-0 w-[76px] border-r border-zinc-700">
+                        <th class="p-0 w-19 border-r border-zinc-700">
                             <label
-                                class="label cursor-pointer max-w-xs px-2 h-[41px] w-[76px] border-b border-r border-zinc-700 text-base-content/60"
+                                class="label cursor-pointer max-w-xs px-2 h-10.25 w-19 border-b border-r border-zinc-700 text-base-content/60"
                             >
                                 <input
                                     type="checkbox"
@@ -280,15 +280,15 @@ function changePresets(task: Task | undefined) {
                                 <span class="pl-1 me-2">Lufs</span>
                             </label>
                         </th>
-                        <th v-if="store.showTranscript" class="p-0 w-[138px] border-r border-zinc-700">
-                            <div class="px-1 py-[3px] w-[138px] h-[41px] border-b border-r border-zinc-700">
+                        <th v-if="store.showTranscript" class="p-0 w-34.5 border-r border-zinc-700">
+                            <div class="px-1 py-0.75 w-34.5 h-10.25 border-b border-r border-zinc-700">
                                 <select
                                     v-model="allTranscript"
                                     class="select select-sm select-bordered rounded-xs focus:border-base-content/30 focus:outline-base-content/30 w-full max-w-xs"
                                     @change="changeTranscription(undefined)"
                                 >
                                     <option disabled selected>Transcript</option>
-                                    <template v-for="lang in store.transcriptLanguages" :key="lang.value">
+                                    <template v-for="lang in store.transcriptLanguages" :key="lang.code">
                                         <option :value="lang.code">{{ lang.name }}</option>
                                     </template>
                                 </select>
@@ -296,7 +296,7 @@ function changePresets(task: Task | undefined) {
                         </th>
                         <th class="p-0 border-r border-zinc-700">
                             <div
-                                class="relative z-10 px-1 w-[calc(100%+1px)] py-[3px] h-[41px] border-b border-r border-zinc-700"
+                                class="relative z-10 px-1 w-[calc(100%+1px)] py-0.75 h-10.25 border-b border-r border-zinc-700"
                                 :style="{ minWidth: `${presetList.length * 58 + 9}px` }"
                             >
                                 <Multiselect
@@ -330,7 +330,7 @@ function changePresets(task: Task | undefined) {
                         @contextmenu.prevent="showContextMenu($event, task)"
                     >
                         <td class="p-0 border-r border-zinc-700">
-                            <div class="m-0 p-[10px] truncate">
+                            <div class="m-0 p-2.5 truncate">
                                 {{ filename(task.path) }}
                             </div>
                         </td>
@@ -379,7 +379,7 @@ function changePresets(task: Task | undefined) {
                                 :disabled="task.active || task.finished"
                             >
                                 <option disabled selected>Transcript</option>
-                                <template v-for="lang in store.transcriptLanguages" :key="lang.value">
+                                <template v-for="lang in store.transcriptLanguages" :key="lang.code">
                                     <option :value="lang.code">{{ lang.name }}</option>
                                 </template>
                             </select>

@@ -157,7 +157,7 @@ async function cancel() {
                                         <th class="p-1 border border-zinc-700 w-14">Code</th>
                                         <th class="p-0 border border-zinc-700 w-6">
                                             <button
-                                                class="btn btn-ghost btn-xs rounded-none p-[5px]"
+                                                class="btn btn-ghost btn-xs rounded-none p-1.25"
                                                 title="Add language"
                                                 @click="addLang()"
                                             >
@@ -188,7 +188,7 @@ async function cancel() {
                                         </td>
                                         <td class="p-0 border border-zinc-700">
                                             <button
-                                                class="btn btn-ghost btn-xs rounded-none p-[5px]"
+                                                class="btn btn-ghost btn-xs rounded-none p-1.25"
                                                 title="Delete language"
                                                 @click="deleteLang(lang)"
                                             >

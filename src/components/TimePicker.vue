@@ -1,43 +1,3 @@
-<template>
-    <div
-        id="timeField"
-        class="input input-bordered rounded-xs flex pl-[2px] pr-0 py-0 focus-within:border-base-content/30 focus-within:outline-base-content/30"
-        :class="`input-${size}`"
-    >
-        <div class="grow flex items-center">
-            <input
-                ref="timeInput"
-                :value="secToTime(props.modelValue)"
-                type="text"
-                pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]((\.|:)[0-9]{1,3})?"
-                class="w-full px-1 py-0 h-[20px] text-[0.8455rem]"
-                @click="setCursorPos"
-                @change="$emit('update:modelValue', timeToSec($event))"
-                :disabled="disabled"
-            />
-        </div>
-
-        <div v-if="props.isNumber" class="w-auto">
-            <div class="flex flex-col text-xs h-[30px]">
-                <button
-                    class="bg-base-300 hover:bg-base-300/50 px-1 leading-0 text-[9px] h-[15px] rounded-t-sm"
-                    tabindex="0"
-                    @click="countUp"
-                    :disabled="disabled"
-                >
-                    <i class="bi-chevron-up" />
-                </button>
-                <button
-                    class="bg-base-300 hover:bg-base-300/50 px-1 leading-3 pb-[2px] text-[9px] h-[15px] rounded-b-sm"
-                    @click="countDown"
-                    :disabled="disabled"
-                >
-                    <i class="bi-chevron-down" />
-                </button>
-            </div>
-        </div>
-    </div>
-</template>
 <script setup lang="ts">
 import { ref, nextTick } from 'vue'
 
@@ -153,6 +113,46 @@ function countDown() {
     })
 }
 </script>
+<template>
+    <div
+        id="timeField"
+        class="input input-bordered rounded-xs flex pl-0.5 pr-0 py-0 focus-within:border-base-content/30 focus-within:outline-base-content/30"
+        :class="`input-${size}`"
+    >
+        <div class="grow flex items-center">
+            <input
+                ref="timeInput"
+                :value="secToTime(props.modelValue)"
+                type="text"
+                pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]((\.|:)[0-9]{1,3})?"
+                class="w-full px-1 py-0 h-5 text-[0.8455rem]"
+                @click="setCursorPos"
+                @change="$emit('update:modelValue', timeToSec($event))"
+                :disabled="disabled"
+            />
+        </div>
+
+        <div v-if="props.isNumber" class="w-auto">
+            <div class="flex flex-col text-xs h-7.5">
+                <button
+                    class="bg-base-300 hover:bg-base-300/50 px-1 leading-0 text-[9px] h-3.75 rounded-t-sm"
+                    tabindex="0"
+                    @click="countUp"
+                    :disabled="disabled"
+                >
+                    <i class="bi-chevron-up" />
+                </button>
+                <button
+                    class="bg-base-300 hover:bg-base-300/50 px-1 leading-3 pb-0.5 text-[9px] h-3.75 rounded-b-sm"
+                    @click="countDown"
+                    :disabled="disabled"
+                >
+                    <i class="bi-chevron-down" />
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
 <style scoped>
 #timeField:has(> div > input:invalid) {
     border: red solid 1px;

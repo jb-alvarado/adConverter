@@ -81,7 +81,7 @@ async function shutdown_system() {
 }
 </script>
 <template>
-    <header class="bg-base-100 max-h-[42px] w-full">
+    <header class="bg-base-100 max-h-10.5 w-full">
         <div class="flex flex-1 justify-start">
             <div class="flex items-stretch z-60">
                 <div class="dropdown dropdown-start">

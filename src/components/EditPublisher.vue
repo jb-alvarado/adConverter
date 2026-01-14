@@ -213,7 +213,7 @@ function addPublisher($event: any) {
 </script>
 <template>
     <GenericModal :show="show" title="Edit Publisher" :modal-action="addPublisher">
-        <div class="min-w-[700px]">
+        <div class="min-w-175">
             <div>
                 <div class="h-8">
                     <button class="btn btn-sm rounded-xs" @click="handlePeertube()">
@@ -237,7 +237,7 @@ function addPublisher($event: any) {
                 </div>
                 <div class="flex gap-3">
                     <div class="form-control w-20">
-                        <label class="label cursor-pointer mt-[2px] p-0 pt-2">
+                        <label class="label cursor-pointer mt-0.5 p-0 pt-2">
                             <span class="label-text">Publish</span>
                             <input v-model="doPublish" type="checkbox" class="checkbox checkbox-sm" />
                         </label>

@@ -118,7 +118,7 @@ function removeLowerThirdPosition(li: number, i: number) {
 </script>
 <template>
     <GenericModal :show="show" title="Edit Template" :modal-action="saveTemplate">
-        <div class="min-w-[700px]">
+        <div class="min-w-175">
             <label class="cursor-pointer join w-full">
                 <div class="label w-14">
                     <span class="label-text">Intro: </span>
@@ -178,11 +178,11 @@ function removeLowerThirdPosition(li: number, i: number) {
                     </button>
                 </div>
                 <div class="grow bg-base-200 min-h-20 rounded-xs">
-                    <div class="overflow-x-auto max-h-[300px]">
+                    <div class="overflow-x-auto max-h-75">
                         <table class="table table-zebra rounded-xs border-collapse">
                             <thead class="top-0 sticky z-50 bg-base-200">
                                 <tr>
-                                    <th class="min-w-[200px] p-0">
+                                    <th class="min-w-50 p-0">
                                         <div class="w-full h-full border border-base-content/30 p-1">Path</div>
                                     </th>
                                     <th class="w-16 p-0">
@@ -190,12 +190,12 @@ function removeLowerThirdPosition(li: number, i: number) {
                                             Duration
                                         </div>
                                     </th>
-                                    <th class="min-w-[220px] max-w-[400px] p-0">
+                                    <th class="min-w-55 max-w-100 p-0">
                                         <div class="w-full h-full border border-base-content/30 p-1">
                                             Position
                                         </div>
                                     </th>
-                                    <th class="w-[28px] p-0">
+                                    <th class="w-7 p-0">
                                         <div class="w-full h-full border border-base-content/30 p-1">&nbsp;</div>
                                     </th>
                                 </tr>
@@ -214,11 +214,11 @@ function removeLowerThirdPosition(li: number, i: number) {
                                     </td>
                                     <td class="border border-base-content/30 p-1">
                                         <div class="flex">
-                                            <div class="grow flex flex-wrap max-w-[430px] pr-1">
+                                            <div class="grow flex flex-wrap max-w-107.5 pr-1">
                                                 <div
                                                     v-for="(pos, i) in lower.position"
                                                     :key="pos"
-                                                    class="w-[106px] relative"
+                                                    class="w-26.5 relative"
                                                 >
                                                     <TimePicker v-model="lower.position[i]" :isNumber="false" />
                                                     <button

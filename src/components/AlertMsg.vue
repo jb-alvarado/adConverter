@@ -8,7 +8,7 @@
             <div
                 v-for="alert in store.alertList"
                 :key="alert.text"
-                class="alert w-auto max-w-[800px] justify-start py-1 rounded-xs"
+                class="alert w-auto max-w-200 justify-start py-1 rounded-xs"
                 :class="`alert-${alert.variance}`"
             >
                 <div v-html="alertIcon(alert.variance)" />
