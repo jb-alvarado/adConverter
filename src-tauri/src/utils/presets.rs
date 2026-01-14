@@ -11,7 +11,7 @@ use tauri::{AppHandle, Manager};
 use tokio::{fs, io::AsyncWriteExt};
 use ts_rs::TS;
 
-use crate::ProcessError;
+use crate::{cli::IDENTIFIER, ProcessError};
 
 #[serde_as]
 #[derive(Clone, Debug, Default, Deserialize, Serialize, TS)]
@@ -58,7 +58,9 @@ pub fn preset_path(app: &Option<AppHandle>) -> Result<PathBuf, Box<dyn std::erro
     } else if let Some(a) = app {
         a.path().app_data_dir()?
     } else {
-        dirs::data_dir().unwrap_or(env::current_dir()?)
+        dirs::data_dir()
+            .unwrap_or(env::current_dir()?)
+            .join(IDENTIFIER)
     };
 
     directory = directory.join("presets");
