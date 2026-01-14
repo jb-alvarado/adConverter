@@ -203,6 +203,7 @@ def transcribe_video(video_path: Path):
                 else:
                     print(percent_complete, flush=True)
 
+        print(100, flush=True)
         log.info(f"Transcription completed, saved to {vtt_path}")
     except KeyboardInterrupt:
         vtt_path.unlink(missing_ok=True)
