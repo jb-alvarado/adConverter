@@ -14,7 +14,7 @@ use indicatif::ProgressBar;
 use log::*;
 use serde_json::Value;
 use shlex::split;
-use tauri::{AppHandle, Emitter, State};
+use tauri::{AppHandle, Emitter, Manager};
 use tokio::{
     fs,
     io::{AsyncBufReadExt, BufReader},
@@ -464,14 +464,13 @@ pub async fn work(
     Ok(())
 }
 
-pub async fn run(
-    app: AppHandle,
-    state: State<'_, AppState>,
-    mut rx: Receiver<Task>,
-) -> Result<(), ProcessError> {
-    let config = state.config.lock().await.clone();
+pub async fn run(app: AppHandle, mut rx: Receiver<Task>) -> Result<(), ProcessError> {
+    let state = app.state::<AppState>().to_owned();
 
     while let Some(task) = rx.recv().await {
+        // Load config for each task to get the latest configuration
+        let config = state.config.lock().await.clone();
+
         task.active.store(true, Ordering::SeqCst);
 
         if !task.presets.is_empty() || task.transcript.as_ref().is_some_and(|t| t != "none") {

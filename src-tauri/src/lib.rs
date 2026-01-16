@@ -373,9 +373,7 @@ pub async fn run() -> tauri::Result<()> {
             let _logger = init_logging(Some(app_handle.clone()));
 
             tokio::spawn(async move {
-                let state = app_handle_clone.state::<AppState>().to_owned();
-
-                if let Err(e) = worker::run(app_handle_clone.clone(), state, rx).await {
+                if let Err(e) = worker::run(app_handle_clone.clone(), rx).await {
                     error!("{e:?}");
                 };
             });
