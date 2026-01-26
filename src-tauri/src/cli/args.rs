@@ -30,6 +30,24 @@ pub struct Args {
 impl Args {
     pub async fn init(config: &Config) -> Result<Self, ProcessError> {
         let mut obj = Self::parse();
+
+        obj.files = obj
+            .files
+            .into_iter()
+            .map(|file| {
+                let path = std::path::Path::new(&file);
+                if path.is_relative() {
+                    std::env::current_dir()
+                        .unwrap_or_default()
+                        .join(path)
+                        .to_string_lossy()
+                        .to_string()
+                } else {
+                    file
+                }
+            })
+            .collect();
+
         let lang_list: Vec<String> = config
             .transcript_lang
             .iter()
