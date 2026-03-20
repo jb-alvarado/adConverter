@@ -31,7 +31,7 @@ pub async fn read_config() -> Result<Config, ProcessError> {
     Ok(config)
 }
 
-pub async fn create_tasks(args: Args) -> Vec<Task> {
+pub async fn create_tasks(config: &Config, args: Args) -> Vec<Task> {
     let preset_list = collect_presets(&None).await.unwrap_or_default();
     let selected_presets = args.presets.unwrap_or_default();
     let mut presets = vec![];
@@ -51,7 +51,7 @@ pub async fn create_tasks(args: Args) -> Vec<Task> {
             fade: args.fade.unwrap_or_default(),
             lufs: args.lufs.unwrap_or_default(),
             transcript: args.lang.clone(),
-            probe: MediaProbe::new(file).await.unwrap_or_default(),
+            probe: MediaProbe::new(config, file).await.unwrap_or_default(),
             presets: presets.clone(),
             template: None,
             target: None,

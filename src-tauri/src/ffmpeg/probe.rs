@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, DisplayFromStr};
 use tokio::process;
@@ -6,14 +8,28 @@ use ts_rs::TS;
 #[cfg(target_os = "macos")]
 use crate::MACOS_PATH;
 
-pub async fn ffprobe(path: impl AsRef<std::path::Path>) -> Result<FfProbe, FfProbeError> {
-    ffprobe_config(path).await
+use crate::Config;
+
+pub async fn ffprobe(
+    config: &Config,
+    path: impl AsRef<std::path::Path>,
+) -> Result<FfProbe, FfProbeError> {
+    ffprobe_config(config, path).await
 }
 
-pub async fn ffprobe_config(path: impl AsRef<std::path::Path>) -> Result<FfProbe, FfProbeError> {
+pub async fn ffprobe_config(
+    config: &Config,
+    path: impl AsRef<std::path::Path>,
+) -> Result<FfProbe, FfProbeError> {
     let path = path.as_ref();
 
-    let mut cmd = process::Command::new("ffprobe");
+    let ff_bin = config
+        .ffmpeg_path
+        .as_deref()
+        .map(|p| p.join("ffprobe"))
+        .unwrap_or(PathBuf::from("ffprobe"));
+
+    let mut cmd = process::Command::new(ff_bin);
 
     cmd.args([
         "-v",
@@ -180,8 +196,11 @@ pub struct MediaProbe {
 }
 
 impl MediaProbe {
-    pub async fn new(input: impl AsRef<std::path::Path>) -> Result<Self, FfProbeError> {
-        let probe = ffprobe(input).await;
+    pub async fn new(
+        config: &Config,
+        input: impl AsRef<std::path::Path>,
+    ) -> Result<Self, FfProbeError> {
+        let probe = ffprobe(config, input).await;
         let mut a_stream = vec![];
         let mut v_stream = vec![];
 
@@ -236,26 +255,5 @@ impl MediaProbe {
         }
 
         asp
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use std::env;
-
-    use path_clean::PathClean;
-
-    use super::*;
-
-    #[tokio::test]
-    async fn print_media_probe() {
-        let path = env::current_dir()
-            .unwrap()
-            .join("../test/assets/media/with_audio.mp4")
-            .clean();
-
-        let probe = MediaProbe::new(&path).await;
-
-        println!("{probe:#?}");
     }
 }

@@ -11,7 +11,7 @@ use tokio::fs;
 use super::{analyze::Lufs, prepare_path, probe::MediaProbe};
 use crate::{
     utils::{find_audio, is_close, time_to_sec, IMAGE_EXTENSIONS},
-    vec_strings, Preset, Task, Template,
+    vec_strings, Config, Preset, Task, Template,
 };
 
 #[derive(Clone, Debug, Copy, Eq, PartialEq)]
@@ -449,6 +449,7 @@ async fn lower_third(
 }
 
 async fn intro_outro(
+    config: &Config,
     path: &str,
     task_probe: &MediaProbe,
     template: &Template,
@@ -464,7 +465,7 @@ async fn intro_outro(
     if let Some(i) = &template.intro {
         let p = PathBuf::from(i.replace("\\", "/"));
         let src = if p.is_relative() { path.join(p) } else { p };
-        let probe = MediaProbe::new(&src).await;
+        let probe = MediaProbe::new(config, &src).await;
 
         intro = format!(
             "movie='{}'",
@@ -505,7 +506,7 @@ async fn intro_outro(
     if let Some(o) = &template.outro {
         let p = PathBuf::from(o.replace("\\", "/"));
         let src = if p.is_relative() { path.join(p) } else { p };
-        let probe = MediaProbe::new(&src).await;
+        let probe = MediaProbe::new(config, &src).await;
 
         outro = format!(
             "movie='{}'",
@@ -667,6 +668,7 @@ fn loudnorm(lufs: &Lufs) -> String {
 }
 
 pub async fn filter_chain(
+    config: &Config,
     task: &Task,
     preset: &Preset,
     lufs: &Lufs,
@@ -730,7 +732,15 @@ pub async fn filter_chain(
                 "[main_v]",
             )
             .await;
-            let (i, o) = intro_outro(&task.path, &task.probe, template, preset, &target_spec).await;
+            let (i, o) = intro_outro(
+                config,
+                &task.path,
+                &task.probe,
+                template,
+                preset,
+                &target_spec,
+            )
+            .await;
 
             if !f.is_empty() {
                 chain.add_filter("[main_v]", 0, Video);
@@ -883,6 +893,7 @@ mod tests {
             .unwrap()
             .join("../test/assets/media/with_audio.mp4")
             .clean();
+        let config = Config::default();
 
         Task {
             path: path.to_string_lossy().to_string(),
@@ -892,7 +903,7 @@ mod tests {
             out: 0.0,
             transcript: None,
             r#in: 0.0,
-            probe: MediaProbe::new(&path.to_string_lossy().to_string())
+            probe: MediaProbe::new(&config, &path.to_string_lossy().to_string())
                 .await
                 .unwrap(),
             publish: None,
@@ -907,8 +918,10 @@ mod tests {
     #[tokio::test]
     async fn concat() {
         let task = task().await;
+        let config = Config::default();
 
-        let mut filter = filter_chain(&task, &preset(), &Lufs::default(), true, true, 0).await;
+        let mut filter =
+            filter_chain(&config, &task, &preset(), &Lufs::default(), true, true, 0).await;
         let cmd = filter.cmd();
         let mapping_video = filter.map_video();
         let mapping_audio = filter.map_audio();
@@ -922,8 +935,10 @@ mod tests {
     async fn no_template() {
         let mut task = task().await;
         task.template = None;
+        let config = Config::default();
 
-        let mut filter = filter_chain(&task, &preset(), &Lufs::default(), true, true, 0).await;
+        let mut filter =
+            filter_chain(&config, &task, &preset(), &Lufs::default(), true, true, 0).await;
         let cmd = filter.cmd();
         let mapping_video = filter.map_video();
         let mapping_audio = filter.map_audio();

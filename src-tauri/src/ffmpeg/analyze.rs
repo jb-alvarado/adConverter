@@ -1,5 +1,6 @@
 use std::{
     collections::HashMap,
+    path::PathBuf,
     process::Stdio,
     sync::{
         atomic::{AtomicBool, Ordering},
@@ -21,7 +22,7 @@ use tokio::{
 use super::FFmpegProgress;
 use crate::{
     utils::logging::{log_command, CommandLogger},
-    vec_strings, LufsConfig, ProcessError,
+    vec_strings, Config, ProcessError,
 };
 
 #[cfg(target_os = "macos")]
@@ -59,11 +60,11 @@ pub struct Lufs {
 impl Lufs {
     pub async fn new(
         app: Option<AppHandle>,
+        config: &Config,
         duration: f64,
         is_running: Arc<AtomicBool>,
         child: Arc<Mutex<Option<Child>>>,
         src_cmd: Vec<String>,
-        lufs_c: LufsConfig,
         mut cmd_logger: CommandLogger,
         progress_bar: Option<ProgressBar>,
     ) -> Result<Self, ProcessError> {
@@ -71,11 +72,11 @@ impl Lufs {
         let running = is_running.clone();
         let running_clone = is_running.clone();
         let app_clone1 = app.clone();
+        let lufs_c = config.lufs.clone();
         let lufs_stats = Arc::new(Mutex::new(Self {
             ..Default::default()
         }));
         let lufs_clone = lufs_stats.clone();
-
         let mut args = vec_strings![
             "-hide_banner",
             "-progress",
@@ -86,6 +87,12 @@ impl Lufs {
             "-y",
             "-v"
         ];
+
+        let ff_bin = config
+            .ffmpeg_path
+            .as_deref()
+            .map(|p| p.join("ffmpeg"))
+            .unwrap_or(PathBuf::from("ffmpeg"));
 
         if app.is_some() {
             args.push("level+info".to_string());
@@ -106,9 +113,13 @@ impl Lufs {
             "-"
         ]);
 
-        log_command("Analyze LUFS", Some("ffmpeg".to_string()), args.clone());
+        log_command(
+            "Analyze LUFS",
+            Some(ff_bin.to_string_lossy().to_string()),
+            args.clone(),
+        );
 
-        let mut cmd = Command::new("ffmpeg");
+        let mut cmd = Command::new(ff_bin);
 
         cmd.args(args).stderr(Stdio::piped()).stdout(Stdio::piped());
 

@@ -26,7 +26,7 @@ pub async fn run() -> Result<(), ProcessError> {
     }
 
     // let preset_length = args.presets.as_ref().unwrap_or(&vec![]).len();
-    let tasks = create_tasks(args).await;
+    let tasks = create_tasks(&config, args).await;
     let task_length = tasks.len();
 
     let multi_prog = MultiProgress::new();

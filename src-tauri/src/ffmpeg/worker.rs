@@ -62,19 +62,19 @@ fn to_vec(value: Value) -> Vec<String> {
     params
 }
 
-async fn calc_duration(task: &Task) -> (f64, f64, f64) {
+async fn calc_duration(config: &Config, task: &Task) -> (f64, f64, f64) {
     let mut duration_intro = 0.0;
     let mut duration_outro = 0.0;
 
     if let Some(template) = &task.template {
         if let Some(intro) = &template.intro {
-            if let Ok(probe) = MediaProbe::new(&intro).await {
+            if let Ok(probe) = MediaProbe::new(config, &intro).await {
                 duration_intro = probe.format_duration();
             };
         }
 
         if let Some(outro) = &template.outro {
-            if let Ok(probe) = MediaProbe::new(&outro).await {
+            if let Ok(probe) = MediaProbe::new(config, &outro).await {
                 duration_outro = probe.format_duration();
             };
         }
@@ -105,7 +105,7 @@ pub async fn work(
     // let mut presets = mem::take(&mut task_clone.presets);
     let sources = Sources::new(&task.path).await;
     let path = Path::new(&task.path);
-    let (intro_dur, video_dur, outro_dur) = calc_duration(&task).await;
+    let (intro_dur, video_dur, outro_dur) = calc_duration(&config, &task).await;
     let duration = intro_dur + video_dur + outro_dur;
     let year = Local::now().year();
     let cmd_logger = CommandLogger::new();
@@ -123,6 +123,12 @@ pub async fn work(
         "-y",
         "-v"
     ];
+
+    let ff_bin = config
+        .ffmpeg_path
+        .as_deref()
+        .map(|p| p.join("ffmpeg"))
+        .unwrap_or(PathBuf::from("ffmpeg"));
 
     if app.is_some() {
         task_args.push("level+info".to_string());
@@ -172,11 +178,11 @@ pub async fn work(
 
         Lufs::new(
             app.clone(),
+            &config,
             video_dur,
             is_running.clone(),
             child.clone(),
             src_cmd,
-            config.lufs.clone(),
             cmd_logger.clone(),
             progress_bar.clone(),
         )
@@ -215,6 +221,7 @@ pub async fn work(
         let finished = preset.finished.clone();
         let mut cmd_logger = cmd_logger.clone();
         let progress_clone = progress_bar.clone();
+        let ff_bin = ff_bin.clone();
 
         let parent_path = path.parent().expect("Path should have a parent");
         let file_stem = path
@@ -274,7 +281,10 @@ pub async fn work(
             }
         }
 
-        let mut filter = filter_chain(&task, &preset, &lufs, has_audio, has_video, audio_pos).await;
+        let mut filter = filter_chain(
+            &config, &task, &preset, &lufs, has_audio, has_video, audio_pos,
+        )
+        .await;
         args.extend(filter.cmd());
 
         if let Some(video_ext) = &preset.container_video {
@@ -317,7 +327,7 @@ pub async fn work(
 
         log_command(
             &format!("Preset: {}", preset.title),
-            Some("ffmpeg".to_string()),
+            Some(ff_bin.to_string_lossy().to_string()),
             args.clone(),
         );
 
@@ -326,7 +336,7 @@ pub async fn work(
             None => (),
         };
 
-        let mut cmd = Command::new("ffmpeg");
+        let mut cmd = Command::new(ff_bin);
 
         cmd.args(args).stderr(Stdio::piped()).stdout(Stdio::piped());
 

@@ -1,8 +1,11 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
+use std::{
+    path::PathBuf,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
 };
 
 use serde::{Deserialize, Serialize};
@@ -90,6 +93,7 @@ struct AppState {
 #[ts(export, export_to = "backend.d.ts")]
 pub struct Config {
     pub copyright: String,
+    pub ffmpeg_path: Option<PathBuf>,
     pub lufs: LufsConfig,
     pub transcript_cmd: String,
     pub transcript_lang: Vec<LangConfig>,
@@ -172,9 +176,10 @@ async fn presets_get(app: AppHandle) -> tauri::Result<Vec<Preset>> {
 }
 
 #[tauri::command]
-async fn file_drop(mut task: Task) -> Result<Task, ProcessError> {
+async fn file_drop(state: State<'_, AppState>, mut task: Task) -> Result<Task, ProcessError> {
+    let config = state.config.lock().await;
     let path = task.path.clone();
-    task.probe = MediaProbe::new(&path).await?;
+    task.probe = MediaProbe::new(&config, &path).await?;
 
     let sources = Sources::new(&path).await?;
 
@@ -242,10 +247,24 @@ async fn save_preset(app: AppHandle, mut preset: Preset) -> Result<(), ProcessEr
     preset.save(&preset_path).await
 }
 
+fn prep_ffmpeg_path(config: &mut Config) {
+    if let Some(ffmpeg_path) = &config.ffmpeg_path {
+        if ffmpeg_path.is_file() {
+            config.ffmpeg_path = ffmpeg_path.parent().map(|p| p.to_path_buf());
+        } else if !ffmpeg_path.is_dir() {
+            config.ffmpeg_path = None;
+        }
+    }
+}
+
 #[tauri::command]
 async fn save_config(app: AppHandle, state: State<'_, AppState>) -> Result<(), ProcessError> {
     let store = app.store("config.json")?;
     let mut config = state.config.lock().await;
+
+    if let Some(Value::String(ffmpeg_path)) = store.get("ffmpeg_path") {
+        config.ffmpeg_path = Some(PathBuf::from(ffmpeg_path));
+    }
 
     if let Some(Value::String(copyright)) = store.get("copyright") {
         config.copyright = copyright;
@@ -261,6 +280,7 @@ async fn save_config(app: AppHandle, state: State<'_, AppState>) -> Result<(), P
         config.transcript_cmd = s;
     }
 
+    prep_ffmpeg_path(&mut config);
     store.close_resource();
 
     Ok(())
@@ -274,6 +294,10 @@ async fn load_config(app: AppHandle, state: State<'_, AppState>) -> Result<(), P
 
     let store = app_handle.store("config.json").expect("Open config");
     let mut config = state.config.lock().await;
+
+    if let Some(Value::String(ffmpeg_path)) = store.get("ffmpeg_path") {
+        config.ffmpeg_path = Some(PathBuf::from(ffmpeg_path));
+    }
 
     if let Some(Value::String(copyright)) = store.get("copyright") {
         config.copyright = copyright;
@@ -313,6 +337,7 @@ async fn load_config(app: AppHandle, state: State<'_, AppState>) -> Result<(), P
         }
     }
 
+    prep_ffmpeg_path(&mut config);
     store.close_resource();
 
     Ok(())

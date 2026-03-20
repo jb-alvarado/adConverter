@@ -26,12 +26,14 @@ const lufs = ref<LufsConfig>({
     lra: 0,
     tp: 0,
 })
+const ffmpeg_path = ref('')
 const transcript_cmd = ref('')
 
 onBeforeMount(async () => {
     appVersion.value = await getVersion()
     copyright.value = await config.get('copyright')
     lufs.value = await config.get('lufs')
+    ffmpeg_path.value = (await config.get('ffmpeg_path')) ?? ''
     transcript_cmd.value = (await config.get('transcript_cmd')) ?? ''
 })
 
@@ -49,6 +51,10 @@ async function saveConfig() {
     await config.set('transcript_cmd', transcript_cmd.value)
     await config.set('transcript_lang', store.transcriptLanguages)
     await config.set('publish_preset', store.publishPreset)
+
+    if (ffmpeg_path.value) {
+        await config.set('ffmpeg_path', ffmpeg_path.value)
+    }
     await config.save()
 
     store.showConfig = false
@@ -79,7 +85,6 @@ async function cancel() {
                         <strong>Audio</strong>
                         <div>LUFS:</div>
                         <div>
-
                             <label class="label max-w-xs justify-normal p-0">
                                 <input
                                     type="number"
@@ -125,9 +130,7 @@ async function cancel() {
                             />
                         </label>
                     </div>
-                    <div class="bg-base-200 p-2 grow flex justify-end">
-                        v{{ appVersion }}
-                    </div>
+                    <div class="bg-base-200 p-2 grow flex justify-end">v{{ appVersion }}</div>
                     <!-- <div class="bg-base-200 p-2 grow">
                         Publish
                         <label class="form-control mt-2 max-w-32 px-0">
@@ -200,21 +203,37 @@ async function cancel() {
                             </table>
                         </div>
                         <div class="grow">
-                            Command line argument
+                            ffmpeg path
                             <label class="form-control mt-2 max-w-full px-0">
                                 <input
                                     type="text"
-                                    v-model="transcript_cmd"
+                                    v-model="ffmpeg_path"
                                     class="input input-xs focus-within:border-base-content/30 focus-within:outline-base-content/30 w-full rounded-xs"
-                                    placeholder="/usr/local/bin/transcript.py -c int8 -l %lang% -f %file% -o %output%"
+                                    placeholder=""
                                 />
                             </label>
                             <label class="label">
                                 <span class="text-sm select-text text-base-content/80"
-                                    >%lang% and %file% are mandatory values, %mount% represents the parent folder of the
-                                    file and is required in container environments.</span
+                                    >Default is system path</span
                                 >
                             </label>
+                            <div class="mt-3">
+                                Command line argument
+                                <label class="form-control mt-2 max-w-full px-0">
+                                    <input
+                                        type="text"
+                                        v-model="transcript_cmd"
+                                        class="input input-xs focus-within:border-base-content/30 focus-within:outline-base-content/30 w-full rounded-xs"
+                                        placeholder="/usr/local/bin/transcript.py -c int8 -l %lang% -f %file% -o %output%"
+                                    />
+                                </label>
+                                <label class="label">
+                                    <span class="text-sm select-text text-base-content/80"
+                                        >%lang% and %file% are mandatory values, %mount% represents the parent folder of
+                                        the file and is required in container environments.</span
+                                    >
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
