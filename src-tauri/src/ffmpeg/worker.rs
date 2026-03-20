@@ -4,8 +4,8 @@ use std::{
     path::{Path, PathBuf},
     process::Stdio,
     sync::{
-        atomic::{AtomicBool, Ordering},
         Arc,
+        atomic::{AtomicBool, Ordering},
     },
 };
 
@@ -19,17 +19,17 @@ use tokio::{
     fs,
     io::{AsyncBufReadExt, BufReader},
     process::{Child, Command},
-    sync::{mpsc::Receiver, Mutex},
+    sync::{Mutex, mpsc::Receiver},
 };
 
-use super::{analyze::Lufs, filter::filter_chain, probe::MediaProbe, FFmpegProgress};
-use crate::{transcript, vec_strings, AppState, ProcessError, Task};
+use super::{FFmpegProgress, analyze::Lufs, filter::filter_chain, probe::MediaProbe};
+use crate::{AppState, ProcessError, Task, transcript, vec_strings};
 use crate::{
-    utils::{
-        logging::{log_command, CommandLogger},
-        Sources,
-    },
     Config,
+    utils::{
+        Sources,
+        logging::{CommandLogger, log_command},
+    },
 };
 
 #[cfg(target_os = "macos")]
@@ -67,17 +67,17 @@ async fn calc_duration(config: &Config, task: &Task) -> (f64, f64, f64) {
     let mut duration_outro = 0.0;
 
     if let Some(template) = &task.template {
-        if let Some(intro) = &template.intro {
-            if let Ok(probe) = MediaProbe::new(config, &intro).await {
-                duration_intro = probe.format_duration();
-            };
-        }
+        if let Some(intro) = &template.intro
+            && let Ok(probe) = MediaProbe::new(config, &intro).await
+        {
+            duration_intro = probe.format_duration();
+        };
 
-        if let Some(outro) = &template.outro {
-            if let Ok(probe) = MediaProbe::new(config, &outro).await {
-                duration_outro = probe.format_duration();
-            };
-        }
+        if let Some(outro) = &template.outro
+            && let Ok(probe) = MediaProbe::new(config, &outro).await
+        {
+            duration_outro = probe.format_duration();
+        };
     }
 
     let mut duration = task.probe.format.duration.unwrap_or_default();
@@ -273,12 +273,11 @@ pub async fn work(
         let temp_out = env::temp_dir().join(&file_name);
         task_clone.presets[i].output_path = Some(output.clone());
 
-        if sources.as_ref().map(|s| s.video.clone()).is_ok() {
-            if let Value::Object(map) = &preset.video {
-                if !map.is_empty() {
-                    has_video = true;
-                }
-            }
+        if sources.as_ref().map(|s| s.video.clone()).is_ok()
+            && let Value::Object(map) = &preset.video
+            && !map.is_empty()
+        {
+            has_video = true;
         }
 
         let mut filter = filter_chain(
@@ -331,10 +330,9 @@ pub async fn work(
             args.clone(),
         );
 
-        match &app {
-            Some(a) => a.emit("preset-start", &preset).expect("Emit Preset"),
-            None => (),
-        };
+        if let Some(a) = &app {
+            a.emit("preset-start", &preset).expect("Emit Preset");
+        }
 
         let mut cmd = Command::new(ff_bin);
 
@@ -414,7 +412,7 @@ pub async fn work(
                                         String::new()
                                     };
                                     current.set_message(msg);
-                                    current.set_position(progress.elapsed_pct as u64);
+                                    current.set_position(progress.elapsed_pct);
                                 }
                             }
                         };
@@ -439,30 +437,28 @@ pub async fn work(
 
         finished.store(true, Ordering::SeqCst);
 
-        match &app {
-            Some(a) => a.emit("preset-finish", &preset).expect("Emit progress"),
-            None => (),
-        };
+        if let Some(a) = &app {
+            a.emit("preset-finish", &preset).expect("Emit progress");
+        }
     }
 
-    if let Some(src) = transcript_src {
-        if task
+    if let Some(src) = transcript_src
+        && task
             .transcript
             .as_ref()
             .is_some_and(|lang| lang.to_lowercase() != "none")
-        {
-            transcript::run(
-                app.clone(),
-                config,
-                child.clone(),
-                is_running.clone(),
-                cmd_logger.clone(),
-                &src,
-                &task,
-                progress_bar,
-            )
-            .await?;
-        }
+    {
+        transcript::run(
+            app.clone(),
+            config,
+            child.clone(),
+            is_running.clone(),
+            cmd_logger.clone(),
+            &src,
+            &task,
+            progress_bar,
+        )
+        .await?;
     }
 
     *child.lock().await = None;

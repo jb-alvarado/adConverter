@@ -1,7 +1,7 @@
 use std::io::{self, Write};
 
 use flexi_logger::{
-    writers::LogWriter, DeferredNow, Level, LogSpecification, Logger, LoggerHandle,
+    DeferredNow, Level, LogSpecification, Logger, LoggerHandle, writers::LogWriter,
 };
 use log::*;
 use regex::Regex;
@@ -106,7 +106,7 @@ pub struct LogPlainConsole;
 
 impl LogWriter for LogPlainConsole {
     fn write(&self, _now: &mut DeferredNow, record: &Record<'_>) -> std::io::Result<()> {
-        writeln!(&mut std::io::stderr(), "{}", record.args().to_string())?;
+        writeln!(&mut std::io::stderr(), "{}", record.args())?;
 
         Ok(())
     }

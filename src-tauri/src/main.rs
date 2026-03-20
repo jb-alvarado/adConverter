@@ -20,9 +20,11 @@ async fn main() {
         #[cfg(target_os = "linux")]
         {
             // prevent "Error 71 dispatching to Wayland display." error
-            std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+            // TODO: Audit that the environment access only happens in single-threaded code.
+            unsafe { std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1") };
             // prevent "Could not create GBM EGL display: EGL_SUCCESS."
-            std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+            // TODO: Audit that the environment access only happens in single-threaded code.
+            unsafe { std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1") };
         }
 
         // set tauri runtime to tokio

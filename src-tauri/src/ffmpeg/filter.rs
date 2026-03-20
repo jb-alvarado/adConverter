@@ -10,8 +10,9 @@ use tokio::fs;
 
 use super::{analyze::Lufs, prepare_path, probe::MediaProbe};
 use crate::{
-    utils::{find_audio, is_close, time_to_sec, IMAGE_EXTENSIONS},
-    vec_strings, Config, Preset, Task, Template,
+    Config, Preset, Task, Template,
+    utils::{IMAGE_EXTENSIONS, find_audio, is_close, time_to_sec},
+    vec_strings,
 };
 
 #[derive(Clone, Debug, Copy, Eq, PartialEq)]
@@ -223,14 +224,13 @@ impl TargetSpec {
                 resolution = res;
             }
 
-            if let Some(Value::String(aspect_str)) = map.get("setdar") {
-                if let Some(aspect_value) = aspect_str
+            if let Some(Value::String(aspect_str)) = map.get("setdar")
+                && let Some(aspect_value) = aspect_str
                     .split_once('=')
                     .map(|s| s.1)
                     .and_then(|n| n.parse::<f64>().ok())
-                {
-                    aspect = aspect_value;
-                }
+            {
+                aspect = aspect_value;
             }
         }
 
@@ -239,22 +239,20 @@ impl TargetSpec {
                 resolution = res;
             }
 
-            if let Some(Value::String(aspect_str)) = map.get("-aspect") {
-                if let Some((w, h)) = aspect_str
+            if let Some(Value::String(aspect_str)) = map.get("-aspect")
+                && let Some((w, h)) = aspect_str
                     .split_once(':')
                     .and_then(|(n1, n2)| Some((n1.parse::<f64>().ok()?, n2.parse::<f64>().ok()?)))
-                {
-                    aspect = w / h;
-                }
+            {
+                aspect = w / h;
             }
         }
 
-        if resolution.0 <= 0 || resolution.1 <= 0 {
-            if let Some(w) = task.probe.video.first().and_then(|v| v.width) {
-                if let Some(h) = task.probe.video.first().and_then(|v| v.height) {
-                    resolution = (w, h);
-                }
-            }
+        if (resolution.0 <= 0 || resolution.1 <= 0)
+            && let Some(w) = task.probe.video.first().and_then(|v| v.width)
+            && let Some(h) = task.probe.video.first().and_then(|v| v.height)
+        {
+            resolution = (w, h);
         }
 
         if aspect == 0.0 {
@@ -296,21 +294,21 @@ fn pad(probe: &MediaProbe, target_spec: &TargetSpec) -> String {
     let mut pad = String::new();
 
     // Only proceed if a video stream exists and the aspect ratio doesn't match
-    if let (Some(v_stream), true) = (v_stream, aspect_mismatch) {
-        if let (Some(w), Some(h)) = (v_stream.width, v_stream.height) {
-            let scale = if w > target_spec.width && source_aspect > target_spec.aspect {
-                format!("scale={}:-1,", target_spec.width)
-            } else if h > target_spec.height && source_aspect < target_spec.aspect {
-                format!("scale=-1:{},", target_spec.height)
-            } else {
-                String::new()
-            };
+    if let (Some(v_stream), true) = (v_stream, aspect_mismatch)
+        && let (Some(w), Some(h)) = (v_stream.width, v_stream.height)
+    {
+        let scale = if w > target_spec.width && source_aspect > target_spec.aspect {
+            format!("scale={}:-1,", target_spec.width)
+        } else if h > target_spec.height && source_aspect < target_spec.aspect {
+            format!("scale=-1:{},", target_spec.height)
+        } else {
+            String::new()
+        };
 
-            pad = format!(
-                "{scale}pad=max(iw\\,ih*{0:.3}):(ow/{0:.3}):((ow-iw)/2):((oh-ih)/2)",
-                target_spec.aspect
-            );
-        }
+        pad = format!(
+            "{scale}pad=max(iw\\,ih*{0:.3}):(ow/{0:.3}):((ow-iw)/2):((oh-ih)/2)",
+            target_spec.aspect
+        );
     }
 
     pad
@@ -362,43 +360,42 @@ async fn lower_third(
         let mut is_image = IMAGE_EXTENSIONS.contains(&extension.as_str());
         let mut use_sequence = false;
 
-        if is_image {
-            if let Some(caps) = re.captures(&src.file_name().unwrap_or_default().to_string_lossy())
-            {
-                let prefix = caps.get(1).unwrap().as_str();
-                let suffix = caps.get(3).unwrap().as_str();
+        if is_image
+            && let Some(caps) = re.captures(&src.file_name().unwrap_or_default().to_string_lossy())
+        {
+            let prefix = caps.get(1).unwrap().as_str();
+            let suffix = caps.get(3).unwrap().as_str();
 
-                let fallback_dir = PathBuf::from(".");
-                let dir = src.parent().unwrap_or(fallback_dir.as_path());
-                let mut files = fs::read_dir(dir).await.unwrap();
+            let fallback_dir = PathBuf::from(".");
+            let dir = src.parent().unwrap_or(fallback_dir.as_path());
+            let mut files = fs::read_dir(dir).await.unwrap();
 
-                // Check if more files with the same prefix and sequential numbers exist
-                let mut count = 0;
-                while let Ok(Some(entry)) = files.next_entry().await {
-                    let file_name = entry.file_name().to_string_lossy().to_string();
-                    if file_name.starts_with(prefix)
-                        && file_name.ends_with(&format!(".{}", suffix))
-                        && Regex::new(&format!(
-                            r"{}(\d{{4}})\.{}",
-                            regex::escape(prefix),
-                            regex::escape(suffix)
-                        ))
-                        .unwrap()
-                        .is_match(&file_name)
-                    {
-                        count += 1;
-                        if count >= 2 {
-                            use_sequence = true;
-                            break;
-                        }
+            // Check if more files with the same prefix and sequential numbers exist
+            let mut count = 0;
+            while let Ok(Some(entry)) = files.next_entry().await {
+                let file_name = entry.file_name().to_string_lossy().to_string();
+                if file_name.starts_with(prefix)
+                    && file_name.ends_with(&format!(".{}", suffix))
+                    && Regex::new(&format!(
+                        r"{}(\d{{4}})\.{}",
+                        regex::escape(prefix),
+                        regex::escape(suffix)
+                    ))
+                    .unwrap()
+                    .is_match(&file_name)
+                {
+                    count += 1;
+                    if count >= 2 {
+                        use_sequence = true;
+                        break;
                     }
                 }
+            }
 
-                if use_sequence {
-                    let new_filename = format!("{}%04d.{}", prefix, suffix);
-                    layer_src = dir.join(new_filename);
-                    is_image = false;
-                }
+            if use_sequence {
+                let new_filename = format!("{}%04d.{}", prefix, suffix);
+                layer_src = dir.join(new_filename);
+                is_image = false;
             }
         }
 
@@ -418,13 +415,13 @@ async fn lower_third(
             if let Value::String(s) = scale {
                 layer_base.push_str(&format!(",scale={s},setdar=dar={:.3}", target_spec.aspect));
             }
-        } else if let Some(w) = task_probe.video[0].width {
-            if let Some(h) = task_probe.video[0].height {
-                layer_base.push_str(&format!(
-                    ",scale={w}:{h},setdar=dar={:.3}",
-                    target_spec.aspect
-                ));
-            }
+        } else if let Some(w) = task_probe.video[0].width
+            && let Some(h) = task_probe.video[0].height
+        {
+            layer_base.push_str(&format!(
+                ",scale={w}:{h},setdar=dar={:.3}",
+                target_spec.aspect
+            ));
         }
 
         filter.push(';');
@@ -547,50 +544,49 @@ async fn intro_outro(
     let mut sf = "null".to_string();
 
     if let Some(scale) = preset.filter_video.get("scale") {
-        if let Value::String(s) = scale {
-            if let Some(prob) = intro_probe.or(outro_probe) {
-                let mut pad_f = pad(&prob, target_spec);
+        if let Value::String(s) = scale
+            && let Some(prob) = intro_probe.or(outro_probe)
+        {
+            let mut pad_f = pad(&prob, target_spec);
 
-                if !pad_f.is_empty() {
-                    pad_f.push(',');
-                }
+            if !pad_f.is_empty() {
+                pad_f.push(',');
+            }
 
-                sf = format!("{pad_f}scale={s}");
+            sf = format!("{pad_f}scale={s}");
 
-                if target_spec.aspect > 0.0
-                    && target_spec.width > 0
-                    && is_close(
-                        target_spec.width as f64 / target_spec.height as f64,
-                        target_spec.aspect,
-                        0.3,
-                    )
-                {
-                    sf.push_str(",setsar=sar=1/1");
-                }
+            if target_spec.aspect > 0.0
+                && target_spec.width > 0
+                && is_close(
+                    target_spec.width as f64 / target_spec.height as f64,
+                    target_spec.aspect,
+                    0.3,
+                )
+            {
+                sf.push_str(",setsar=sar=1/1");
             }
         }
-    } else if let Some(w) = task_probe.video.first().and_then(|v| v.width) {
-        if let Some(h) = task_probe.video.first().and_then(|v| v.height) {
-            if let Some(prob) = intro_probe.or(outro_probe) {
-                let mut pad_f = pad(&prob, target_spec);
+    } else if let Some(w) = task_probe.video.first().and_then(|v| v.width)
+        && let Some(h) = task_probe.video.first().and_then(|v| v.height)
+        && let Some(prob) = intro_probe.or(outro_probe)
+    {
+        let mut pad_f = pad(&prob, target_spec);
 
-                if !pad_f.is_empty() {
-                    pad_f.push(',');
-                }
+        if !pad_f.is_empty() {
+            pad_f.push(',');
+        }
 
-                sf = format!("{pad_f}scale={w}:{h}");
+        sf = format!("{pad_f}scale={w}:{h}");
 
-                if target_spec.aspect > 0.0
-                    && target_spec.width > 0
-                    && is_close(
-                        target_spec.width as f64 / target_spec.height as f64,
-                        target_spec.aspect,
-                        0.3,
-                    )
-                {
-                    sf.push_str(",setsar=sar=1/1");
-                }
-            }
+        if target_spec.aspect > 0.0
+            && target_spec.width > 0
+            && is_close(
+                target_spec.width as f64 / target_spec.height as f64,
+                target_spec.aspect,
+                0.3,
+            )
+        {
+            sf.push_str(",setsar=sar=1/1");
         }
     }
 
@@ -663,7 +659,14 @@ fn has_codec_copy(args: &Value, typ: FilterType) -> bool {
 fn loudnorm(lufs: &Lufs) -> String {
     format!(
         "loudnorm=I={}:LRA={}:TP={}:measured_I={}:measured_LRA={}:measured_TP={}:measured_thresh={}:offset={}:linear=true:print_format=summary",
-        lufs.target_i, lufs.target_lra, lufs.target_tp, lufs.input_i, lufs.input_lra, lufs.input_tp, lufs.input_thresh, lufs.target_offset
+        lufs.target_i,
+        lufs.target_lra,
+        lufs.target_tp,
+        lufs.input_i,
+        lufs.input_lra,
+        lufs.input_tp,
+        lufs.input_thresh,
+        lufs.target_offset
     )
 }
 
@@ -805,7 +808,7 @@ pub async fn filter_chain(
 mod tests {
     use std::{
         env,
-        sync::{atomic::AtomicBool, Arc},
+        sync::{Arc, atomic::AtomicBool},
     };
 
     use path_clean::PathClean;
@@ -813,7 +816,7 @@ mod tests {
 
     use super::*;
 
-    use crate::{utils::template::LowerThird, MediaProbe};
+    use crate::{MediaProbe, utils::template::LowerThird};
 
     fn preset() -> Preset {
         Preset {

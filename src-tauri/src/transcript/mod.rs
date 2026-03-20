@@ -3,8 +3,8 @@ use std::{
     path::Path,
     process::Stdio,
     sync::{
-        atomic::{AtomicBool, Ordering},
         Arc,
+        atomic::{AtomicBool, Ordering},
     },
 };
 
@@ -20,14 +20,15 @@ use tokio::{
 mod process;
 
 use crate::{
-    transcript::process::optimize_vtt,
-    utils::logging::{log_command, CommandLogger},
     Config, ProcessError, Task,
+    transcript::process::optimize_vtt,
+    utils::logging::{CommandLogger, log_command},
 };
 
 #[cfg(target_os = "macos")]
 use crate::MACOS_PATH;
 
+#[allow(clippy::too_many_arguments)]
 pub async fn run(
     app: Option<AppHandle>,
     config: Config,
@@ -60,12 +61,12 @@ pub async fn run(
         source_str = source_str.replace("\\", "\\\\");
     }
 
-    if transcript_cmd.contains("%mount%") {
-        if let Some(parent) = Path::new(&task.path).parent() {
-            transcript_cmd =
-                transcript_cmd.replace("%mount%", &format!("\"{}\"", parent.to_string_lossy()))
-        };
-    }
+    if transcript_cmd.contains("%mount%")
+        && let Some(parent) = Path::new(&task.path).parent()
+    {
+        transcript_cmd =
+            transcript_cmd.replace("%mount%", &format!("\"{}\"", parent.to_string_lossy()))
+    };
 
     transcript_cmd = transcript_cmd.replace("%lang%", lang);
 
@@ -90,10 +91,9 @@ pub async fn run(
     #[cfg(target_os = "windows")]
     cmd.creation_flags(0x08000000);
 
-    match &app {
-        Some(a) => a.emit("transcript-start", 0).expect("Emit progress"),
-        None => (),
-    };
+    if let Some(a) = &app {
+        a.emit("transcript-start", 0).expect("Emit progress");
+    }
 
     let mut proc = cmd.spawn()?;
 
@@ -117,14 +117,14 @@ pub async fn run(
 
             let log_line = String::from_utf8_lossy(&buffer);
 
-            if log_line.contains("Transcription completed") {
-                if let Some(ref current) = progress_clone {
-                    current.set_position(100);
-                    current.finish_with_message("Transcription done...");
-                }
+            if log_line.contains("Transcription completed")
+                && let Some(ref current) = progress_clone
+            {
+                current.set_position(100);
+                current.finish_with_message("Transcription done...");
             }
 
-            cmd_logger.log(Some("[transcript]"), &log_line.trim());
+            cmd_logger.log(Some("[transcript]"), log_line.trim());
             buffer.clear();
         }
     });
@@ -189,10 +189,9 @@ pub async fn run(
         fs::remove_file(temp_out).await?;
     }
 
-    match &app {
-        Some(a) => a.emit("transcript-finish", lang).expect("Emit progress"),
-        None => (),
-    };
+    if let Some(a) = &app {
+        a.emit("transcript-finish", lang).expect("Emit progress");
+    }
 
     Ok(())
 }

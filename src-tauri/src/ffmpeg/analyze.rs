@@ -3,8 +3,8 @@ use std::{
     path::PathBuf,
     process::Stdio,
     sync::{
-        atomic::{AtomicBool, Ordering},
         Arc,
+        atomic::{AtomicBool, Ordering},
     },
 };
 
@@ -21,8 +21,9 @@ use tokio::{
 
 use super::FFmpegProgress;
 use crate::{
-    utils::logging::{log_command, CommandLogger},
-    vec_strings, Config, ProcessError,
+    Config, ProcessError,
+    utils::logging::{CommandLogger, log_command},
+    vec_strings,
 };
 
 #[cfg(target_os = "macos")]
@@ -58,6 +59,7 @@ pub struct Lufs {
 }
 
 impl Lufs {
+    #[allow(clippy::too_many_arguments)]
     pub async fn new(
         app: Option<AppHandle>,
         config: &Config,
@@ -202,7 +204,7 @@ impl Lufs {
                                     String::new()
                                 };
                                 current.set_message(msg);
-                                current.set_position(progress.elapsed_pct as u64);
+                                current.set_position(progress.elapsed_pct);
                             }
                         }
                     }
