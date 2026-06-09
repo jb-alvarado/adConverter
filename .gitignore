@@ -26,6 +26,7 @@ venv
 *.sw?
 
 __pycache__/
+.cache/
 
 test.mp4
 ffmpeg.exe
