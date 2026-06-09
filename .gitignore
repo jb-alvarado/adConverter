@@ -25,6 +25,8 @@ venv
 *.sln
 *.sw?
 
+__pycache__/
+
 test.mp4
 ffmpeg.exe
 ffplay.exe

@@ -7,70 +7,51 @@ import subprocess
 import sys
 import threading
 import time
-import torch
 from argparse import ArgumentParser
 from pathlib import Path
+
+import torch
 from ctranslate2 import get_supported_compute_types
 
 if platform.system() == "Darwin":
     from mlx_whisper import transcribe, writers
 else:
-    from faster_whisper import (BatchedInferencePipeline, WhisperModel,
-                                format_timestamp)
+    from faster_whisper import BatchedInferencePipeline, WhisperModel, format_timestamp
 
-supported_compute_types = list(get_supported_compute_types(
-    "cuda" if torch.cuda.is_available() else "cpu"))
+supported_compute_types = list(
+    get_supported_compute_types("cuda" if torch.cuda.is_available() else "cpu")
+)
 
 # Argument parser for command-line options
 stdin_parser = ArgumentParser(description="Transcribe video file")
 stdin_parser.add_argument(
-    "-b",
-    help=f"Use batched model to transcript",
-    action='store_true'
+    "-b", help="Use batched model to transcript", action='store_true'
 )
 stdin_parser.add_argument(
     "-c",
     metavar="compute_type",
-    help=f"Compute type for whisper. Choices: {
-        supported_compute_types}",
+    help=f"Compute type for whisper. Choices: {supported_compute_types}",
     default="default",
-    choices=supported_compute_types
+    choices=supported_compute_types,
 )
 stdin_parser.add_argument(
-    "-d",
-    metavar="device",
-    help="Set device for whisper (cuda or cpu)",
-    default=None
+    "-d", metavar="device", help="Set device for whisper (cuda or cpu)", default=None
 )
 stdin_parser.add_argument(
-    "-l",
-    metavar="language",
-    help="Set language for whisper",
-    default=None
+    "-l", metavar="language", help="Set language for whisper", default=None
 )
 stdin_parser.add_argument(
-    "-f",
-    metavar="file",
-    help="file input",
-    required=True,
-    nargs='+',
-    type=Path
+    "-f", metavar="file", help="file input", required=True, nargs='+', type=Path
 )
-stdin_parser.add_argument(
-    "-p",
-    help="Print status in percent",
-    action='store_true'
-)
-stdin_parser.add_argument(
-    "-o",
-    metavar="output",
-    help="Output path",
-    type=Path
-)
+stdin_parser.add_argument("-p", help="Print status in percent", action='store_true')
+stdin_parser.add_argument("-o", metavar="output", help="Output path", type=Path)
 
 ARGS = stdin_parser.parse_args()
-MODEL_NAME = "mlx-community/whisper-large-v3-mlx" if platform.system(
-) == "Darwin" else "large-v3"   # Model size based on hardware
+MODEL_NAME = (
+    "mlx-community/whisper-large-v3-mlx"
+    if platform.system() == "Darwin"
+    else "large-v3"
+)  # Model size based on hardware
 ALLOWED_EXTENSIONS = [".mp4", ".mp3", ".mov", ".mkv", ".webm"]
 EXCLUDE_DIRS = [
     "_NICHT SENDEN",
@@ -78,9 +59,16 @@ EXCLUDE_DIRS = [
     "00-audio",
     "00-social-share",
     "Black Error",
-    "03 - Musikalische Lückenfüller"
+    "03 - Musikalische Lückenfüller",
 ]
 LOCK_EXT = ".lock"
+
+
+def get_model_download_root() -> Path:
+    if platform.system() == "Windows":
+        return Path(__file__).resolve().parent.joinpath(".cache", "huggingface", "hub")
+
+    return Path.home().joinpath(".cache", "huggingface", "hub")
 
 
 class Logger:
@@ -137,6 +125,7 @@ def unlock_video(video_path: Path):
 def transcribe_video(video_path: Path):
     lang = ARGS.l
     dev = None
+    download_root = get_model_download_root()
 
     if lang.lower() == "auto":
         lang = None
@@ -151,7 +140,7 @@ def transcribe_video(video_path: Path):
         MODEL_NAME,
         device=dev,
         compute_type=ARGS.c,
-        download_root=Path.home().joinpath('.cache/huggingface/hub')
+        download_root=download_root,
     )
     batched_model = BatchedInferencePipeline(model=model)
 
@@ -159,17 +148,21 @@ def transcribe_video(video_path: Path):
         if ARGS.b:
             if lang == 'ml':
                 segments, info = batched_model.transcribe(
-                    video_path, vad_filter=True, multilingual=True, batch_size=16)
+                    video_path, vad_filter=True, multilingual=True, batch_size=16
+                )
             else:
                 segments, info = batched_model.transcribe(
-                    video_path, vad_filter=True, language=lang, batch_size=16)
+                    video_path, vad_filter=True, language=lang, batch_size=16
+                )
         else:
             if lang == 'ml':
                 segments, info = model.transcribe(
-                    video_path, vad_filter=True, multilingual=True)
+                    video_path, vad_filter=True, multilingual=True
+                )
             else:
                 segments, info = model.transcribe(
-                    video_path, vad_filter=True, language=lang)
+                    video_path, vad_filter=True, language=lang
+                )
     except Exception as e:
         log.error(f"Failed to transcribe {video_path}: {e}")
         return
@@ -195,7 +188,7 @@ def transcribe_video(video_path: Path):
                 vtt_file.write(f"\n{start_time} --> {end_time}\n")
                 vtt_file.write(f"{segment.text.strip()}\n")
 
-                progress += (segment.end - segment.start)
+                progress += segment.end - segment.start
                 percent_complete = int((progress / total_duration) * 100)
 
                 if ARGS.p:
@@ -246,21 +239,23 @@ def transcribe_video_mlx(video_path: Path):
         python_code = (
             f"from mlx_whisper import transcribe, writers; "
             f"result = transcribe(audio=r'{video_path}', "
-            f"path_or_hf_repo=r'{MODEL_NAME}', language={
-                repr(lang)}, verbose=False, "
+            f"path_or_hf_repo=r'{MODEL_NAME}', language={repr(lang)}, verbose=False, "
             f"condition_on_previous_text=False); "
             f"writer_vtt = writers.get_writer(output_format='vtt', output_dir=r'{
-                video_path.parent}'); "
+                video_path.parent
+            }'); "
             f"writer_vtt(result, '{vtt_path}')"
         )
         command = [sys.executable, "-c", python_code]
         log.debug(" ".join(command))
 
         process = subprocess.Popen(
-            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+        )
 
         stderr_thread = threading.Thread(
-            target=read_stream, args=(process.stderr, process_output))
+            target=read_stream, args=(process.stderr, process_output)
+        )
         stderr_thread.start()
         stderr_thread.join()
         process.wait()
@@ -298,9 +293,12 @@ if __name__ == "__main__":
                 transcribe_video(f)
         elif f.is_dir():
             for p in f.rglob('*'):
-                if not any(ex_dir in str(p) for ex_dir in EXCLUDE_DIRS) and \
-                    p.suffix in ALLOWED_EXTENSIONS and \
-                        not is_locked(p) and not is_transcribed(p):
+                if (
+                    not any(ex_dir in str(p) for ex_dir in EXCLUDE_DIRS)
+                    and p.suffix in ALLOWED_EXTENSIONS
+                    and not is_locked(p)
+                    and not is_transcribed(p)
+                ):
                     if platform.system() == "Darwin":
                         transcribe_video_mlx(p)
                     else:
