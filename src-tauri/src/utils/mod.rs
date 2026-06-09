@@ -5,7 +5,7 @@ use std::{
 };
 
 use log::*;
-use tauri::{path::BaseDirectory, AppHandle, Manager};
+use tauri::{AppHandle, Manager, path::BaseDirectory};
 use tauri_plugin_updater::UpdaterExt;
 use tokio::fs::{self};
 use tokio_stream::StreamExt;

@@ -42,7 +42,11 @@ impl CommandLogger {
             None => String::new(),
         };
 
-        if line.to_lowercase().contains("[info]") {
+        if line.to_lowercase().contains("error:") {
+            error!("{prefix}{}", self.clean_log(line));
+
+            self.last_level = Level::Error;
+        } else if line.to_lowercase().contains("[info]") {
             info!("{prefix}{}", self.clean_log(line));
 
             self.last_level = Level::Info;

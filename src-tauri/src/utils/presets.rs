@@ -1,7 +1,7 @@
 use std::{
     env,
     path::{Path, PathBuf},
-    sync::{atomic::AtomicBool, Arc},
+    sync::{Arc, atomic::AtomicBool},
 };
 
 use serde::{Deserialize, Serialize};
@@ -11,7 +11,7 @@ use tauri::{AppHandle, Manager};
 use tokio::{fs, io::AsyncWriteExt};
 use ts_rs::TS;
 
-use crate::{cli::IDENTIFIER, ProcessError};
+use crate::{ProcessError, cli::IDENTIFIER};
 
 #[serde_as]
 #[derive(Clone, Debug, Default, Deserialize, Serialize, TS)]
@@ -91,7 +91,7 @@ pub async fn collect_presets(
         }
     }
 
-    presets.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+    presets.sort_by_key(|a| a.name.to_lowercase());
 
     Ok(presets)
 }

@@ -1,73 +1,65 @@
 {
-  "$schema": "https://schema.tauri.app/config/2",
-  "productName": "adConverter",
-  "version": "0.13.0",
-  "identifier": "com.adconverter",
-  "build": {
-    "beforeDevCommand": "npm run dev",
-    "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "npm run build",
-    "frontendDist": "../dist"
-  },
-  "app": {
-    "windows": [
-      {
-        "title": "adConverter",
-        "width": 1800,
-        "height": 600,
-        "minWidth": 960,
-        "minHeight": 620
-      }
-    ],
-    "security": {
-      "csp": null
+    "$schema": "https://schema.tauri.app/config/2",
+    "productName": "adConverter",
+    "version": "0.13.1",
+    "identifier": "com.adconverter",
+    "build": {
+        "beforeDevCommand": "npm run dev",
+        "devUrl": "http://localhost:1420",
+        "beforeBuildCommand": "npm run build",
+        "frontendDist": "../dist"
     },
-    "withGlobalTauri": true
-  },
-  "bundle": {
-    "createUpdaterArtifacts": true,
-    "active": true,
-    "targets": "all",
-    "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
-    ],
-    "resources": ["assets/**/*"],
-    "linux": {
-      "rpm": {
-        "desktopTemplate": "main.desktop"
-      }
-    }
-  },
-  "plugins": {
-    "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDkyODAyQTVEQTI1RkQwQjYKUldTMjBGK2lYU3FBa2hGNHpoMEFoSHZMaDBpYVZpc3B3RldzTFNQTlJ4eEpDNW5NRWk2Mk5idWsK",
-      "endpoints": [
-        "https://github.com/jb-alvarado/adConverter/releases/latest/download/latest.json"
-      ],
-      "windows": {
-        "installMode": "passive"
-      }
-    },
-    "cli": {
-      "description": "adConverter input arguments",
-      "args": [
-        {
-          "name": "cli",
-          "description": "Run adConverter in CLI mode.",
-          "takesValue": false
+    "app": {
+        "windows": [
+            {
+                "title": "adConverter",
+                "width": 1800,
+                "height": 600,
+                "minWidth": 960,
+                "minHeight": 620
+            }
+        ],
+        "security": {
+            "csp": null
         },
-        {
-          "name": "files",
-          "description": "Files to process",
-          "index": 1,
-          "multiple": true,
-          "takesValue": true
+        "withGlobalTauri": true
+    },
+    "bundle": {
+        "createUpdaterArtifacts": true,
+        "active": true,
+        "targets": "all",
+        "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
+        "resources": ["assets/**/*"],
+        "linux": {
+            "rpm": {
+                "desktopTemplate": "main.desktop"
+            }
         }
-      ]
+    },
+    "plugins": {
+        "updater": {
+            "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDkyODAyQTVEQTI1RkQwQjYKUldTMjBGK2lYU3FBa2hGNHpoMEFoSHZMaDBpYVZpc3B3RldzTFNQTlJ4eEpDNW5NRWk2Mk5idWsK",
+            "endpoints": ["https://github.com/jb-alvarado/adConverter/releases/latest/download/latest.json"],
+            "windows": {
+                "installMode": "passive"
+            }
+        },
+        "cli": {
+            "description": "adConverter input arguments",
+            "args": [
+                {
+                    "name": "cli",
+                    "description": "Run adConverter in CLI mode.",
+                    "takesValue": false
+                },
+                {
+                    "name": "files",
+                    "description": "Files to process",
+                    "index": 1,
+                    "multiple": true,
+                    "takesValue": true
+                }
+            ]
+        }
     }
-  }
 }
