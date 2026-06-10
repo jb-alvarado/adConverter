@@ -5,6 +5,7 @@ use tokio::{
     fs::File,
     io::{self, AsyncBufReadExt, AsyncWriteExt, BufReader},
 };
+use unicode_script::{Script, UnicodeScript};
 
 const MAX_DUPLICATE_DURATION_MS: u64 = 50;
 const MAX_LEN: usize = 200;
@@ -146,8 +147,26 @@ fn split_long_subtitle(subtitle: &Subtitle) -> Vec<Subtitle> {
     result
 }
 
-fn process_vtt(subtitles: Vec<Subtitle>, duration: u64) -> Vec<Subtitle> {
+fn contains_foreign_script(text: &str) -> Option<char> {
+    text.chars().find(|&c| {
+        matches!(
+            c.script(),
+            Script::Arabic
+                | Script::Han
+                | Script::Hiragana
+                | Script::Katakana
+                | Script::Hangul
+                | Script::Cyrillic
+                | Script::Greek
+                | Script::Hebrew
+                | Script::Devanagari
+        )
+    })
+}
+
+fn process_vtt(subtitles: Vec<Subtitle>, duration: u64, lang: &str) -> Vec<Subtitle> {
     let mut processed = Vec::new();
+    let mut foreign_chars = Vec::new();
     let mut prev: Option<Subtitle> = None;
 
     for current in subtitles {
@@ -191,6 +210,14 @@ fn process_vtt(subtitles: Vec<Subtitle>, duration: u64) -> Vec<Subtitle> {
             continue;
         }
 
+        if !matches!(
+            lang,
+            "ar" | "fa" | "ur" | "zh" | "ja" | "ko" | "ru" | "uk" | "he" | "hi"
+        ) && let Some(c) = contains_foreign_script(&current.text)
+        {
+            foreign_chars.push(c);
+        }
+
         prev = Some(current);
     }
 
@@ -201,6 +228,10 @@ fn process_vtt(subtitles: Vec<Subtitle>, duration: u64) -> Vec<Subtitle> {
         }
 
         processed.push(last);
+    }
+
+    if !foreign_chars.is_empty() {
+        error!("Foreign characters found: {foreign_chars:?}");
     }
 
     processed
@@ -222,9 +253,14 @@ async fn write_vtt<P: AsRef<Path>>(path: P, subtitles: &[Subtitle]) -> io::Resul
     Ok(())
 }
 
-pub async fn optimize_vtt(in_path: &Path, out_path: &Path, duration: u64) -> io::Result<()> {
+pub async fn optimize_vtt(
+    in_path: &Path,
+    out_path: &Path,
+    duration: u64,
+    lang: &str,
+) -> io::Result<()> {
     let vtt_list = vtt_serialize(in_path).await?;
-    let new_vtt_list = process_vtt(vtt_list.clone(), duration);
+    let new_vtt_list = process_vtt(vtt_list.clone(), duration, lang);
 
     if new_vtt_list != vtt_list {
         warn!("Optimized: {out_path:?}");

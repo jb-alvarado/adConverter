@@ -184,7 +184,7 @@ pub async fn run(
     if temp_out.is_file() {
         let duration = (task.probe.clone().format_duration() * 1000.0) as u64;
 
-        optimize_vtt(&temp_out, &output_path, duration).await?;
+        optimize_vtt(&temp_out, &output_path, duration, lang).await?;
 
         fs::remove_file(temp_out).await?;
     }
