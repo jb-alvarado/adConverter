@@ -211,10 +211,22 @@ function changePresets(task: Task | undefined) {
             } else {
                 presetList.value = cloneDeep(task.presets)
             }
+
+            if (task.presets.length === 1 && task.presets[0].lufs !== undefined) {
+                task.lufs = task.presets[0].lufs
+            } else if (task.presets.length === 0) {
+                task.lufs = false
+            }
         } else {
             for (const task of store.taskList) {
                 if (!task.active) {
                     task.presets = cloneDeep(presetList.value)
+
+                    if (task.presets.length === 1 && task.presets[0].lufs !== undefined) {
+                        task.lufs = task.presets[0].lufs
+                    } else if (task.presets.length === 0) {
+                        task.lufs = false
+                    }
                 }
             }
         }

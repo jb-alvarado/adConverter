@@ -3,6 +3,7 @@
   "title": "AV1 NVENC",
   "tooltip": "Encoding settings for ffplayout (AV1 NVENC)",
   "input": "-thread_queue_size 1024 -hwaccel_device 0 -hwaccel cuvid -hwaccel_output_format cuda",
+  "lufs": true,
   "filter_video": {
     "scale": "1920:1080"
   },

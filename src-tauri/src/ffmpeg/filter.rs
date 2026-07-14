@@ -824,6 +824,7 @@ mod tests {
             title: "ADtv".to_string(),
             tooltip: "Encoding settings for ADTV (x265)".to_string(),
             input: None,
+            lufs: None,
             filter_video: {
                 let mut map = Map::new();
                 map.insert("scale".to_string(), Value::String("1920:1080".to_string()));

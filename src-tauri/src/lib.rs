@@ -3,29 +3,29 @@
 use std::{
     path::PathBuf,
     sync::{
-        atomic::{AtomicBool, Ordering},
         Arc,
+        atomic::{AtomicBool, Ordering},
     },
 };
 
 use serde::{Deserialize, Serialize};
-use serde_with::{serde_as, NoneAsEmptyString};
+use serde_with::{NoneAsEmptyString, serde_as};
 // use tauri::Listener;
 // use tauri::Manager;
 use log::*;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use tauri::{
+    AppHandle, Manager, State, WindowEvent,
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
-    AppHandle, Manager, State, WindowEvent,
 };
 use tauri_plugin_store::StoreExt;
 use tauri_plugin_window_state::{AppHandleExt, StateFlags, WindowExt};
 use tokio::{
     process::Child,
     sync::{
-        mpsc::{channel, Sender},
         Mutex,
+        mpsc::{Sender, channel},
     },
 };
 use ts_rs::TS;
@@ -39,12 +39,12 @@ mod utils;
 
 pub use publisher::Publish;
 pub use utils::{
-    copy_assets, delete_files,
+    Sources, copy_assets, delete_files,
     errors::ProcessError,
     logging::init_logging,
-    presets::{collect_presets, Preset},
+    presets::{Preset, collect_presets},
     template::Template,
-    update, Sources,
+    update,
 };
 
 use ffmpeg::{probe::MediaProbe, worker};
@@ -382,8 +382,12 @@ pub async fn run() -> tauri::Result<()> {
             let menu = Menu::with_items(app, &[&quit])?;
             let window = app.get_webview_window("main").unwrap();
 
+            let _logger = init_logging(Some(app_handle.clone()));
+
             tokio::spawn(async move {
-                update(app_handle_clone2).await.unwrap();
+                if let Err(error) = update(app_handle_clone2).await {
+                    error!("Update check failed: {error}");
+                }
             });
 
             window
@@ -394,8 +398,6 @@ pub async fn run() -> tauri::Result<()> {
             window
                 .restore_state(StateFlags::SIZE)
                 .expect("Restore window size");
-
-            let _logger = init_logging(Some(app_handle.clone()));
 
             tokio::spawn(async move {
                 if let Err(e) = worker::run(app_handle_clone.clone(), rx).await {

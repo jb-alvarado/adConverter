@@ -35,7 +35,11 @@ use crate::{
 #[cfg(target_os = "macos")]
 use crate::MACOS_PATH;
 
-const IGNORE_LINES: &[&str; 2] = &["SEI type 1 size", "Late SEI is not implemented"];
+const IGNORE_LINES: &[&str] = &[
+    "SEI type 1 size",
+    "Late SEI is not implemented",
+    "If you want to help, upload a sample of this file to",
+];
 
 fn is_empty(value: &Value) -> bool {
     match value {

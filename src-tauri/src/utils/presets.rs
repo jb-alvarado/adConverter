@@ -21,6 +21,8 @@ pub struct Preset {
     pub title: String,
     pub tooltip: String,
     pub input: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lufs: Option<bool>,
     pub filter_video: Value,
     pub filter_audio: Value,
     pub video: Value,
