@@ -26,7 +26,15 @@ pub async fn read_config() -> Result<Config, ProcessError> {
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer).await?;
 
-    let config: Config = serde_json::from_slice(&buffer)?;
+    let mut config: Config = serde_json::from_slice(&buffer)?;
+
+    if let Some(ffmpeg_path) = &config.ffmpeg_path {
+        if ffmpeg_path.is_file() {
+            config.ffmpeg_path = ffmpeg_path.parent().map(|path| path.to_path_buf());
+        } else if !ffmpeg_path.is_dir() {
+            config.ffmpeg_path = None;
+        }
+    }
 
     Ok(config)
 }

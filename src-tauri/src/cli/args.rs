@@ -1,7 +1,7 @@
 use clap::Parser;
 use inquire::{Confirm, MultiSelect, Select};
 
-use crate::{collect_presets, Config, ProcessError};
+use crate::{Config, ProcessError, collect_presets};
 
 #[derive(Parser, Debug, Clone)]
 #[clap(version,
