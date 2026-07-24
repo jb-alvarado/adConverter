@@ -288,6 +288,7 @@ pub fn init_logging(app: Option<AppHandle>) -> Result<LoggerHandle, io::Error> {
         .module("winit-gtk", LevelFilter::Error)
         .module("reqwest", LevelFilter::Error)
         .module("tauri_plugin_http", LevelFilter::Error)
+        .module("rustls_platform_verifier", LevelFilter::Error)
         .module("tauri_plugin_updater", LevelFilter::Error);
 
     let mut logger = Logger::with(builder.build());

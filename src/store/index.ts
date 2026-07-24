@@ -3,7 +3,7 @@ import { some } from 'lodash-es'
 
 export const useStore = defineStore('index', {
     state: () => ({
-        ALLOWED_EXTENSIONS: ['avi', 'mpv', 'mp4', 'm4v', 'm4a', 'mov', 'webm', 'mkv', 'wav', 'aif', 'mp3', 'aac'],
+        ALLOWED_EXTENSIONS: ['avi', 'mpv', 'mp4', 'm4v', 'm4a', 'mov', 'webm', 'mkv', 'wav', 'aif', 'mp3', 'aac', 'flac'],
         IMAGE_EXTENSIONS: ['exr', 'png', 'tga', 'tif', 'tiff', 'gif'],
         VIDEO_EXTENSIONS: [
             'avi',
