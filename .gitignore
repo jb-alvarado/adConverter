@@ -32,3 +32,4 @@ test.mp4
 ffmpeg.exe
 ffplay.exe
 ffprobe.exe
+src-tauri/binaries/

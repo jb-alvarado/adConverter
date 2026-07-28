@@ -8,9 +8,6 @@ use crate::{Config, ProcessError, collect_presets};
     about = "adConverter CLI",
     long_about = None)]
 pub struct Args {
-    #[clap(long, help = "Run adConverter in CLI mode")]
-    pub cli: bool,
-
     #[clap(short, long, help = "Files to encode", num_args = 1..)]
     pub files: Vec<String>,
 

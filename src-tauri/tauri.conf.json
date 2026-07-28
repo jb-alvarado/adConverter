@@ -1,12 +1,12 @@
 {
     "$schema": "https://schema.tauri.app/config/2",
     "productName": "adConverter",
-    "version": "0.14.2",
+    "version": "0.15.0",
     "identifier": "com.adconverter",
     "build": {
-        "beforeDevCommand": "npm run dev",
+        "beforeDevCommand": "npm run prepare-cli-sidecar && npm run dev",
         "devUrl": "http://localhost:1420",
-        "beforeBuildCommand": "npm run build",
+        "beforeBuildCommand": "npm run build && npm run prepare-cli-sidecar",
         "frontendDist": "../dist"
     },
     "app": {
@@ -27,6 +27,7 @@
     "bundle": {
         "createUpdaterArtifacts": true,
         "active": true,
+        "externalBin": ["binaries/adConverter-cli"],
         "targets": "all",
         "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
         "resources": ["assets/**/*"],
@@ -47,11 +48,6 @@
         "cli": {
             "description": "adConverter input arguments",
             "args": [
-                {
-                    "name": "cli",
-                    "description": "Run adConverter in CLI mode.",
-                    "takesValue": false
-                },
                 {
                     "name": "files",
                     "description": "Files to process",
