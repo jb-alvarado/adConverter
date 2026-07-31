@@ -88,6 +88,8 @@ impl Args {
             obj.presets = Some(presets);
         }
 
+        obj.lang = obj.lang.map(|lang| config.code_from(&lang));
+
         Ok(obj)
     }
 }

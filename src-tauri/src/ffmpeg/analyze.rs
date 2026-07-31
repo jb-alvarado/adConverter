@@ -74,6 +74,7 @@ impl Lufs {
         let running = is_running.clone();
         let running_clone = is_running.clone();
         let app_clone1 = app.clone();
+        let log_ffmpeg_output = app.is_some();
         let lufs_c = config.lufs.clone();
         let lufs_stats = Arc::new(Mutex::new(Self {
             ..Default::default()
@@ -96,12 +97,7 @@ impl Lufs {
             .map(|p| p.join("ffmpeg"))
             .unwrap_or(PathBuf::from("ffmpeg"));
 
-        if app.is_some() {
-            args.push("level+info".to_string());
-        } else {
-            args.push("level+warning".to_string());
-        }
-
+        args.push("level+info".to_string());
         args.extend(src_cmd);
         args.extend(vec_strings![
             "-vn",
@@ -148,7 +144,9 @@ impl Lufs {
                     break;
                 }
 
-                cmd_logger.log(Some("[ffmpeg]"), &line);
+                if log_ffmpeg_output || is_warning_or_error(&line) {
+                    cmd_logger.log(Some("[ffmpeg]"), &line);
+                }
 
                 if line == "{" {
                     is_object = true;
@@ -231,6 +229,12 @@ impl Lufs {
 
         Ok(lufs)
     }
+}
+
+fn is_warning_or_error(line: &str) -> bool {
+    let line = line.to_lowercase();
+
+    line.contains("warning") || line.contains("error") || line.contains("fatal")
 }
 
 fn deserialize_as_f64<'de, D: Deserializer<'de>>(deserializer: D) -> Result<f64, D::Error> {

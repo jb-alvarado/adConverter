@@ -271,7 +271,13 @@ pub async fn work(
             && has_audio
             && !is_empty(&preset.audio)
         {
-            transcript_src = Some(output.clone())
+            transcript_src = Some(
+                preset
+                    .container_audio
+                    .as_ref()
+                    .map(|audio_ext| output.with_extension(audio_ext))
+                    .unwrap_or_else(|| output.clone()),
+            )
         }
 
         let temp_out = env::temp_dir().join(&file_name);
@@ -434,10 +440,23 @@ pub async fn work(
             proc.wait().await?;
         }
 
-        // info!("Copy output file to: {output:?}");
+        let mut output_files = Vec::with_capacity(2);
 
-        fs::copy(&temp_out, output).await?;
-        fs::remove_file(temp_out).await?;
+        if has_video && preset.container_video.is_some() {
+            output_files.push((temp_out.clone(), output.clone()));
+        }
+
+        if has_audio && let Some(audio_ext) = &preset.container_audio {
+            output_files.push((
+                temp_out.with_extension(audio_ext),
+                output.with_extension(audio_ext),
+            ));
+        }
+
+        for (temp_file, output_file) in output_files {
+            fs::copy(&temp_file, &output_file).await?;
+            fs::remove_file(temp_file).await?;
+        }
 
         finished.store(true, Ordering::SeqCst);
 

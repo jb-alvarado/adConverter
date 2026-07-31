@@ -104,12 +104,12 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn code_from(self, lang: &str) -> String {
+    pub fn code_from(&self, lang: &str) -> String {
         self.transcript_lang
             .iter()
-            .find(|l| l.name == lang)
+            .find(|l| l.name.eq_ignore_ascii_case(lang) || l.code.eq_ignore_ascii_case(lang))
             .map(|l| l.code.clone())
-            .unwrap_or_default()
+            .unwrap_or_else(|| lang.to_string())
     }
 }
 
