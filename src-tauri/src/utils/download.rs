@@ -12,11 +12,11 @@ use crate::utils::errors::ProcessError;
 
 const OUTPUT_MARKER: &str = "__ADCONVERTER_OUTPUT__";
 
-pub async fn version() -> Result<String, ProcessError> {
-    version_from_program("yt-dlp").await
+pub async fn version(path: Option<PathBuf>) -> Result<String, ProcessError> {
+    version_from_program(program(path)).await
 }
 
-async fn version_from_program(program: &str) -> Result<String, ProcessError> {
+async fn version_from_program(program: PathBuf) -> Result<String, ProcessError> {
     let mut command = Command::new(program);
     command.arg("--version");
 
@@ -47,13 +47,14 @@ pub async fn download(
     url: String,
     directory: PathBuf,
     arguments: &str,
+    yt_dlp_path: Option<PathBuf>,
     process: Arc<Mutex<Option<Child>>>,
 ) -> Result<String, ProcessError> {
     tokio::fs::create_dir_all(&directory).await?;
 
     let arguments = parse_arguments(arguments)?;
     eprintln!("[yt-dlp] starting download for {url} with arguments: {arguments:?}");
-    let mut command = Command::new("yt-dlp");
+    let mut command = Command::new(program(yt_dlp_path));
     command
         .kill_on_drop(true)
         .args(arguments)
@@ -135,6 +136,14 @@ pub async fn download(
     })
 }
 
+fn program(path: Option<PathBuf>) -> PathBuf {
+    match path {
+        Some(path) if path.is_dir() => path.join("yt-dlp"),
+        Some(path) => path,
+        None => PathBuf::from("yt-dlp"),
+    }
+}
+
 fn process_line(app: &AppHandle, line: &str, downloaded_file: &mut Option<String>) {
     if let Some(path) = output_path(line) {
         *downloaded_file = Some(path.to_string());
@@ -197,9 +206,15 @@ mod tests {
 
     #[tokio::test]
     async fn reports_a_missing_program() {
-        let error = version_from_program("adconverter-definitely-missing-program")
+        let error = version_from_program(PathBuf::from("adconverter-definitely-missing-program"))
             .await
             .unwrap_err();
         assert!(error.to_string().contains("yt-dlp was not found"));
+    }
+
+    #[test]
+    fn resolves_a_directory_to_the_yt_dlp_binary() {
+        let directory = std::env::temp_dir();
+        assert_eq!(program(Some(directory.clone())), directory.join("yt-dlp"));
     }
 }

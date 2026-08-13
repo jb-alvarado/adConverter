@@ -32,6 +32,7 @@ const ffmpeg_path = ref('')
 const transcript_cmd = ref('')
 const download_path = ref('')
 const download_args = ref('--output "%(title)s.%(ext)s"')
+const yt_dlp_path = ref('')
 
 onBeforeMount(async () => {
     appVersion.value = await getVersion()
@@ -41,6 +42,7 @@ onBeforeMount(async () => {
     transcript_cmd.value = (await config.get('transcript_cmd')) ?? ''
     download_path.value = (await config.get('download_path')) ?? (await downloadDir())
     download_args.value = (await config.get('download_args')) ?? '--output "%(title)s.%(ext)s"'
+    yt_dlp_path.value = (await config.get('yt_dlp_path')) ?? ''
 })
 
 async function selectDownloadPath() {
@@ -64,6 +66,7 @@ async function saveConfig() {
     await config.set('publish_preset', store.publishPreset)
     await config.set('download_path', download_path.value)
     await config.set('download_args', download_args.value)
+    await config.set('yt_dlp_path', yt_dlp_path.value)
 
     if (ffmpeg_path.value) {
         await config.set('ffmpeg_path', ffmpeg_path.value)
@@ -262,6 +265,17 @@ async function cancel() {
                     </div>
                     <div class="text-sm text-base-content/80 mt-2">
                         “Save As” in the main window overrides this folder.
+                    </div>
+                    <div class="form-control mt-3 max-w-full px-0">
+                        <span class="label-text mb-1">yt-dlp binary or folder:</span>
+                        <input
+                            v-model="yt_dlp_path"
+                            class="input input-xs input-bordered rounded-xs w-full font-mono"
+                            placeholder="/usr/local/bin/yt-dlp"
+                        />
+                        <span class="text-sm text-base-content/80 mt-1">
+                            Optional. A binary or its folder is accepted; standard Homebrew paths are searched on macOS.
+                        </span>
                     </div>
                     <div class="form-control mt-3 max-w-full px-0">
                         <span class="label-text mb-1">yt-dlp parameters:</span>

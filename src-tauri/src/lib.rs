@@ -50,7 +50,7 @@ pub use utils::{
 use ffmpeg::{probe::MediaProbe, worker};
 
 #[cfg(target_os = "macos")]
-const MACOS_PATH: &str = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+const MACOS_PATH: &str = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
 
 #[serde_as]
 #[derive(Clone, Debug, Default, Deserialize, Serialize, TS)]
@@ -103,6 +103,8 @@ pub struct Config {
     pub download_path: Option<PathBuf>,
     #[serde(default)]
     pub download_args: String,
+    #[serde(default)]
+    pub yt_dlp_path: Option<PathBuf>,
     pub lufs: LufsConfig,
     pub transcript_cmd: String,
     pub transcript_lang: Vec<LangConfig>,
@@ -208,8 +210,9 @@ async fn file_drop(state: State<'_, AppState>, mut task: Task) -> Result<Task, P
 }
 
 #[tauri::command]
-async fn yt_dlp_version() -> Result<String, ProcessError> {
-    download::version().await
+async fn yt_dlp_version(state: State<'_, AppState>) -> Result<String, ProcessError> {
+    let path = state.config.lock().await.yt_dlp_path.clone();
+    download::version(path).await
 }
 
 #[tauri::command]
@@ -227,6 +230,7 @@ async fn download_url(
 
     let config = state.config.lock().await;
     let configured_path = config.download_path.clone();
+    let yt_dlp_path = config.yt_dlp_path.clone();
     let arguments = if config.download_args.trim().is_empty() {
         DEFAULT_DOWNLOAD_ARGS.to_string()
     } else {
@@ -243,6 +247,7 @@ async fn download_url(
         url,
         directory,
         &arguments,
+        yt_dlp_path,
         state.downloader.clone(),
     )
     .await?;
@@ -332,6 +337,10 @@ fn resolve_download_directory(
         .or(fallback)
 }
 
+fn non_empty_path(path: &str) -> Option<PathBuf> {
+    (!path.trim().is_empty()).then(|| PathBuf::from(path))
+}
+
 #[tauri::command]
 async fn save_config(app: AppHandle, state: State<'_, AppState>) -> Result<(), ProcessError> {
     let store = app.store("config.json")?;
@@ -345,6 +354,9 @@ async fn save_config(app: AppHandle, state: State<'_, AppState>) -> Result<(), P
     }
     if let Some(Value::String(download_args)) = store.get("download_args") {
         config.download_args = download_args;
+    }
+    if let Some(Value::String(yt_dlp_path)) = store.get("yt_dlp_path") {
+        config.yt_dlp_path = non_empty_path(&yt_dlp_path);
     }
 
     if let Some(Value::String(copyright)) = store.get("copyright") {
@@ -384,6 +396,9 @@ async fn load_config(app: AppHandle, state: State<'_, AppState>) -> Result<(), P
     }
     if let Some(Value::String(download_args)) = store.get("download_args") {
         config.download_args = download_args;
+    }
+    if let Some(Value::String(yt_dlp_path)) = store.get("yt_dlp_path") {
+        config.yt_dlp_path = non_empty_path(&yt_dlp_path);
     }
 
     if let Some(Value::String(copyright)) = store.get("copyright") {
@@ -583,6 +598,15 @@ mod download_path_tests {
                 Some(PathBuf::from("/fallback")),
             ),
             Some(PathBuf::from("/fallback"))
+        );
+    }
+
+    #[test]
+    fn ignores_an_empty_yt_dlp_path() {
+        assert_eq!(non_empty_path("  "), None);
+        assert_eq!(
+            non_empty_path("/opt/homebrew/bin/yt-dlp"),
+            Some(PathBuf::from("/opt/homebrew/bin/yt-dlp"))
         );
     }
 }
