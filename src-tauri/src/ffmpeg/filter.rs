@@ -900,7 +900,9 @@ mod tests {
         let config = Config::default();
 
         Task {
+            id: "test-task".to_string(),
             path: path.to_string_lossy().to_string(),
+            url: None,
             presets: vec![preset()],
             template: Some(template()),
             fade: true,

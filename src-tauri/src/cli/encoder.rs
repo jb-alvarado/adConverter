@@ -1,6 +1,6 @@
 use std::{
     process::exit,
-    sync::{atomic::AtomicBool, Arc},
+    sync::{Arc, atomic::AtomicBool},
 };
 
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};

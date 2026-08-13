@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, onBeforeMount } from 'vue'
 import { getVersion } from '@tauri-apps/api/app'
+import { open } from '@tauri-apps/plugin-dialog'
+import { downloadDir } from '@tauri-apps/api/path'
 import { invoke } from '@tauri-apps/api/core'
 import { LazyStore } from '@tauri-apps/plugin-store'
 
@@ -28,6 +30,8 @@ const lufs = ref<LufsConfig>({
 })
 const ffmpeg_path = ref('')
 const transcript_cmd = ref('')
+const download_path = ref('')
+const download_args = ref('--output "%(title)s.%(ext)s"')
 
 onBeforeMount(async () => {
     appVersion.value = await getVersion()
@@ -35,7 +39,14 @@ onBeforeMount(async () => {
     lufs.value = await config.get('lufs')
     ffmpeg_path.value = (await config.get('ffmpeg_path')) ?? ''
     transcript_cmd.value = (await config.get('transcript_cmd')) ?? ''
+    download_path.value = (await config.get('download_path')) ?? (await downloadDir())
+    download_args.value = (await config.get('download_args')) ?? '--output "%(title)s.%(ext)s"'
 })
+
+async function selectDownloadPath() {
+    const path = await open({ directory: true, multiple: false, defaultPath: download_path.value })
+    if (path) download_path.value = path as string
+}
 
 function addLang() {
     store.transcriptLanguages.push({ name: '', code: '' })
@@ -51,6 +62,8 @@ async function saveConfig() {
     await config.set('transcript_cmd', transcript_cmd.value)
     await config.set('transcript_lang', store.transcriptLanguages)
     await config.set('publish_preset', store.publishPreset)
+    await config.set('download_path', download_path.value)
+    await config.set('download_args', download_args.value)
 
     if (ffmpeg_path.value) {
         await config.set('ffmpeg_path', ffmpeg_path.value)
@@ -213,9 +226,7 @@ async function cancel() {
                                 />
                             </label>
                             <label class="label">
-                                <span class="text-sm select-text text-base-content/80"
-                                    >Default is system path</span
-                                >
+                                <span class="text-sm select-text text-base-content/80">Default is system path</span>
                             </label>
                             <div class="mt-3">
                                 Command line argument
@@ -235,6 +246,30 @@ async function cancel() {
                                 </label>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div class="bg-base-200 p-2">
+                    <div class="font-bold">Downloads</div>
+                    <div class="form-control mt-2 max-w-full px-0">
+                        <span class="label-text mb-1">Default download folder:</span>
+                        <div class="join w-full">
+                            <input
+                                v-model="download_path"
+                                class="input input-xs input-bordered rounded-xs join-item w-full"
+                            />
+                            <button class="btn btn-xs join-item rounded-xs" @click="selectDownloadPath">Choose</button>
+                        </div>
+                    </div>
+                    <div class="text-sm text-base-content/80 mt-2">
+                        “Save As” in the main window overrides this folder.
+                    </div>
+                    <div class="form-control mt-3 max-w-full px-0">
+                        <span class="label-text mb-1">yt-dlp parameters:</span>
+                        <input
+                            v-model="download_args"
+                            class="input input-xs input-bordered rounded-xs w-full font-mono"
+                            placeholder='--output "%(title)s.%(ext)s"'
+                        />
                     </div>
                 </div>
             </div>

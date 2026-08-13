@@ -29,7 +29,9 @@ export const useStore = defineStore('index', {
         jobsDone: false,
         taskList: [] as Task[],
         defaultTask: {
+            id: '',
             path: '',
+            url: null,
             in: 0,
             out: 0,
             lufs: false,
@@ -71,6 +73,7 @@ export const useStore = defineStore('index', {
         processMsg: '',
         processPath: '',
         jobInProcess: false,
+        downloadInProgress: false,
     }),
 
     actions: {

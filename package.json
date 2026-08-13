@@ -1,11 +1,12 @@
 {
   "name": "ad_converter",
   "private": true,
-  "version": "0.15.2",
+  "version": "0.16.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
+    "test": "node test/taskQueue.test.ts",
     "preview": "vite preview",
     "tauri": "tauri"
   },
@@ -24,7 +25,7 @@
     "bootstrap-icons": "^1.13.1",
     "lodash-es": "^4.18.1",
     "pinia": "^4.0.2",
-    "vue": "^3.5.40"
+    "vue": "^3.5.41"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
@@ -32,11 +33,11 @@
     "@tauri-apps/cli": "^2",
     "@types/lodash-es": "^4.17.12",
     "@vitejs/plugin-vue": "^6.0.8",
-    "daisyui": "^5.7.9",
-    "postcss": "^8.5.25",
+    "daisyui": "^5.7.16",
+    "postcss": "^8.5.26",
     "tailwindcss": "^4.3.3",
-    "typescript": "5.9.3",
-    "vite": "^8.2.0",
+    "typescript": "6.0.3",
+    "vite": "^8.2.1",
     "vue-tsc": "^3.3.9"
   }
 }

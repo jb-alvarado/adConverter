@@ -9,6 +9,7 @@ import { cloneDeep, isEqual } from 'lodash-es'
 import Multiselect from '@vueform/multiselect'
 
 import { stringFormatter, useVariables } from '../composables/helper'
+import { createTaskId } from '../composables/taskQueue'
 import { useStore } from '../store/index.ts'
 
 import TimePicker from '../components/TimePicker.vue'
@@ -21,8 +22,9 @@ const { multiSelectClasses } = useVariables()
 
 const defaultContext = [
     { label: 'Add Files', action: 'add' },
+    { label: 'Add URL', action: 'url' },
     { label: 'Edit Template', action: 'edit' },
-    { label: 'Delete', action: 'delete' },
+    { label: 'Remove', action: 'delete' },
     { label: 'Reset', action: 'reset' },
 ]
 
@@ -53,6 +55,12 @@ const prop = defineProps({
         },
     },
     addFiles: {
+        type: Function,
+        default() {
+            return
+        },
+    },
+    addUrl: {
         type: Function,
         default() {
             return
@@ -103,6 +111,9 @@ function handleActionClick(action: any) {
         case 'add':
             prop.addFiles()
             break
+        case 'url':
+            prop.addUrl()
+            break
         case 'edit':
             if (selectedTask.value) {
                 prop.editTemplate(selectedTask.value)
@@ -113,7 +124,7 @@ function handleActionClick(action: any) {
             break
         case 'delete':
             if (selectedTask.value) {
-                const index = store.taskList.findIndex((t: Task) => t.path === selectedTask.value.path)
+                const index = store.taskList.findIndex((t: Task) => t.id === selectedTask.value.id)
                 if (index !== -1) {
                     store.taskList.splice(index, 1)
                 }
@@ -126,6 +137,13 @@ function handleActionClick(action: any) {
 
 async function getClipboard() {
     const content = await readText()
+    const urls = content.match(/https?:\/\/[^\s"']+/g) ?? []
+    if (urls.length > 0) {
+        for (const url of urls) {
+            await prop.addUrl(url)
+        }
+        return
+    }
     const regex = /(["'])(.*?[^\\])\1|([^\s"']+(?:\\\s[^\s"']*)*)/g
 
     let match
@@ -150,6 +168,7 @@ async function addFile(path: string) {
     }
 
     const task = cloneDeep(store.defaultTask)
+    task.id = createTaskId()
     task.path = path
 
     await invoke<Task>('file_drop', { task })
@@ -336,19 +355,19 @@ function changePresets(task: Task | undefined) {
                 <tbody>
                     <tr
                         v-for="task in store.taskList"
-                        :key="task.path"
+                        :key="task.id"
                         class="p-0 m-0 border-b border-zinc-700 bg-base-200 odd:bg-base-300 hover:bg-base-100"
                         :class="{ 'opacity-50': task.active || task.finished }"
                         @contextmenu.prevent="showContextMenu($event, task)"
                     >
                         <td class="p-0 border-r border-zinc-700">
                             <div class="m-0 p-2.5 truncate">
-                                {{ filename(task.path) }}
+                                {{ task.url ?? filename(task.path) }}
                             </div>
                         </td>
                         <td class="p-0 border-r border-zinc-700">
                             <div class="p-2">
-                                {{ secToMin(task.probe.format.duration) }}
+                                {{ task.url ? 'Unknown' : secToMin(task.probe.format.duration) }}
                             </div>
                         </td>
                         <td class="p-0 border-r border-zinc-700">

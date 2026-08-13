@@ -3,10 +3,19 @@ import { invoke } from '@tauri-apps/api/core'
 import { listen, type Event } from '@tauri-apps/api/event'
 import { open } from '@tauri-apps/plugin-dialog'
 import { load } from '@tauri-apps/plugin-store'
-import { cloneDeep, isEqual, round } from 'lodash-es'
-import { onBeforeMount, ref } from 'vue'
+import { cloneDeep, isEqual } from 'lodash-es'
+import { onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue'
+import { readText } from '@tauri-apps/plugin-clipboard-manager'
 
 import { stringFormatter } from './composables/helper'
+import {
+    createTaskId,
+    findTaskById,
+    finishedProgress,
+    hasPendingTasks,
+    nextPendingTask,
+    taskHasWork,
+} from './composables/taskQueue'
 import { useStore } from './store/index.ts'
 
 import AlertMsg from './components/AlertMsg.vue'
@@ -17,6 +26,7 @@ import EditTemplate from './components/EditTemplate.vue'
 import HeaderMenu from './components/HeaderMenu.vue'
 import LogWindow from './components/LogWindow.vue'
 import MediaTable from './components/MediaTable.vue'
+import AddUrl from './components/AddUrl.vue'
 
 const { folderPath, filename, removeExtension, Logger } = stringFormatter()
 
@@ -34,8 +44,35 @@ const targetSubfolder = ref(false)
 const noProgressValues = ref(false)
 const showTemplateEditor = ref(false)
 const showPublisherEditor = ref(false)
+const showUrlDialog = ref(false)
+const pendingUrl = ref('')
 
 const log = new Logger()
+
+function errorMessage(error: unknown): string {
+    if (error instanceof Error) return error.message
+    if (typeof error === 'string') return error
+    try {
+        return JSON.stringify(error)
+    } catch {
+        return String(error)
+    }
+}
+
+async function pasteUrl(event: KeyboardEvent) {
+    if (event.defaultPrevented || !(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'v') return
+    const element = event.target as HTMLElement | null
+    if (element?.matches('input, textarea, [contenteditable="true"]')) return
+
+    const url = (await readText()).match(/https?:\/\/[^\s"']+/)?.[0]
+    if (url) {
+        event.preventDefault()
+        showAddUrl(url)
+    }
+}
+
+onMounted(() => window.addEventListener('keydown', pasteUrl))
+onBeforeUnmount(() => window.removeEventListener('keydown', pasteUrl))
 
 onBeforeMount(async () => {
     await invoke('load_config').catch((e) => {
@@ -77,37 +114,24 @@ onBeforeMount(async () => {
 })
 
 listen<Task>('task-active', (event: Event<Task>) => {
-    for (const entry of store.taskList) {
-        if (entry.path === event.payload.path) {
-            entry.active = true
-            store.processPath = filename(entry.path)
-        }
+    const task = findTaskById(store.taskList, event.payload.id)
+    if (task) {
+        task.active = true
+        store.processPath = filename(task.path)
     }
 })
 
 listen<Task>('task-finish', (event: Event<Task>) => {
-    for (let i = 0; i < store.taskList.length; i++) {
-        if (store.jobInProcess && store.taskList[i].path === event.payload.path) {
-            store.progressAll = round(((i + 1) * 100) / store.taskList.length)
-            store.taskList[i].active = false
-            store.taskList[i].finished = true
+    const task = findTaskById(store.taskList, event.payload.id)
+    if (!task || !store.jobInProcess) return
 
-            if (i === store.taskList.length - 1) {
-                store.jobInProcess = false
-                store.jobsDone = true
-            } else {
-                taskSendNext()
-            }
+    task.active = false
+    task.finished = true
+    store.progressAll = finishedProgress(store.taskList)
 
-            break
-        }
-    }
-
-    if (
-        !store.taskList.some(
-            (task: Task) => task.presets.length > 0 || (task.transcript && task.transcript != 'none') || task.publish
-        )
-    ) {
+    if (nextPendingTask(store.taskList)) {
+        void taskSendNext()
+    } else if (!hasPendingTasks(store.taskList)) {
         store.jobInProcess = false
         store.jobsDone = true
     }
@@ -158,6 +182,24 @@ listen<string>('transcript-finish', async (event: Event<string>) => {
     store.processMsg = `<strong>Transcript (${event.payload}) done: </strong>`
 })
 
+listen<string>('download-start', (event: Event<string>) => {
+    store.downloadInProgress = true
+    noProgressValues.value = false
+    store.progressCurrent = 0
+    store.processPath = event.payload
+    store.processMsg = '<strong>Download: </strong>'
+})
+
+listen<number>('download-progress', (event: Event<number>) => {
+    store.progressCurrent = Math.round(event.payload)
+})
+
+listen<string>('download-finish', (event: Event<string>) => {
+    store.progressCurrent = 100
+    store.processPath = filename(event.payload)
+    store.processMsg = '<strong>Download complete: </strong>'
+})
+
 listen<string>('logging', (event: Event<string>) => {
     store.logContent.push(event.payload)
 
@@ -185,29 +227,71 @@ async function getDir() {
 }
 
 async function taskSendNext() {
-    for (const task of store.taskList) {
-        if (!task.finished) {
-            if (task.presets.length === 0 && task.transcript === 'none' && !task.publish) {
-                store.msgAlert('warning', 'No transcription, preset or publisher selected!', 3)
-                break
-            }
-
-            store.jobInProcess = true
-            task.active = true
-            task.target = targetFolder.value
-            task.target_subfolder = targetSubfolder.value
-
-            if (!task.template.intro && !task.template.outro && task.template.lower_thirds.length === 0) {
-                task.template = null
-            }
-
-            currentTask.value = task
-            await invoke<Task>('task_send', { task }).catch((e) => {
-                store.msgAlert('error', e, 5)
-                log.error(e)
-            })
-            break
+    const task = nextPendingTask(store.taskList)
+    if (!task) {
+        if (!hasPendingTasks(store.taskList)) {
+            store.jobInProcess = false
+            store.jobsDone = true
         }
+        return
+    }
+
+    if (!taskHasWork(task)) {
+        task.finished = true
+        store.progressAll = finishedProgress(store.taskList)
+        store.msgAlert('warning', `Skipped ${filename(task.path)}: no transcription, preset or publisher selected.`, 5)
+        await taskSendNext()
+        return
+    }
+
+    store.jobInProcess = true
+    store.jobsDone = false
+    task.active = true
+    task.target = targetFolder.value
+    task.target_subfolder = targetSubfolder.value
+
+    if (task.template && !task.template.intro && !task.template.outro && task.template.lower_thirds.length === 0) {
+        task.template = null
+    }
+
+    currentTask.value = task
+    if (task.url) {
+        try {
+            const path = await invoke<string>('download_url', { url: task.url, target: targetFolder.value })
+            task.path = path
+            task.url = null
+            const downloadedTask = await invoke<Task>('file_drop', { task })
+            Object.assign(task, downloadedTask)
+        } catch (e) {
+            task.active = false
+            store.jobInProcess = false
+            console.error('yt-dlp download failed:', e)
+            const message = errorMessage(e)
+            store.msgAlert('error', message, 5)
+            log.error(message)
+            return
+        } finally {
+            store.downloadInProgress = false
+        }
+
+        if (!taskHasWork(task)) {
+            task.active = false
+            task.finished = true
+            store.progressAll = finishedProgress(store.taskList)
+            await taskSendNext()
+            return
+        }
+    }
+
+    try {
+        await invoke<Task>('task_send', { task })
+    } catch (e) {
+        task.active = false
+        store.jobInProcess = false
+        const message = errorMessage(e)
+        console.error('Could not enqueue task:', e)
+        store.msgAlert('error', message, 5)
+        log.error(message)
     }
 }
 
@@ -226,6 +310,7 @@ async function jobRun() {
             })
     } else {
         // start encoding job
+        store.jobsDone = false
         await invoke('task_start').catch((e) => {
             store.msgAlert('error', e, 5)
             log.error(e)
@@ -299,6 +384,7 @@ async function addFiles() {
 
     for (const file of files) {
         const task = cloneDeep(store.defaultTask)
+        task.id = createTaskId()
 
         if (store.taskList.some((task: Task) => task.path === file)) {
             store.msgAlert('warning', `File: <strong>${filename(file)}</strong> already in list!`, 5)
@@ -320,14 +406,46 @@ async function addFiles() {
             })
     }
 }
+
+function showAddUrl(url = '') {
+    pendingUrl.value = url
+    showUrlDialog.value = true
+}
+
+async function addUrl(url: string) {
+    showUrlDialog.value = false
+    if (!url) return
+
+    if (store.taskList.some((item: Task) => item.url === url)) {
+        store.msgAlert('warning', 'URL is already in the queue.', 5)
+        return
+    }
+
+    const task = cloneDeep(store.defaultTask)
+    task.id = createTaskId()
+    task.path = url
+    task.url = url
+    task.template = cloneDeep(store.defaultTemplate)
+    store.taskList.push(task)
+
+    try {
+        const version = await invoke<string>('yt_dlp_version')
+        console.debug(`yt-dlp ${version} found`)
+    } catch (e) {
+        const message = errorMessage(e)
+        console.warn('yt-dlp availability check failed:', e)
+        store.msgAlert('warning', message, 8)
+        log.warn(message)
+    }
+}
 </script>
 
 <template>
     <div class="flex flex-col h-screen justify-between select-none cursor-default overflow-hidden">
-        <HeaderMenu :logger="log" :add-files="addFiles" />
+        <HeaderMenu :logger="log" :add-files="addFiles" :add-url="showAddUrl" />
         <main class="mb-auto bg-base-300 w-full h-full overflow-x-hidden overflow-y-auto">
             <div class="relative bg-base-200 h-full">
-                <MediaTable :logger="log" :editTemplate="editTemplate" :editPublisher="editPublisher" :add-files="addFiles" />
+                <MediaTable :logger="log" :editTemplate="editTemplate" :editPublisher="editPublisher" :add-files="addFiles" :add-url="showAddUrl" />
                 <LogWindow v-if="store.openLog" />
                 <EditConfig v-if="store.showConfig" :logger="log" />
                 <EditPresets v-if="store.showPresets" :logger="log" />
@@ -406,12 +524,12 @@ async function addFiles() {
                                         type="text"
                                         class="input input-sm input-bordered focus:border-base-content/30 focus:outline-base-content/30 rounded-xs join-item w-full"
                                         :class="{ 'disabled:input-bordered': store.jobInProcess }"
-                                        :disabled="store.jobInProcess"
+                                        :disabled="store.jobInProcess || store.downloadInProgress"
                                     />
                                     <button
                                         class="btn btn-sm border-base-content/30 hover:border-base-content/40 rounded-xs join-item"
                                         @click="getDir()"
-                                        :disabled="store.jobInProcess"
+                                        :disabled="store.jobInProcess || store.downloadInProgress"
                                     >
                                         Save As
                                     </button>
@@ -439,5 +557,6 @@ async function addFiles() {
             :currentTask="currentTask"
             :savePublisher="savePublisher"
         />
+        <AddUrl :show="showUrlDialog" :initial-url="pendingUrl" :add-url="addUrl" />
     </div>
 </template>

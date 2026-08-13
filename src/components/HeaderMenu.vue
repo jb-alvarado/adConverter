@@ -24,7 +24,13 @@ const prop = defineProps({
         default() {
             return
         },
-    }
+    },
+    addUrl: {
+        type: Function,
+        default() {
+            return
+        },
+    },
 })
 
 onBeforeMount(async () => {
@@ -37,7 +43,7 @@ watch([jobsDone], () => {
     }
 })
 
-async function resetApp($event: any,) {
+async function resetApp($event: any) {
     store.taskList.length = 0
     store.processMsg = ''
     store.processPath = ''
@@ -88,6 +94,7 @@ async function shutdown_system() {
                     <button tabindex="0" role="button" class="btn btn-xs btn-ghost rounded-none!">File</button>
                     <ul tabindex="0" class="menu dropdown-content bg-base-100 rounded-xs w-36 mt-1 p-0 shadow-sm">
                         <li><button class="hover:rounded-xs rounded-xs!" @click="addFiles()">Open</button></li>
+                        <li><button class="hover:rounded-xs rounded-xs!" @click="addUrl()">Add URL</button></li>
                         <li><button class="hover:rounded-xs rounded-xs!" @click="resetApp">Reset</button></li>
                         <li><button class="hover:rounded-xs rounded-xs!" @click="closeApp()">Close</button></li>
                     </ul>

@@ -1,15 +1,15 @@
-use std::sync::{atomic::AtomicBool, Arc};
+use std::sync::{Arc, atomic::AtomicBool};
 
 use dirs::data_dir;
 use serde_json;
 use tokio::{fs::File, io::AsyncReadExt};
 
 use crate::{
-    cli::{args::Args, IDENTIFIER},
+    Config, Task,
+    cli::{IDENTIFIER, args::Args},
     collect_presets,
     ffmpeg::probe::MediaProbe,
     utils::errors::ProcessError,
-    Config, Task,
 };
 
 pub async fn read_config() -> Result<Config, ProcessError> {
@@ -51,9 +51,11 @@ pub async fn create_tasks(config: &Config, args: Args) -> Vec<Task> {
         }
     }
 
-    for file in args.files {
+    for (index, file) in args.files.into_iter().enumerate() {
         let task = Task {
+            id: format!("cli-{index}"),
             path: file.clone(),
+            url: None,
             r#in: 0.0,
             out: 0.0,
             fade: args.fade.unwrap_or_default(),

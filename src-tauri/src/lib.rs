@@ -15,7 +15,7 @@ use serde_with::{NoneAsEmptyString, serde_as};
 use log::*;
 use serde_json::{Value, json};
 use tauri::{
-    AppHandle, Manager, State, WindowEvent,
+    AppHandle, Emitter, Manager, State, WindowEvent,
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
 };
@@ -39,7 +39,7 @@ mod utils;
 
 pub use publisher::Publish;
 pub use utils::{
-    Sources, copy_assets, delete_files,
+    Sources, copy_assets, delete_files, download,
     errors::ProcessError,
     logging::init_logging,
     presets::{Preset, collect_presets},
@@ -56,7 +56,11 @@ const MACOS_PATH: &str = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
 #[derive(Clone, Debug, Default, Deserialize, Serialize, TS)]
 #[ts(export, export_to = "backend.d.ts")]
 pub struct Task {
+    #[serde(default)]
+    pub id: String,
     pub path: String,
+    #[serde(default)]
+    pub url: Option<String>,
     pub r#in: f64,
     pub out: f64,
     pub fade: bool,
@@ -86,6 +90,7 @@ struct AppState {
     run: Arc<AtomicBool>,
     sender: Sender<Task>,
     encoder: Arc<Mutex<Option<Child>>>,
+    downloader: Arc<Mutex<Option<Child>>>,
     config: Arc<Mutex<Config>>,
 }
 
@@ -94,6 +99,10 @@ struct AppState {
 pub struct Config {
     pub copyright: String,
     pub ffmpeg_path: Option<PathBuf>,
+    #[serde(default)]
+    pub download_path: Option<PathBuf>,
+    #[serde(default)]
+    pub download_args: String,
     pub lufs: LufsConfig,
     pub transcript_cmd: String,
     pub transcript_lang: Vec<LangConfig>,
@@ -102,6 +111,8 @@ pub struct Config {
     #[serde(default)]
     pub publisher: Option<Value>,
 }
+
+const DEFAULT_DOWNLOAD_ARGS: &str = "--output \"%(title)s.%(ext)s\"";
 
 impl Config {
     pub fn code_from(&self, lang: &str) -> String {
@@ -134,6 +145,7 @@ impl AppState {
             run: Arc::new(AtomicBool::new(false)),
             sender: tx,
             encoder: Arc::new(Mutex::new(None)),
+            downloader: Arc::new(Mutex::new(None)),
             config: Arc::new(Mutex::new(Config {
                 lufs: LufsConfig {
                     i: -17.0,
@@ -142,6 +154,7 @@ impl AppState {
                 },
 
                 transcript_cmd: String::new(),
+                download_args: DEFAULT_DOWNLOAD_ARGS.to_string(),
                 ..Default::default()
             })),
         }
@@ -151,15 +164,18 @@ impl AppState {
 impl Drop for AppState {
     fn drop(&mut self) {
         let encoder = self.encoder.clone();
+        let downloader = self.downloader.clone();
         self.run.store(false, Ordering::SeqCst);
 
         tokio::spawn(async move {
-            if let Some(mut proc) = encoder.lock().await.take() {
-                if let Err(e) = proc.kill().await {
-                    eprintln!("Failed to kill process: {e:?}");
-                }
-                if let Err(e) = proc.wait().await {
-                    eprintln!("Failed to wait for process: {e:?}");
+            for process in [encoder, downloader] {
+                if let Some(mut proc) = process.lock().await.take() {
+                    if let Err(e) = proc.kill().await {
+                        eprintln!("Failed to kill process: {e:?}");
+                    }
+                    if let Err(e) = proc.wait().await {
+                        eprintln!("Failed to wait for process: {e:?}");
+                    }
                 }
             }
         });
@@ -192,6 +208,50 @@ async fn file_drop(state: State<'_, AppState>, mut task: Task) -> Result<Task, P
 }
 
 #[tauri::command]
+async fn yt_dlp_version() -> Result<String, ProcessError> {
+    download::version().await
+}
+
+#[tauri::command]
+async fn download_url(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    url: String,
+    target: Option<String>,
+) -> Result<String, ProcessError> {
+    if !url.starts_with("http://") && !url.starts_with("https://") {
+        return Err(ProcessError::Custom(
+            "Please enter a valid http(s) URL".into(),
+        ));
+    }
+
+    let config = state.config.lock().await;
+    let configured_path = config.download_path.clone();
+    let arguments = if config.download_args.trim().is_empty() {
+        DEFAULT_DOWNLOAD_ARGS.to_string()
+    } else {
+        config.download_args.clone()
+    };
+    drop(config);
+    let directory = resolve_download_directory(target, configured_path, dirs::download_dir())
+        .ok_or_else(|| ProcessError::Custom("Could not determine the Downloads folder".into()))?;
+
+    app.emit("download-start", &url)
+        .map_err(|error| ProcessError::Custom(error.to_string()))?;
+    let file = download::download(
+        app.clone(),
+        url,
+        directory,
+        &arguments,
+        state.downloader.clone(),
+    )
+    .await?;
+    app.emit("download-finish", &file)
+        .map_err(|error| ProcessError::Custom(error.to_string()))?;
+    Ok(file)
+}
+
+#[tauri::command]
 async fn task_start(state: State<'_, AppState>) -> Result<(), ProcessError> {
     state.run.store(true, Ordering::SeqCst);
 
@@ -208,11 +268,14 @@ async fn task_send(task: Task, state: State<'_, AppState>) -> Result<(), Process
 #[tauri::command]
 async fn task_cancel(task: Task, state: State<'_, AppState>) -> Result<(), ProcessError> {
     let encoder = state.encoder.clone();
+    let downloader = state.downloader.clone();
     state.run.store(false, Ordering::SeqCst);
 
-    if let Some(mut proc) = encoder.lock().await.take() {
-        proc.kill().await?;
-        proc.wait().await?;
+    for process in [encoder.clone(), downloader] {
+        if let Some(mut proc) = process.lock().await.take() {
+            proc.kill().await?;
+            proc.wait().await?;
+        }
     }
 
     *encoder.lock().await = None;
@@ -257,6 +320,18 @@ fn prep_ffmpeg_path(config: &mut Config) {
     }
 }
 
+fn resolve_download_directory(
+    target: Option<String>,
+    configured: Option<PathBuf>,
+    fallback: Option<PathBuf>,
+) -> Option<PathBuf> {
+    target
+        .filter(|path| !path.trim().is_empty())
+        .map(PathBuf::from)
+        .or_else(|| configured.filter(|path| !path.as_os_str().is_empty()))
+        .or(fallback)
+}
+
 #[tauri::command]
 async fn save_config(app: AppHandle, state: State<'_, AppState>) -> Result<(), ProcessError> {
     let store = app.store("config.json")?;
@@ -264,6 +339,12 @@ async fn save_config(app: AppHandle, state: State<'_, AppState>) -> Result<(), P
 
     if let Some(Value::String(ffmpeg_path)) = store.get("ffmpeg_path") {
         config.ffmpeg_path = Some(PathBuf::from(ffmpeg_path));
+    }
+    if let Some(Value::String(download_path)) = store.get("download_path") {
+        config.download_path = Some(PathBuf::from(download_path));
+    }
+    if let Some(Value::String(download_args)) = store.get("download_args") {
+        config.download_args = download_args;
     }
 
     if let Some(Value::String(copyright)) = store.get("copyright") {
@@ -297,6 +378,12 @@ async fn load_config(app: AppHandle, state: State<'_, AppState>) -> Result<(), P
 
     if let Some(Value::String(ffmpeg_path)) = store.get("ffmpeg_path") {
         config.ffmpeg_path = Some(PathBuf::from(ffmpeg_path));
+    }
+    if let Some(Value::String(download_path)) = store.get("download_path") {
+        config.download_path = Some(PathBuf::from(download_path));
+    }
+    if let Some(Value::String(download_args)) = store.get("download_args") {
+        config.download_args = download_args;
     }
 
     if let Some(Value::String(copyright)) = store.get("copyright") {
@@ -425,14 +512,17 @@ pub async fn run() -> tauri::Result<()> {
             WindowEvent::CloseRequested { .. } => {
                 let app_state = window.state::<AppState>();
                 let encoder = app_state.encoder.clone();
+                let downloader = app_state.downloader.clone();
 
                 tokio::spawn(async move {
-                    if let Some(mut proc) = encoder.lock().await.take() {
-                        if let Err(e) = proc.kill().await {
-                            eprintln!("Failed to kill process: {e:?}");
-                        }
-                        if let Err(e) = proc.wait().await {
-                            eprintln!("Failed to wait for process: {e:?}");
+                    for process in [encoder, downloader] {
+                        if let Some(mut proc) = process.lock().await.take() {
+                            if let Err(e) = proc.kill().await {
+                                eprintln!("Failed to kill process: {e:?}");
+                            }
+                            if let Err(e) = proc.wait().await {
+                                eprintln!("Failed to wait for process: {e:?}");
+                            }
                         }
                     }
                 });
@@ -451,6 +541,8 @@ pub async fn run() -> tauri::Result<()> {
         })
         .invoke_handler(tauri::generate_handler![
             file_drop,
+            yt_dlp_version,
+            download_url,
             presets_get,
             task_start,
             task_send,
@@ -464,4 +556,33 @@ pub async fn run() -> tauri::Result<()> {
         .run(tauri::generate_context!())?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod download_path_tests {
+    use super::*;
+
+    #[test]
+    fn save_as_overrides_configured_download_path() {
+        assert_eq!(
+            resolve_download_directory(
+                Some("/save-as".into()),
+                Some(PathBuf::from("/configured")),
+                Some(PathBuf::from("/fallback")),
+            ),
+            Some(PathBuf::from("/save-as"))
+        );
+    }
+
+    #[test]
+    fn empty_paths_use_download_folder_fallback() {
+        assert_eq!(
+            resolve_download_directory(
+                Some("  ".into()),
+                Some(PathBuf::new()),
+                Some(PathBuf::from("/fallback")),
+            ),
+            Some(PathBuf::from("/fallback"))
+        );
+    }
 }
